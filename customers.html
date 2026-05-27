@@ -97,18 +97,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <script>
 var SHEET_ID = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 
-// Your exact tab names as they appear in Google Sheets
-var TABS = [
-  {name:'1/1',       short:'1/1 Cakes'},
-  {name:'2/1',       short:'2/1 Cakes'},
-  {name:'500G',      short:'500 Gram'},
-  {name:'200G',      short:'200 Gram'},
-  {name:'SHELLS',    short:'Shells'},
-  {name:'CANDLES',   short:'Candles'},
-  {name:'ROCKETS',   short:'Rockets'},
-  {name:'FOUNTAINS', short:'Fountains'},
-  {name:'MISC',      short:'Misc'}
-];
+// Exact tab names in order as they appear in your sheet
+var TAB_NAMES = ['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
+var TAB_LABELS = ['1/1 Cakes','2/1 Cakes','500 Gram','200 Gram','Shells','Candles','Rockets','Fountains','Misc'];
 
 var DATA = [];
 var statusFilter = '';
@@ -118,113 +109,156 @@ function parseCSVRow(row) {
   var result=[], inQuotes=false, current='';
   for (var i=0;i<row.length;i++) {
     var ch=row[i];
-    if (ch==='"'){inQuotes=!inQuotes;}
-    else if(ch===','&&!inQuotes){result.push(current.trim());current='';}
+    if(ch==='"'){inQuotes=!inQuotes;}
+    else if(ch===','&&!inQuotes){result.push(current.trim().replace(/^"|"$/g,''));current='';}
     else{current+=ch;}
   }
-  result.push(current.trim());
+  result.push(current.trim().replace(/^"|"$/g,''));
   return result;
 }
 
-function fetchTab(tabIndex) {
-  var tabName = TABS[tabIndex].name;
+function isHeaderRow(row) {
+  // A header row has PRODUCT NAME or STATUS in it
+  for (var i=0;i<row.length;i++) {
+    var v = row[i].toUpperCase().trim();
+    if (v==='PRODUCT NAME' || v==='STATUS') return true;
+  }
+  return false;
+}
+
+function isEmptyRow(row) {
+  for (var i=0;i<row.length;i++) {
+    if (row[i].trim()) return false;
+  }
+  return true;
+}
+
+function loadData() {
+  document.getElementById('grid').innerHTML='<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
+
+  // Fetch each tab individually using the sheet name parameter
+  var promises = [];
+  for (var i=0;i<TAB_NAMES.length;i++) {
+    promises.push(fetchSingleTab(i));
+  }
+
+  Promise.all(promises).then(function(results) {
+    DATA = [];
+    for (var i=0;i<results.length;i++) {
+      for (var j=0;j<results[i].length;j++) {
+        DATA.push(results[i][j]);
+      }
+    }
+    if (!DATA.length) {
+      document.getElementById('grid').innerHTML='<div class="empty">Could not load inventory. Please try again shortly.</div>';
+      return;
+    }
+    var now = new Date();
+    document.getElementById('lastUpdated').textContent = 'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    buildTabFilters();
+    render();
+  });
+}
+
+function fetchSingleTab(tabIndex) {
+  // Use gviz CSV export which works per-tab
   var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+
-            '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(tabName)+'&t='+Date.now();
+            '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(TAB_NAMES[tabIndex])+'&t='+Date.now();
   return fetch(url)
     .then(function(r){ return r.text(); })
-    .then(function(csv){
-      var lines = csv.split('\n');
-      if (lines.length < 2) return [];
-      var headers = parseCSVRow(lines[0]);
-      var nameCol=-1, priceCol=-1, casePriceCol=-1, statusCol=-1, contCol=-1, storeCol=-1, totalCol=-1;
-      for (var h=0;h<headers.length;h++) {
-        var hdr = headers[h].replace(/"/g,'').toUpperCase().trim();
-        if (hdr==='STATUS')                              statusCol    = h;
-        else if(hdr==='PRODUCT NAME')                    nameCol      = h;
-        else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol     = h;
-        else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol = h;
-        else if(hdr==='CASES'||hdr==='CONTAINER')           contCol      = h;
-        else if(hdr==='SINGLES'||hdr==='STORE')             storeCol     = h;
-        else if(hdr==='TOTAL'||hdr==='QTY')              totalCol     = h;
-      }
-      if (nameCol===-1) return [];
-      var items=[];
-      for (var i=1;i<lines.length;i++) {
-        if (!lines[i].trim()) continue;
-        var row = parseCSVRow(lines[i]);
-        var name = nameCol>=0 ? row[nameCol].replace(/"/g,'').trim() : '';
-        if (!name || name==='PRODUCT NAME') continue;
-        var price     = priceCol>=0     ? row[priceCol].replace(/[^0-9.]/g,'').trim()     : '';
-        var casePrice = casePriceCol>=0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
-        // Calculate qty from CONTAINER+STORE or TOTAL
-        var qty = 0;
-        if (totalCol>=0 && parseInt(row[totalCol])>0) {
-          qty = parseInt(row[totalCol])||0;
-        } else {
-          var cont  = contCol>=0  ? parseInt(row[contCol])||0  : 0;
-          var store = storeCol>=0 ? parseInt(row[storeCol])||0 : 0;
-          qty = cont + store;
-        }
-        // If qty is 0 but STATUS says IN or LOW, trust the STATUS column
-        var rawStatus = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
-        var status;
-        if (qty===0 && (rawStatus==='IN'||rawStatus==='LOW')) {
-          status = rawStatus;
-        } else if (qty===0) {
-          status = 'OUT';
-        } else if (qty<=2) {
-          status = 'LOW';
-        } else {
-          status = 'IN';
-        }
-        // Skip rows that are clearly headers or junk
-        if (status==='STATUS'||name.length<2) continue;
-        items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
-      }
-      return items;
-    })
+    .then(function(csv){ return parseTab(csv, tabIndex); })
     .catch(function(){ return []; });
 }
 
-function loadAllTabs() {
-  document.getElementById('grid').innerHTML='<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
-  var promises=[];
-  for(var i=0;i<TABS.length;i++) promises.push(fetchTab(i));
-  Promise.all(promises).then(function(results){
-    DATA=[];
-    for(var i=0;i<results.length;i++){
-      for(var j=0;j<results[i].length;j++) DATA.push(results[i][j]);
+function parseTab(csv, tabIndex) {
+  var lines = csv.split('\n');
+  if (!lines.length) return [];
+
+  // Find header row
+  var headerIdx = -1;
+  var headers = [];
+  for (var i=0;i<Math.min(lines.length,5);i++) {
+    var row = parseCSVRow(lines[i]);
+    if (isHeaderRow(row)) { headerIdx=i; headers=row; break; }
+  }
+  if (headerIdx===-1) return [];
+
+  // Map columns
+  var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1;
+  var casesCol=-1, singlesCol=-1, totalCol=-1;
+  for (var h=0;h<headers.length;h++) {
+    var hdr = headers[h].toUpperCase().trim();
+    if (hdr==='STATUS')                              statusCol   = h;
+    else if(hdr==='PRODUCT NAME')                    nameCol     = h;
+    else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol    = h;
+    else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol= h;
+    else if(hdr==='CASES'||hdr==='CONTAINER')        casesCol    = h;
+    else if(hdr==='SINGLES'||hdr==='STORE')          singlesCol  = h;
+    else if(hdr==='TOTAL'||hdr==='QTY')              totalCol    = h;
+  }
+  if (nameCol===-1) return [];
+
+  var items=[];
+  for (var i=headerIdx+1;i<lines.length;i++) {
+    if (!lines[i].trim()) continue;
+    var row = parseCSVRow(lines[i]);
+    var name = nameCol>=0 ? row[nameCol].trim() : '';
+    if (!name || name.toUpperCase()==='PRODUCT NAME') continue;
+
+    var price     = priceCol>=0     ? row[priceCol].replace(/[^0-9.]/g,'').trim()     : '';
+    var casePrice = casePriceCol>=0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
+
+    // Get qty — try TOTAL first, then CASES+SINGLES
+    var qty = 0;
+    if (totalCol>=0 && parseInt(row[totalCol])>0) {
+      qty = parseInt(row[totalCol])||0;
+    } else {
+      var cases   = casesCol>=0   ? parseInt(row[casesCol])||0   : 0;
+      var singles = singlesCol>=0 ? parseInt(row[singlesCol])||0 : 0;
+      qty = cases + singles;
     }
-    var now=new Date();
-    document.getElementById('lastUpdated').textContent=
-      'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    buildTabFilters();
-    render();
-  }).catch(function(){
-    document.getElementById('grid').innerHTML='<div class="empty">Could not load inventory. Please try again shortly.</div>';
-  });
+
+    // Get status — trust sheet STATUS if qty is 0
+    var rawStatus = statusCol>=0 ? row[statusCol].trim().toUpperCase() : '';
+    var status;
+    if (qty===0 && (rawStatus==='IN'||rawStatus==='LOW')) {
+      status = rawStatus;
+    } else if (qty===0) {
+      status = 'OUT';
+    } else if (qty<=2) {
+      status = 'LOW';
+    } else {
+      status = 'IN';
+    }
+
+    if (status==='STATUS') continue;
+    items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
+  }
+  return items;
 }
 
 function setStatus(s,btn){
   statusFilter=s;
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  var btns=document.querySelectorAll('.filter-btn');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
   btn.classList.add('active');
   render();
 }
 
 function buildTabFilters(){
   var h='<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
-  for(var i=0;i<TABS.length;i++){
+  for(var i=0;i<TAB_NAMES.length;i++){
     var has=false;
     for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){has=true;break;}}
-    if(has) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TABS[i].short+'</button>';
+    if(has) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TAB_LABELS[i]+'</button>';
   }
   document.getElementById('tabFilters').innerHTML=h;
 }
 
 function setTab(t,btn){
   tabFilter=t;
-  document.querySelectorAll('.tab-f').forEach(function(b){b.classList.remove('active');});
+  var btns=document.querySelectorAll('.tab-f');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
   btn.classList.add('active');
   render();
 }
@@ -250,7 +284,7 @@ function render(){
     var d=rows[r];
     var label=d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
     h+='<div class="card '+d.s+'">'+
-      '<div class="card-tab">'+(TABS[d.t]?TABS[d.t].short:'')+'</div>'+
+      '<div class="card-tab">'+TAB_LABELS[d.t]+'</div>'+
       '<div class="card-name">'+d.n+'</div>'+
       '<div class="card-footer">'+
         '<div class="card-prices">'+
@@ -264,8 +298,8 @@ function render(){
   grid.innerHTML=h;
 }
 
-loadAllTabs();
-setInterval(loadAllTabs, 3*60*1000);
+loadData();
+setInterval(loadData, 3*60*1000);
 </script>
 </body>
 </html>
