@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fireworks Availability</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root{
+  --bg:#faf8f4;--surface:#fff;--border:#e8e4dc;
+  --text:#1a1714;--muted:#8a8680;
+  --accent:#ff4d00;--accent2:#ffaa00;
+  --green:#16a34a;--amber:#d97706;--red:#dc2626;
+  --green-bg:#f0fdf4;--amber-bg:#fffbeb;--red-bg:#fef2f2;
+  --green-border:#bbf7d0;--amber-border:#fde68a;--red-border:#fecaca;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* HERO */
+.hero{
+  background: linear-gradient(135deg, #0e0e0f 0%, #1a0a00 50%, #0e0e0f 100%);
+  padding:3rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,77,0,0.3) 0%, transparent 60%);
+}
+.hero-logo{font-family:'Bebas Neue',sans-serif;font-size:56px;color:#fff;letter-spacing:4px;position:relative;line-height:1}
+.hero-logo span{color:var(--accent)}
+.hero-tagline{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-top:8px;position:relative}
+.hero-note{
+  display:inline-block;margin-top:1.5rem;background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);border-radius:20px;
+  padding:6px 18px;font-size:12px;color:rgba(255,255,255,0.6);position:relative;
+}
+
+/* LEGEND */
+.legend{display:flex;justify-content:center;gap:20px;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot.g{background:var(--green)}.dot.a{background:var(--amber)}.dot.r{background:var(--red)}
+
+/* FILTERS */
+.filters{max-width:900px;margin:1.5rem auto 0;padding:0 1.25rem;display:flex;gap:10px;flex-wrap:wrap}
+.filters input{
+  flex:1;min-width:180px;height:40px;padding:0 14px;
+  border:1.5px solid var(--border);border-radius:10px;
+  background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
+}
+.filters input:focus{outline:none;border-color:var(--accent)}
+.filter-btn{
+  height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:10px;
+  background:var(--surface);color:var(--muted);font-size:13px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;
+}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filter-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+/* TAB FILTER */
+.tab-filters{max-width:900px;margin:.75rem auto 0;padding:0 1.25rem;display:flex;gap:6px;flex-wrap:wrap}
+.tab-f{
+  padding:4px 14px;font-size:12px;border:1.5px solid var(--border);border-radius:20px;
+  background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;
+}
+.tab-f.active{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* GRID */
+.grid{max-width:900px;margin:1.5rem auto 3rem;padding:0 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+
+.card{
+  background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
+  padding:1rem 1.1rem;transition:all 0.2s;position:relative;overflow:hidden;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08)}
+.card.OUT{opacity:0.55}
+.card-tab{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:500}
+.card-name{font-weight:600;font-size:14px;line-height:1.3;margin-bottom:10px;color:var(--text)}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.card-price{font-weight:600;font-size:15px;color:var(--accent)}
+.card-price.none{color:var(--muted);font-size:12px;font-weight:400}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.status-badge.IN{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.status-badge.LOW{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.status-badge.OUT{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.empty{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+
+@media(max-width:500px){
+  .hero-logo{font-size:40px}
+  .grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-logo">🎆 <span>PYROLANDIA</span></div>
+  <div class="hero-tagline">Fireworks Availability</div>
+  <div class="hero-note">Prices shown · Quantities not shown · Updated daily</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot g"></div>In Stock — Ready to go</div>
+  <div class="legend-item"><div class="dot a"></div>Low Stock — Get it while it lasts</div>
+  <div class="legend-item"><div class="dot r"></div>Out of Stock</div>
+</div>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="Search fireworks..." oninput="render()">
+  <button class="filter-btn active" onclick="setStatus('',this)">All</button>
+  <button class="filter-btn" onclick="setStatus('IN',this)">In Stock</button>
+  <button class="filter-btn" onclick="setStatus('LOW',this)">Low Stock</button>
+  <button class="filter-btn" onclick="setStatus('OUT',this)">Out of Stock</button>
+</div>
+
+<div class="tab-filters" id="tabFilters"></div>
+
+<div class="grid" id="grid"></div>
+
+<div class="footer">Questions? Ask us about anything not listed — Pyrolandia &mdash; we may have it! 🎆</div>
+
+<script>
+var TABS=[
+  {name:'1/1',short:'1/1 Cakes'},{name:'2/1',short:'2/1 Cakes'},
+  {name:'500G',short:'500 Gram'},{name:'200G',short:'200 Gram'},
+  {name:'SHELLS',short:'Shells'},{name:'CANDLES',short:'Candles'},
+  {name:'ROCKETS',short:'Rockets'},{name:'FOUNTAINS',short:'Fountains'},
+  {name:'MISC',short:'Misc'}
+];
+
+var DATA=[
+  {t:0,s:'LOW',n:'ALTER EGO',p:''},{t:0,s:'IN',n:'ASIAN KONG',p:''},{t:0,s:'IN',n:'BAD BITCH',p:''},{t:0,s:'IN',n:'BANDIDOS',p:''},{t:0,s:'IN',n:'BEAR NECESSITIES',p:''},
+  {t:0,s:'IN',n:'BIG BERTHA',p:'300'},{t:0,s:'LOW',n:'BIG DEAL',p:''},{t:0,s:'LOW',n:'BURNING DOWN THE HOUSE',p:''},{t:0,s:'IN',n:"CORNHOLI'S",p:'325'},{t:0,s:'IN',n:'CROWNING THE KING',p:''},
+  {t:0,s:'LOW',n:'FALLS FROM HEAVEN',p:''},{t:0,s:'IN',n:'FORTNITE',p:''},{t:0,s:'LOW',n:'FRANKENSTEIN 2.0',p:''},{t:0,s:'IN',n:'GOLD DIGGER',p:''},{t:0,s:'LOW',n:'GTA',p:''},
+  {t:0,s:'LOW',n:'HANDS OF TIME',p:''},{t:0,s:'IN',n:'HARLEY QUINN',p:''},{t:0,s:'IN',n:'HELLS BELLS',p:'350'},{t:0,s:'IN',n:'HOMEBOYZZZ',p:'295'},{t:0,s:'LOW',n:'HULK RETURNS',p:''},
+  {t:0,s:'IN',n:'ILLEGAL ALIEN',p:'225'},{t:0,s:'IN',n:'INFERNAL COLLECTOR',p:'315'},{t:0,s:'IN',n:'INTOXICATED',p:''},{t:0,s:'LOW',n:'INVADER',p:''},{t:0,s:'IN',n:'KING OF KINGS',p:''},
+  {t:0,s:'IN',n:'LAFFY TAFFY',p:''},{t:0,s:'LOW',n:'LIQUID',p:'295'},{t:0,s:'IN',n:'LORAX',p:''},{t:0,s:'IN',n:'LORD OF THE PIT',p:''},{t:0,s:'LOW',n:'MAD TIKI BOMBER',p:''},
+  {t:0,s:'LOW',n:'MAGA',p:'265'},{t:0,s:'LOW',n:'MAKE IT RAIN',p:''},{t:0,s:'IN',n:'MAN OF STEEL',p:''},{t:0,s:'IN',n:'MASTER ALL COLOR ALL THUNDER',p:'285'},{t:0,s:'LOW',n:'MASTER BEAUTY AND THE BEAST',p:''},
+  {t:0,s:'IN',n:'MASTER SKY ORANGE',p:''},{t:0,s:'LOW',n:'MASTER NEVER ENDING SHOW',p:'205'},{t:0,s:'LOW',n:'MASTER RAGE',p:''},{t:0,s:'LOW',n:'MASTODON',p:''},{t:0,s:'LOW',n:'MEGAMIND',p:''},
+  {t:0,s:'IN',n:'MEGATRON',p:'375'},{t:0,s:'IN',n:'MENACE TO SOCIETY',p:''},{t:0,s:'LOW',n:'MONSTARS',p:''},{t:0,s:'LOW',n:'MORDOR',p:''},{t:0,s:'LOW',n:'NIGHT GALLERY',p:'265'},
+  {t:0,s:'IN',n:'NOOKIE',p:'350'},{t:0,s:'IN',n:'NOT ON THE LIST',p:'240'},{t:0,s:'LOW',n:'ODIN',p:''},{t:0,s:'LOW',n:'OH YEA',p:''},{t:0,s:'IN',n:'PAC-MAN',p:''},
+  {t:0,s:'LOW',n:'POP OFF',p:'275'},{t:0,s:'LOW',n:'PURPLE FUSION',p:'300'},{t:0,s:'IN',n:'RAZZLE',p:''},{t:0,s:'OUT',n:'SAMURAI WARRIOR',p:'195'},{t:0,s:'IN',n:'SCARFACE',p:'295'},
+  {t:0,s:'IN',n:'SKULL ARISTOCRAT',p:'295'},{t:0,s:'LOW',n:'SKY DRAGON',p:'285'},{t:0,s:'IN',n:'TEARS OF GOLD',p:'350'},{t:0,s:'LOW',n:'THE EMPEROR',p:''},{t:0,s:'IN',n:'THE GAME WE PLAY',p:''},
+  {t:0,s:'IN',n:'THE HANDS OF TIME',p:'345'},{t:0,s:'LOW',n:'THE HOUND',p:''},{t:0,s:'IN',n:'THE THING',p:''},{t:0,s:'IN',n:'THE ULTIMATE 36',p:'265'},{t:0,s:'IN',n:'THE WRAITH SOVEREIGN',p:''},
+  {t:0,s:'IN',n:'THING 2',p:''},{t:0,s:'LOW',n:'VICTORIOUS WARRIORS',p:'400'},{t:0,s:'IN',n:'WANTED DEAD OR ALIVE',p:'325'},{t:0,s:'IN',n:'WARLOCK',p:'265'},{t:0,s:'IN',n:'WEAPON X',p:''},
+  {t:0,s:'LOW',n:"WILD'E",p:''},{t:0,s:'IN',n:'WRECK-IT RALPH',p:''},
+  {t:1,s:'LOW',n:'AMERICAN BADASS',p:''},{t:1,s:'IN',n:'EXPLODING STARS',p:''},{t:1,s:'IN',n:'FAST MONEY',p:''},{t:1,s:'LOW',n:'MAD AS MARCH HARE',p:'150'},{t:1,s:'IN',n:'MASTER GOLD',p:'250'},
+  {t:1,s:'LOW',n:'MASTER KALEIDOSCOPE',p:''},{t:1,s:'LOW',n:'POWERSLAVE',p:''},{t:1,s:'IN',n:'THUNDER WILLOW',p:''},{t:1,s:'IN',n:'WILLOW KING',p:''},
+  {t:2,s:'LOW',n:'4 HORSEMAN',p:''},{t:2,s:'IN',n:'BACKYARD HEROES',p:''},{t:2,s:'IN',n:'BIG MONEY',p:''},{t:2,s:'IN',n:'BLACK DIAMOND',p:''},{t:2,s:'IN',n:'BLESSED',p:'225'},
+  {t:2,s:'IN',n:'BOOM BOOM',p:''},{t:2,s:'IN',n:'COSMIC CHAOS',p:''},{t:2,s:'IN',n:'DOUBLE HORROR',p:''},{t:2,s:'LOW',n:'GOD OF THUNDER',p:''},{t:2,s:'IN',n:'HAPPY HOUR',p:'225'},
+  {t:2,s:'LOW',n:'INSANITY',p:''},{t:2,s:'IN',n:'MAHALO',p:'225'},{t:2,s:'IN',n:'MASTER BABE',p:''},{t:2,s:'IN',n:'MISBEHAVIN',p:''},{t:2,s:'IN',n:'NO WHERE TO RUN',p:''},
+  {t:2,s:'IN',n:'NOWHERE TO HIDE',p:''},{t:2,s:'IN',n:'SPACE COWBOY',p:''},{t:2,s:'IN',n:'SUPERNOVA',p:''},{t:2,s:'LOW',n:'THE JACKHAMMER',p:''},{t:2,s:'LOW',n:'TOUGH GUY',p:''},
+  {t:2,s:'IN',n:'THUNDER',p:''},{t:2,s:'IN',n:'VOODOO DOLL',p:''},{t:2,s:'LOW',n:'WEIRD SCIENCE',p:''},
+  {t:3,s:'IN',n:'#1 IN THE BATTLE FIELD',p:''},{t:3,s:'LOW',n:'4 OF A KIND',p:''},{t:3,s:'IN',n:'8 SHOT ASST',p:''},{t:3,s:'LOW',n:'AMERICAN SNIPER',p:''},{t:3,s:'IN',n:'BELICON',p:''},
+  {t:3,s:'LOW',n:'CAROLINA COAST',p:''},{t:3,s:'LOW',n:'CURSE BREAKER',p:''},{t:3,s:'IN',n:'DESERT STORM',p:''},{t:3,s:'LOW',n:'EL CABRON',p:''},{t:3,s:'LOW',n:'HEISENBERG',p:'23'},
+  {t:3,s:'IN',n:"IT'S A GIRL OR IT'S A BOY",p:''},{t:3,s:'IN',n:'JUST ADVENTURE',p:''},{t:3,s:'IN',n:'NEON MONKEY',p:''},{t:3,s:'IN',n:'PATRIOT ASST',p:''},{t:3,s:'IN',n:'ROYAL PITA',p:''},
+  {t:3,s:'LOW',n:'SHOCKER',p:''},{t:3,s:'IN',n:'SHOCKWAVE',p:''},{t:3,s:'IN',n:'SUPER BINGO',p:''},{t:3,s:'LOW',n:'SUPER CAKE',p:''},{t:3,s:'IN',n:'TEXAS HOLDEM',p:''},
+  {t:3,s:'IN',n:'THE SKULL HOUSE',p:''},{t:3,s:'LOW',n:'WILD CARD',p:''},{t:3,s:'LOW',n:'WILDER BOYS',p:''},{t:3,s:'IN',n:'STAIRWAY TO PYRO HEAVEN',p:''},
+  {t:4,s:'IN',n:'AMERICAN THUNDER',p:''},{t:4,s:'IN',n:'ARTILLERY SHELLS',p:''},{t:4,s:'IN',n:'BLAZING 7',p:'150'},{t:4,s:'IN',n:'FULL METAL JACKET',p:'225'},{t:4,s:'IN',n:'GUSHERS',p:''},
+  {t:4,s:'LOW',n:'HCMF 7',p:''},{t:4,s:'LOW',n:'HCMF LOCO 9',p:''},{t:4,s:'IN',n:'LIGHT SABERS',p:'100'},{t:4,s:'IN',n:'MASTER 5',p:''},{t:4,s:'IN',n:'MASTER 7',p:''},
+  {t:4,s:'IN',n:'MASTER 8',p:''},{t:4,s:'IN',n:'MONSTER 9',p:'100'},{t:4,s:'IN',n:'NWA',p:''},{t:4,s:'IN',n:'SUPER 7',p:''},{t:4,s:'IN',n:'TRUMP RETURNS',p:''},{t:4,s:'IN',n:'THRILLER 7',p:''},
+  {t:5,s:'LOW',n:'BORDER BUSTER',p:''},{t:5,s:'IN',n:'CUATROL',p:'30'},{t:5,s:'IN',n:'MASTER 4"',p:''},{t:5,s:'IN',n:'MASTER BALLISTIC 2"',p:''},{t:5,s:'LOW',n:'MASTER BALLISTIC 3"',p:''},{t:5,s:'LOW',n:'STROBING ROCKET',p:'40'},
+  {t:6,s:'LOW',n:'ERUPTION',p:''},{t:6,s:'IN',n:'FLUORESCENT MEGA FOUNTAIN',p:''},{t:6,s:'IN',n:'HEART ATTACK',p:''},{t:6,s:'IN',n:'VOLCANO',p:''},
+  {t:7,s:'IN',n:'MAGA TUBES',p:''},{t:7,s:'IN',n:'SMOKIN JOE',p:''},{t:7,s:'LOW',n:'MEXICAN STAND OFF',p:''},{t:7,s:'LOW',n:'POWER CRACKERS 4000 ROLL',p:''},
+  {t:7,s:'IN',n:'SUPER GROUND BLOOMS',p:'50'},{t:7,s:'LOW',n:'300 SHOT SATURN MISSILE',p:''},{t:7,s:'IN',n:'GANGSTER CRACKERS',p:''},{t:7,s:'IN',n:'MASTER CLASS ASST',p:''},
+  {t:8,s:'IN',n:'PESOS',p:''}
+];
+
+var statusFilter='', tabFilter=-1;
+
+function setStatus(s,btn){
+  statusFilter=s;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');render();
+}
+
+function buildTabFilters(){
+  var h='<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
+  for(var i=0;i<TABS.length;i++) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TABS[i].short+'</button>';
+  document.getElementById('tabFilters').innerHTML=h;
+}
+
+function setTab(t,btn){
+  tabFilter=t;
+  document.querySelectorAll('.tab-f').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');render();
+}
+
+function render(){
+  var search=(document.getElementById('search').value||'').toLowerCase();
+  var rows=DATA.filter(function(d){
+    if(tabFilter>=0&&d.t!==tabFilter)return false;
+    if(statusFilter&&d.s!==statusFilter)return false;
+    if(search&&d.n.toLowerCase().indexOf(search)===-1)return false;
+    return true;
+  });
+  var grid=document.getElementById('grid');
+  if(!rows.length){grid.innerHTML='<div class="empty">No products match your search.</div>';return;}
+  var h='';
+  for(var i=0;i<rows.length;i++){
+    var d=rows[i];
+    var label=d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
+    h+='<div class="card '+d.s+'">'+
+      '<div class="card-tab">'+(TABS[d.t]?TABS[d.t].short:'')+'</div>'+
+      '<div class="card-name">'+d.n+'</div>'+
+      '<div class="card-footer">'+
+        '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
+        '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+  grid.innerHTML=h;
+}
+
+buildTabFilters();render();
+</script>
+</body>
+</html>

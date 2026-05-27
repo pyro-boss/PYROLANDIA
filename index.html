@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrolandia — Staff Portal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0e0e0f;
+  --surface: #1a1a1c;
+  --surface2: #222224;
+  --border: rgba(255,255,255,0.08);
+  --accent: #ff4d00;
+  --accent2: #ffaa00;
+  --text: #f0ede8;
+  --muted: #888884;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --green-bg: rgba(34,197,94,0.12);
+  --amber-bg: rgba(245,158,11,0.12);
+  --red-bg: rgba(239,68,68,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+/* LOGIN */
+#loginScreen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, rgba(255,77,0,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(255,170,0,0.08) 0%, transparent 50%), var(--bg);
+}
+.login-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 3rem 2.5rem; width: 100%; max-width: 380px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+.login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--accent); letter-spacing: 2px; margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--muted); margin-bottom: 2rem; }
+.login-box label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.login-box input {
+  width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface2); color: var(--text); font-size: 14px; margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+.login-box input:focus { outline: none; border-color: var(--accent); }
+.login-btn {
+  width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+}
+.login-btn:hover { opacity: 0.88; }
+.login-err { color: var(--red); font-size: 13px; margin-top: 10px; text-align: center; display: none; }
+
+/* APP SHELL */
+#appShell { display: none; min-height: 100vh; }
+.topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--accent); letter-spacing: 2px; }
+.user-badge {
+  background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+  padding: 3px 12px; font-size: 12px; color: var(--muted);
+}
+.user-badge span { color: var(--text); font-weight: 500; }
+.logout-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px;
+  border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+}
+.logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+.main { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 1.5rem; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+.stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; }
+.stat-val.g { color: var(--green); }
+.stat-val.a { color: var(--amber); }
+.stat-val.r { color: var(--red); }
+
+/* NAV */
+.nav { display: flex; gap: 4px; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+.nav-btn {
+  padding: 8px 18px; font-size: 13px; font-weight: 500; border: none; background: none;
+  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.nav-btn:hover { color: var(--text); }
+
+/* TOOLBAR */
+.toolbar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+.toolbar input, .toolbar select {
+  height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif;
+}
+.toolbar input { flex: 1; min-width: 160px; }
+.toolbar input:focus, .toolbar select:focus { outline: none; border-color: var(--accent); }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
+  border-radius: 8px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text); font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap;
+  font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { opacity: 0.88; color: #fff; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* TAB BAR */
+.tab-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+.tab-btn {
+  padding: 4px 12px; font-size: 12px; border: 1px solid var(--border); border-radius: 20px;
+  background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* TABLE */
+.tbl-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--surface2); padding: 8px 12px; text-align: left; font-weight: 500; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; }
+.badge.IN { background: var(--green-bg); color: var(--green); }
+.badge.LOW { background: var(--amber-bg); color: var(--amber); }
+.badge.OUT { background: var(--red-bg); color: var(--red); }
+.qty-pill { background: rgba(255,77,0,0.12); color: var(--accent); border-radius: 20px; padding: 1px 9px; font-size: 12px; font-weight: 600; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px 6px; border-radius: 6px; font-size: 15px; transition: all 0.15s; }
+.icon-btn:hover { background: var(--surface2); color: var(--text); }
+.icon-btn.del:hover { color: var(--red); }
+.empty { text-align: center; padding: 3rem; color: var(--muted); font-size: 13px; }
+
+/* SALES */
+.sales-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+.panel-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+.sale-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.sale-row select { flex: 1; height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; }
+.sale-row input { width: 64px; height: 36px; padding: 0 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font-size: 13px; text-align: center; font-family: 'DM Sans', sans-serif; }
+.sale-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 6px; }
+.sale-item-name { font-weight: 500; font-size: 13px; }
+.sale-item-qty { color: var(--muted); font-size: 12px; }
+.warn { background: var(--amber-bg); border: 1px solid rgba(245,158,11,0.3); border-radius: 8px; padding: 8px 12px; font-size: 12px; color: var(--amber); margin-bottom: 10px; }
+.log-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.log-item:last-child { border-bottom: none; }
+.log-meta { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.log-user { font-weight: 600; color: var(--accent2); }
+.log-time { color: var(--muted); }
+.log-detail { color: var(--muted); }
+.log-detail b { color: var(--text); }
+
+/* INLINE RESTOCK */
+.inline-num { width: 64px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); color: var(--text); font-size: 13px; text-align: center; font-family: 'DM Sans', sans-serif; }
+
+/* MODAL */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; backdrop-filter: blur(4px); }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--accent); letter-spacing: 1px; margin-bottom: 1.25rem; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.5rem; }
+
+/* VIEW */
+.view { display: none; }
+.view.active { display: block; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 12px 20px; border-radius: 10px; font-size: 13px; z-index: 9999; opacity: 0; transition: opacity 0.3s; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+.toast.show { opacity: 1; }
+
+@media(max-width:640px){
+  .stats{grid-template-columns:1fr 1fr}
+  .sales-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🎆 PYROLANDIA</div>
+    <div class="login-sub">Pyrolandia Staff Portal</div>
+    <label>Username</label>
+    <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr">Invalid username or password.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appShell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">🎆 PYROLANDIA STAFF</div>
+      <div class="user-badge">Signed in as <span id="currentUserLabel">—</span></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+  </div>
+
+  <div class="main">
+    <div class="stats" id="stats"></div>
+
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchView('inventory',this)">📦 Inventory</button>
+      <button class="nav-btn" onclick="switchView('sales',this)">🧾 End of Day Sales</button>
+      <button class="nav-btn" onclick="switchView('lowstock',this)">⚠️ Low / Out</button>
+      <button class="nav-btn" onclick="switchView('actlog',this)">📋 Activity Log</button>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="view active" id="view-inventory">
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()">
+        <select id="statusFilter" onchange="renderTable()">
+          <option value="">All statuses</option>
+          <option value="IN">IN</option>
+          <option value="LOW">LOW</option>
+          <option value="OUT">OUT</option>
+        </select>
+        <button class="btn primary" onclick="openAddModal()">+ Add Product</button>
+      </div>
+      <div class="tab-bar" id="tabBar"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:72px">Status</th>
+            <th>Product</th>
+            <th id="catHeader" style="width:80px">Tab</th>
+            <th style="width:72px">Price</th>
+            <th style="width:72px">Qty</th>
+            <th style="width:90px">Actions</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="emptyMsg" style="display:none">No products found.</div>
+    </div>
+
+    <!-- SALES -->
+    <div class="view" id="view-sales">
+      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Log what sold today — stock updates automatically.</div>
+      <div class="sales-grid">
+        <div>
+          <div class="panel">
+            <div class="panel-title">🛒 Add Sales</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">Date: <b id="todayDate" style="color:var(--text)"></b></div>
+            <div id="saleWarn" class="warn" style="display:none"></div>
+            <div class="sale-row">
+              <select id="saleProduct"><option value="">Select product...</option></select>
+              <input type="number" id="saleQty" min="1" value="1">
+              <button class="btn" onclick="addSaleItem()">+</button>
+            </div>
+            <div id="saleList"></div>
+            <div style="display:flex;gap:8px;margin-top:1rem">
+              <button class="btn primary" id="applyBtn" onclick="commitSales()" style="flex:1" disabled>Apply & Sync to Sheet</button>
+              <button class="btn" onclick="clearSales()">Clear</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-title">📜 Today's Sales Log</div>
+            <div id="salesLog"><div class="empty">No sales logged yet.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOW/OUT -->
+    <div class="view" id="view-lowstock">
+      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Items needing restock — update qty and it syncs to your sheet.</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:72px">Status</th>
+            <th>Product</th>
+            <th style="width:80px">Tab</th>
+            <th style="width:72px">Price</th>
+            <th style="width:72px">Qty</th>
+            <th style="width:120px">Add Stock</th>
+          </tr></thead>
+          <tbody id="lowTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="view" id="view-actlog">
+      <div class="panel" style="max-height:600px;overflow-y:auto">
+        <div class="panel-title">📋 Activity Log — Who Changed What</div>
+        <div id="actLog"><div class="empty">No activity yet.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="editOverlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Edit Product</div>
+    <div class="field"><label>Product Name</label><input id="mName" type="text"></div>
+    <div class="field"><label>Tab</label><select id="mTab"></select></div>
+    <div class="field"><label>Price ($)</label><input id="mPrice" type="number" min="0"></div>
+    <div class="field"><label>Quantity</label><input id="mQty" type="number" min="0"></div>
+    <div class="field"><label>Status</label>
+      <select id="mStatus"><option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" id="modalSaveBtn" onclick="saveModal()">Save & Sync</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
+
+// ── USERS — change these passwords! ─────────────────────────
+var USERS = {
+  'admin':   {pass:'pyro2024!',  role:'Admin'},
+  'staff1':  {pass:'staff1pass', role:'Staff'},
+  'staff2':  {pass:'staff2pass', role:'Staff'},
+  'staff3':  {pass:'staff3pass', role:'Staff'},
+  'staff4':  {pass:'staff4pass', role:'Staff'},
+  'staff5':  {pass:'staff5pass', role:'Staff'}
+};
+
+var TABS=[
+  {name:'1/1',short:'1/1'},{name:'2/1',short:'2/1'},
+  {name:'500G',short:'500G'},{name:'200G',short:'200G'},
+  {name:'SHELLS',short:'Shells'},{name:'CANDLES',short:'Candles'},
+  {name:'ROCKETS',short:'Rockets'},{name:'FOUNTAINS',short:'Fountains'},
+  {name:'MISC',short:'Misc'}
+];
+
+var inventory=[], nextId=0, activeTab=-1, editingId=null, isAdding=false;
+var saleItems=[], salesLog=[], activityLog=[];
+var currentUser=null;
+
+// ── INVENTORY DATA (fresh from Google Drive) ─────────────────
+var RAW=[
+  {t:0,s:'LOW',n:'ALTER EGO',p:'',q:1},
+  {t:0,s:'IN',n:'ASIAN KONG',p:'',q:5},
+  {t:0,s:'IN',n:'BAD BITCH',p:'',q:13},
+  {t:0,s:'IN',n:'BANDIDOS',p:'',q:3},
+  {t:0,s:'IN',n:'BEAR NECESSITIES',p:'',q:7},
+  {t:0,s:'IN',n:'BIG BERTHA',p:'300',q:47},
+  {t:0,s:'LOW',n:'BIG DEAL',p:'',q:1},
+  {t:0,s:'LOW',n:'BURNING DOWN THE HOUSE',p:'',q:1},
+  {t:0,s:'IN',n:"CORNHOLI'S",p:'325',q:2},
+  {t:0,s:'IN',n:'CROWNING THE KING',p:'',q:2},
+  {t:0,s:'LOW',n:'FALLS FROM HEAVEN',p:'',q:1},
+  {t:0,s:'IN',n:'FORTNITE',p:'',q:5},
+  {t:0,s:'LOW',n:'FRANKENSTEIN 2.0',p:'',q:1},
+  {t:0,s:'IN',n:'GOLD DIGGER',p:'',q:5},
+  {t:0,s:'LOW',n:'GTA',p:'',q:1},
+  {t:0,s:'LOW',n:'HANDS OF TIME',p:'',q:1},
+  {t:0,s:'IN',n:'HARLEY QUINN',p:'',q:4},
+  {t:0,s:'IN',n:'HELLS BELLS',p:'350',q:24},
+  {t:0,s:'IN',n:'HOMEBOYZZZ',p:'295',q:2},
+  {t:0,s:'LOW',n:'HULK RETURNS',p:'',q:1},
+  {t:0,s:'IN',n:'ILLEGAL ALIEN',p:'225',q:4},
+  {t:0,s:'IN',n:'INFERNAL COLLECTOR',p:'315',q:4},
+  {t:0,s:'IN',n:'INTOXICATED',p:'',q:10},
+  {t:0,s:'LOW',n:'INVADER',p:'',q:1},
+  {t:0,s:'IN',n:'KING OF KINGS',p:'',q:5},
+  {t:0,s:'IN',n:'LAFFY TAFFY',p:'',q:4},
+  {t:0,s:'LOW',n:'LIQUID',p:'295',q:1},
+  {t:0,s:'IN',n:'LORAX',p:'',q:2},
+  {t:0,s:'IN',n:'LORD OF THE PIT',p:'',q:7},
+  {t:0,s:'LOW',n:'MAD TIKI BOMBER',p:'',q:1},
+  {t:0,s:'LOW',n:'MAGA',p:'265',q:1},
+  {t:0,s:'LOW',n:'MAKE IT RAIN',p:'',q:1},
+  {t:0,s:'IN',n:'MAN OF STEEL',p:'',q:2},
+  {t:0,s:'IN',n:'MASTER ALL COLOR ALL THUNDER',p:'285',q:18},
+  {t:0,s:'LOW',n:'MASTER BEAUTY AND THE BEAST',p:'',q:1},
+  {t:0,s:'IN',n:'MASTER SKY ORANGE',p:'',q:2},
+  {t:0,s:'LOW',n:'MASTER NEVER ENDING SHOW',p:'205',q:1},
+  {t:0,s:'LOW',n:'MASTER RAGE',p:'',q:1},
+  {t:0,s:'LOW',n:'MASTODON',p:'',q:1},
+  {t:0,s:'LOW',n:'MEGAMIND',p:'',q:1},
+  {t:0,s:'IN',n:'MEGATRON',p:'375',q:3},
+  {t:0,s:'IN',n:'MENACE TO SOCIETY',p:'',q:2},
+  {t:0,s:'LOW',n:'MONSTARS',p:'',q:1},
+  {t:0,s:'LOW',n:'MORDOR',p:'',q:1},
+  {t:0,s:'LOW',n:'NIGHT GALLERY',p:'265',q:1},
+  {t:0,s:'IN',n:'NOOKIE',p:'350',q:10},
+  {t:0,s:'IN',n:'NOT ON THE LIST',p:'240',q:2},
+  {t:0,s:'LOW',n:'ODIN',p:'',q:1},
+  {t:0,s:'LOW',n:'OH YEA',p:'',q:1},
+  {t:0,s:'IN',n:'PAC-MAN',p:'',q:4},
+  {t:0,s:'LOW',n:'POP OFF',p:'275',q:1},
+  {t:0,s:'LOW',n:'PURPLE FUSION',p:'300',q:1},
+  {t:0,s:'IN',n:'RAZZLE',p:'',q:3},
+  {t:0,s:'OUT',n:'SAMURAI WARRIOR',p:'195',q:0},
+  {t:0,s:'IN',n:'SCARFACE',p:'295',q:8},
+  {t:0,s:'IN',n:'SKULL ARISTOCRAT',p:'295',q:3},
+  {t:0,s:'LOW',n:'SKY DRAGON',p:'285',q:1},
+  {t:0,s:'IN',n:'TEARS OF GOLD',p:'350',q:5},
+  {t:0,s:'LOW',n:'THE EMPEROR',p:'',q:1},
+  {t:0,s:'IN',n:'THE GAME WE PLAY',p:'',q:5},
+  {t:0,s:'IN',n:'THE HANDS OF TIME',p:'345',q:2},
+  {t:0,s:'LOW',n:'THE HOUND',p:'',q:1},
+  {t:0,s:'IN',n:'THE THING',p:'',q:2},
+  {t:0,s:'IN',n:'THE ULTIMATE 36',p:'265',q:5},
+  {t:0,s:'IN',n:'THE WRAITH SOVEREIGN',p:'',q:7},
+  {t:0,s:'IN',n:'THING 2',p:'',q:2},
+  {t:0,s:'LOW',n:'VICTORIOUS WARRIORS',p:'400',q:1},
+  {t:0,s:'IN',n:'WANTED DEAD OR ALIVE',p:'325',q:2},
+  {t:0,s:'IN',n:'WARLOCK',p:'265',q:7},
+  {t:0,s:'IN',n:'WEAPON X',p:'',q:3},
+  {t:0,s:'LOW',n:"WILD'E",p:'',q:1},
+  {t:0,s:'IN',n:'WRECK-IT RALPH',p:'',q:3},
+  {t:1,s:'LOW',n:'AMERICAN BADASS',p:'',q:1},
+  {t:1,s:'IN',n:'EXPLODING STARS',p:'',q:4},
+  {t:1,s:'IN',n:'FAST MONEY',p:'',q:2},
+  {t:1,s:'LOW',n:'MAD AS MARCH HARE',p:'150',q:1},
+  {t:1,s:'IN',n:'MASTER GOLD',p:'250',q:8},
+  {t:1,s:'LOW',n:'MASTER KALEIDOSCOPE',p:'',q:1},
+  {t:1,s:'LOW',n:'POWERSLAVE',p:'',q:1},
+  {t:1,s:'IN',n:'THUNDER WILLOW',p:'',q:4},
+  {t:1,s:'IN',n:'WILLOW KING',p:'',q:2},
+  {t:2,s:'LOW',n:'4 HORSEMAN',p:'',q:1},
+  {t:2,s:'IN',n:'BACKYARD HEROES',p:'',q:6},
+  {t:2,s:'IN',n:'BIG MONEY',p:'',q:8},
+  {t:2,s:'IN',n:'BLACK DIAMOND',p:'',q:6},
+  {t:2,s:'IN',n:'BLESSED',p:'225',q:1},
+  {t:2,s:'IN',n:'BOOM BOOM',p:'',q:5},
+  {t:2,s:'IN',n:'COSMIC CHAOS',p:'',q:6},
+  {t:2,s:'IN',n:'DOUBLE HORROR',p:'',q:3},
+  {t:2,s:'LOW',n:'GOD OF THUNDER',p:'',q:1},
+  {t:2,s:'IN',n:'HAPPY HOUR',p:'225',q:6},
+  {t:2,s:'LOW',n:'INSANITY',p:'',q:1},
+  {t:2,s:'IN',n:'MAHALO',p:'225',q:20},
+  {t:2,s:'IN',n:'MASTER BABE',p:'',q:16},
+  {t:2,s:'IN',n:'MISBEHAVIN',p:'',q:18},
+  {t:2,s:'IN',n:'NO WHERE TO RUN',p:'',q:21},
+  {t:2,s:'IN',n:'NOWHERE TO HIDE',p:'',q:22},
+  {t:2,s:'IN',n:'SPACE COWBOY',p:'',q:2},
+  {t:2,s:'IN',n:'SUPERNOVA',p:'',q:3},
+  {t:2,s:'LOW',n:'THE JACKHAMMER',p:'',q:1},
+  {t:2,s:'LOW',n:'TOUGH GUY',p:'',q:1},
+  {t:2,s:'IN',n:'THUNDER',p:'',q:9},
+  {t:2,s:'IN',n:'VOODOO DOLL',p:'',q:2},
+  {t:2,s:'LOW',n:'WEIRD SCIENCE',p:'',q:1},
+  {t:3,s:'IN',n:'#1 IN THE BATTLE FIELD',p:'',q:10},
+  {t:3,s:'LOW',n:'4 OF A KIND',p:'',q:1},
+  {t:3,s:'IN',n:'8 SHOT ASST',p:'',q:6},
+  {t:3,s:'LOW',n:'AMERICAN SNIPER',p:'',q:1},
+  {t:3,s:'IN',n:'BELICON',p:'',q:17},
+  {t:3,s:'LOW',n:'CAROLINA COAST',p:'',q:1},
+  {t:3,s:'LOW',n:'CURSE BREAKER',p:'',q:1},
+  {t:3,s:'IN',n:'DESERT STORM',p:'',q:4},
+  {t:3,s:'LOW',n:'EL CABRON',p:'',q:1},
+  {t:3,s:'LOW',n:'HEISENBERG',p:'23',q:1},
+  {t:3,s:'IN',n:"IT'S A GIRL OR IT'S A BOY",p:'',q:3},
+  {t:3,s:'IN',n:'JUST ADVENTURE',p:'',q:5},
+  {t:3,s:'IN',n:'NEON MONKEY',p:'',q:3},
+  {t:3,s:'IN',n:'PATRIOT ASST',p:'',q:2},
+  {t:3,s:'IN',n:'ROYAL PITA',p:'',q:5},
+  {t:3,s:'LOW',n:'SHOCKER',p:'',q:1},
+  {t:3,s:'IN',n:'SHOCKWAVE',p:'',q:3},
+  {t:3,s:'IN',n:'SUPER BINGO',p:'',q:4},
+  {t:3,s:'LOW',n:'SUPER CAKE',p:'',q:1},
+  {t:3,s:'IN',n:'TEXAS HOLDEM',p:'',q:4},
+  {t:3,s:'IN',n:'THE SKULL HOUSE',p:'',q:2},
+  {t:3,s:'LOW',n:'WILD CARD',p:'',q:1},
+  {t:3,s:'LOW',n:'WILDER BOYS',p:'',q:1},
+  {t:3,s:'IN',n:'STAIRWAY TO PYRO HEAVEN',p:'',q:14},
+  {t:4,s:'IN',n:'AMERICAN THUNDER',p:'',q:2},
+  {t:4,s:'IN',n:'ARTILLERY SHELLS',p:'',q:3},
+  {t:4,s:'IN',n:'BLAZING 7',p:'150',q:3},
+  {t:4,s:'IN',n:'FULL METAL JACKET',p:'225',q:10},
+  {t:4,s:'IN',n:'GUSHERS',p:'',q:2},
+  {t:4,s:'LOW',n:'HCMF 7',p:'',q:1},
+  {t:4,s:'LOW',n:'HCMF LOCO 9',p:'',q:1},
+  {t:4,s:'IN',n:'LIGHT SABERS',p:'100',q:4},
+  {t:4,s:'IN',n:'MASTER 5',p:'',q:8},
+  {t:4,s:'IN',n:'MASTER 7',p:'',q:11},
+  {t:4,s:'IN',n:'MASTER 8',p:'',q:9},
+  {t:4,s:'IN',n:'MONSTER 9',p:'100',q:12},
+  {t:4,s:'IN',n:'NWA',p:'',q:25},
+  {t:4,s:'IN',n:'SUPER 7',p:'',q:13},
+  {t:4,s:'IN',n:'TRUMP RETURNS',p:'',q:2},
+  {t:4,s:'IN',n:'THRILLER 7',p:'',q:2},
+  {t:5,s:'LOW',n:'BORDER BUSTER',p:'',q:1},
+  {t:5,s:'IN',n:'CUATROL',p:'30',q:2},
+  {t:5,s:'IN',n:'MASTER 4"',p:'',q:7},
+  {t:5,s:'IN',n:'MASTER BALLISTIC 2"',p:'',q:15},
+  {t:5,s:'LOW',n:'MASTER BALLISTIC 3"',p:'',q:1},
+  {t:5,s:'LOW',n:'STROBING ROCKET',p:'40',q:1},
+  {t:6,s:'LOW',n:'ERUPTION',p:'',q:1},
+  {t:6,s:'IN',n:'FLUORESCENT MEGA FOUNTAIN',p:'',q:2},
+  {t:6,s:'IN',n:'HEART ATTACK',p:'',q:3},
+  {t:6,s:'IN',n:'VOLCANO',p:'',q:5},
+  {t:7,s:'IN',n:'MAGA TUBES',p:'',q:6},
+  {t:7,s:'IN',n:'SMOKIN JOE',p:'',q:3},
+  {t:7,s:'LOW',n:'MEXICAN STAND OFF',p:'',q:1},
+  {t:7,s:'LOW',n:'POWER CRACKERS 4000 ROLL',p:'',q:1},
+  {t:7,s:'IN',n:'SUPER GROUND BLOOMS',p:'50',q:3},
+  {t:7,s:'LOW',n:'300 SHOT SATURN MISSILE',p:'',q:1},
+  {t:7,s:'IN',n:'GANGSTER CRACKERS',p:'',q:2},
+  {t:7,s:'IN',n:'MASTER CLASS ASST',p:'',q:5},
+  {t:8,s:'IN',n:'PESOS',p:'',q:12}
+];
+
+// ── AUTH ─────────────────────────────────────────────────────
+function doLogin(){
+  var u=document.getElementById('loginUser').value.trim().toLowerCase();
+  var p=document.getElementById('loginPass').value;
+  if(USERS[u]&&USERS[u].pass===p){
+    currentUser=u;
+    document.getElementById('currentUserLabel').textContent=u+' ('+USERS[u].role+')';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').style.display='block';
+    init();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+function init(){
+  inventory=[];
+  for(var i=0;i<RAW.length;i++){
+    var d=RAW[i];
+    inventory.push({id:i,tab:d.t,status:d.s,name:d.n,price:d.p,qty:d.q});
+  }
+  nextId=inventory.length;
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();
+  document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+
+// ── SHEET SYNC ───────────────────────────────────────────────
+function sendWrite(payload){
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(function(){});
+}
+
+// ── ACTIVITY LOG ─────────────────────────────────────────────
+function logActivity(action, detail){
+  var entry={user:currentUser,time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),action:action,detail:detail};
+  activityLog.unshift(entry);
+  renderActLog();
+}
+
+function renderActLog(){
+  var el=document.getElementById('actLog');
+  if(!activityLog.length){el.innerHTML='<div class="empty">No activity yet.</div>';return;}
+  var h='';
+  for(var i=0;i<activityLog.length;i++){
+    var e=activityLog[i];
+    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+' '+e.time+'</span></div><div class="log-detail">'+e.action+': <b>'+e.detail+'</b></div></div>';
+  }
+  el.innerHTML=h;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function toast(msg,dur){dur=dur||2600;var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},dur);}
+function recalc(item){if(item.qty===0)item.status='OUT';else if(item.qty<=2)item.status='LOW';else item.status='IN';}
+function tl(item){return TABS[item.tab]?TABS[item.tab].short:'';}
+function fi(id){for(var i=0;i<inventory.length;i++){if(inventory[i].id===id)return inventory[i];}return null;}
+
+// ── STATS ────────────────────────────────────────────────────
+function updateStats(){
+  var inC=0,lowC=0,outC=0;
+  for(var i=0;i<inventory.length;i++){if(inventory[i].status==='IN')inC++;else if(inventory[i].status==='LOW')lowC++;else if(inventory[i].status==='OUT')outC++;}
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><div class="stat-label">Total Products</div><div class="stat-val">'+inventory.length+'</div></div>'+
+    '<div class="stat"><div class="stat-label">In Stock</div><div class="stat-val g">'+inC+'</div></div>'+
+    '<div class="stat"><div class="stat-label">Running Low</div><div class="stat-val a">'+lowC+'</div></div>'+
+    '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>';
+}
+
+// ── TABLE ─────────────────────────────────────────────────────
+function buildTabBar(){
+  var h='<button class="tab-btn '+(activeTab===-1?'active':'')+'" onclick="activeTab=-1;renderTable()">All</button>';
+  for(var i=0;i<TABS.length;i++)h+='<button class="tab-btn '+(activeTab===i?'active':'')+'" onclick="activeTab='+i+';renderTable()">'+TABS[i].short+'</button>';
+  document.getElementById('tabBar').innerHTML=h;
+}
+
+function renderTable(){
+  buildTabBar();
+  var search=(document.getElementById('search').value||'').toLowerCase();
+  var sf=document.getElementById('statusFilter').value;
+  var showCat=activeTab===-1;
+  document.getElementById('catHeader').style.display=showCat?'':'none';
+  var rows=[];
+  for(var i=0;i<inventory.length;i++){
+    var x=inventory[i];
+    if(activeTab>=0&&x.tab!==activeTab)continue;
+    if(sf&&x.status!==sf)continue;
+    if(search&&x.name.toLowerCase().indexOf(search)===-1)continue;
+    rows.push(x);
+  }
+  var empty=document.getElementById('emptyMsg');
+  if(!rows.length){document.getElementById('tbody').innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  var h='';
+  for(var r=0;r<rows.length;r++){
+    var item=rows[r];
+    h+='<tr><td><span class="badge '+item.status+'">'+item.status+'</span></td>'+
+      '<td style="font-weight:500">'+item.name+'</td>'+
+      (showCat?'<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>':'')+
+      '<td>'+(item.price?'<span style="color:var(--accent2);font-weight:600">$'+item.price+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+      '<td><span class="qty-pill">'+item.qty+'</span></td>'+
+      '<td>'+
+        '<button class="icon-btn" onclick="openEdit('+item.id+')" title="Edit">✏️</button>'+
+        '<button class="icon-btn" onclick="quickAdd('+item.id+')" title="Add stock">➕</button>'+
+        '<button class="icon-btn del" onclick="delItem('+item.id+')" title="Delete">🗑</button>'+
+      '</td></tr>';
+  }
+  document.getElementById('tbody').innerHTML=h;
+}
+
+function renderLowStock(){
+  var rows=[];for(var i=0;i<inventory.length;i++){if(inventory[i].status==='LOW'||inventory[i].status==='OUT')rows.push(inventory[i]);}
+  if(!rows.length){document.getElementById('lowTbody').innerHTML='<tr><td colspan="6" class="empty">All good — nothing low or out!</td></tr>';return;}
+  var h='';
+  for(var r=0;r<rows.length;r++){
+    var item=rows[r];
+    h+='<tr><td><span class="badge '+item.status+'">'+item.status+'</span></td>'+
+      '<td style="font-weight:500">'+item.name+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
+      '<td>'+(item.price?'$'+item.price:'—')+'</td>'+
+      '<td><span class="qty-pill">'+item.qty+'</span></td>'+
+      '<td><div style="display:flex;gap:6px;align-items:center">'+
+        '<input class="inline-num" type="number" min="1" value="1" id="rs_'+item.id+'">'+
+        '<button class="btn" style="padding:4px 10px;font-size:12px" onclick="restockItem('+item.id+')">Add</button>'+
+      '</div></td></tr>';
+  }
+  document.getElementById('lowTbody').innerHTML=h;
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────
+function restockItem(id){
+  var item=fi(id);var qty=parseInt(document.getElementById('rs_'+id).value)||0;
+  if(!item||qty<=0)return;
+  var old=item.qty;item.qty+=qty;recalc(item);
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+  logActivity('Restocked',item.name+' +'+qty+' ('+old+' \u2192 '+item.qty+')');
+  toast('Added '+qty+' to '+item.name+' \u2713');
+}
+
+function quickAdd(id){
+  var item=fi(id);if(!item)return;
+  var qty=parseInt(prompt('Add stock to "'+item.name+'"\nQty to add:'));
+  if(!qty||isNaN(qty)||qty<=0)return;
+  var old=item.qty;item.qty+=qty;recalc(item);
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+  logActivity('Added stock',item.name+' +'+qty+' ('+old+' \u2192 '+item.qty+')');
+  toast('Added '+qty+' to '+item.name+' \u2713');
+}
+
+function delItem(id){
+  var item=fi(id);if(!item||!confirm('Delete "'+item.name+'"?'))return;
+  inventory=inventory.filter(function(x){return x.id!==id;});
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();
+  sendWrite({action:'deleteItem',item:{name:item.name,tab:item.tab}});
+  logActivity('Deleted',item.name);
+  toast('Deleted '+item.name);
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function buildTabSelect(sel){
+  var h='';for(var i=0;i<TABS.length;i++)h+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+TABS[i].name+'</option>';
+  document.getElementById('mTab').innerHTML=h;
+}
+
+function openEdit(id){
+  isAdding=false;editingId=id;var item=fi(id);
+  document.getElementById('modalTitle').textContent='Edit Product';
+  document.getElementById('mName').value=item.name;
+  document.getElementById('mPrice').value=item.price||'';
+  document.getElementById('mQty').value=item.qty;
+  document.getElementById('mStatus').value=item.status;
+  buildTabSelect(item.tab||0);
+  document.getElementById('editOverlay').style.display='flex';
+}
+
+function openAddModal(){
+  isAdding=true;editingId=null;
+  document.getElementById('modalTitle').textContent='Add New Product';
+  document.getElementById('mName').value='';document.getElementById('mPrice').value='';
+  document.getElementById('mQty').value='';document.getElementById('mStatus').value='IN';
+  buildTabSelect(activeTab>=0?activeTab:0);
+  document.getElementById('editOverlay').style.display='flex';
+}
+
+function saveModal(){
+  var name=document.getElementById('mName').value.trim().toUpperCase();
+  if(!name){alert('Name required.');return;}
+  var btn=document.getElementById('modalSaveBtn');btn.disabled=true;btn.textContent='Saving...';
+  var tab=parseInt(document.getElementById('mTab').value);
+  var price=document.getElementById('mPrice').value.trim();
+  var qty=parseInt(document.getElementById('mQty').value)||0;
+  var status=document.getElementById('mStatus').value;
+  var item;
+  if(isAdding){
+    item={id:nextId++,tab:tab,status:status,name:name,price:price,qty:qty};
+    recalc(item);inventory.push(item);
+    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+    logActivity('Added product',name+' (Qty: '+qty+')');
+    toast('Added '+name+' \u2713');
+  } else {
+    item=fi(editingId);
+    var old=item.qty;
+    item.tab=tab;item.name=name;item.price=price;item.qty=qty;item.status=status;
+    recalc(item);
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+    logActivity('Edited',name+(old!==qty?' qty: '+old+' \u2192 '+qty:''));
+    toast('Updated '+name+' \u2713');
+  }
+  btn.disabled=false;btn.textContent='Save & Sync';
+  closeModal();updateStats();renderTable();renderLowStock();populateSaleDropdown();
+}
+
+function closeModal(){document.getElementById('editOverlay').style.display='none';}
+
+// ── SALES ─────────────────────────────────────────────────────
+function populateSaleDropdown(){
+  var sorted=[];for(var i=0;i<inventory.length;i++){if(inventory[i].status!=='OUT')sorted.push(inventory[i]);}
+  sorted.sort(function(a,b){return a.name.localeCompare(b.name);});
+  var h='<option value="">Select product...</option>';
+  for(var s=0;s<sorted.length;s++){var x=sorted[s];h+='<option value="'+x.id+'">'+x.name+' ('+tl(x)+') — '+x.qty+' left</option>';}
+  document.getElementById('saleProduct').innerHTML=h;
+}
+
+function addSaleItem(){
+  var id=parseInt(document.getElementById('saleProduct').value);
+  var qty=parseInt(document.getElementById('saleQty').value)||1;
+  var warn=document.getElementById('saleWarn');
+  if(!id){warn.style.display='block';warn.textContent='Please select a product.';return;}
+  var item=fi(id);if(!item)return;
+  if(qty>item.qty){warn.style.display='block';warn.textContent='Only '+item.qty+' left for '+item.name+'.';return;}
+  warn.style.display='none';
+  var found=false;
+  for(var s=0;s<saleItems.length;s++){if(saleItems[s].id===id){saleItems[s].qty+=qty;found=true;break;}}
+  if(!found)saleItems.push({id:id,name:item.name,tab:item.tab,qty:qty});
+  document.getElementById('applyBtn').disabled=false;renderSaleList();
+}
+
+function removeSaleItem(i){saleItems.splice(i,1);document.getElementById('applyBtn').disabled=saleItems.length===0;renderSaleList();}
+
+function renderSaleList(){
+  var list=document.getElementById('saleList');if(!saleItems.length){list.innerHTML='';return;}
+  var h='';
+  for(var i=0;i<saleItems.length;i++){var s=saleItems[i];h+='<div class="sale-item"><div><div class="sale-item-name">'+s.name+'</div><div class="sale-item-qty">Qty: '+s.qty+'</div></div><button class="icon-btn" onclick="removeSaleItem('+i+')" style="font-size:13px">✕</button></div>';}
+  list.innerHTML=h;
+}
+
+function clearSales(){saleItems=[];document.getElementById('applyBtn').disabled=true;document.getElementById('saleWarn').style.display='none';renderSaleList();}
+
+function commitSales(){
+  if(!saleItems.length)return;
+  var btn=document.getElementById('applyBtn');btn.disabled=true;btn.textContent='Syncing...';
+  var date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var names=[];
+  for(var s=0;s<saleItems.length;s++){
+    var sale=saleItems[s];var item=fi(sale.id);if(!item)continue;
+    item.qty=Math.max(0,item.qty-sale.qty);recalc(item);
+    names.push(sale.name+' x'+sale.qty);
+  }
+  sendWrite({action:'applySales',sales:saleItems});
+  logActivity('End of Day Sales',names.join(', '));
+  salesLog.unshift({date:date,items:saleItems.slice(),user:currentUser});
+  clearSales();renderSalesLog();
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();
+  btn.textContent='Apply & Sync to Sheet';btn.disabled=false;
+  toast('Sales for '+date+' synced \u2713');
+}
+
+function renderSalesLog(){
+  var log=document.getElementById('salesLog');
+  if(!salesLog.length){log.innerHTML='<div class="empty">No sales logged yet.</div>';return;}
+  var h='';
+  for(var i=0;i<salesLog.length;i++){
+    var e=salesLog[i];var detail=[];
+    for(var j=0;j<e.items.length;j++)detail.push(e.items[j].name+' \xd7'+e.items[j].qty);
+    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+'</span></div><div class="log-detail">'+detail.join(' \xb7 ')+'</div></div>';
+  }
+  log.innerHTML=h;
+}
+
+function switchView(view,btn){
+  var vs=document.querySelectorAll('.view');for(var i=0;i<vs.length;i++)vs[i].classList.remove('active');
+  var bs=document.querySelectorAll('.nav-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');
+  document.getElementById('view-'+view).classList.add('active');btn.classList.add('active');
+  if(view==='lowstock')renderLowStock();
+  if(view==='actlog')renderActLog();
+}
+
+document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>
