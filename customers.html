@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fireworks Availability</title>
+<title>Pyrolandia — Fireworks Availability</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -19,62 +19,39 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 
-/* HERO */
 .hero{
-  background: linear-gradient(135deg, #0e0e0f 0%, #1a0a00 50%, #0e0e0f 100%);
+  background:linear-gradient(135deg,#0e0e0f 0%,#1a0a00 50%,#0e0e0f 100%);
   padding:3rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden;
 }
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 0%, rgba(255,77,0,0.3) 0%, transparent 60%);
-}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,77,0,0.3) 0%,transparent 60%);}
 .hero-logo{font-family:'Bebas Neue',sans-serif;font-size:56px;color:#fff;letter-spacing:4px;position:relative;line-height:1}
-.hero-logo span{color:var(--accent)}
+.hero-logo span{color:#ff4d00}
 .hero-tagline{font-size:14px;color:rgba(255,255,255,0.5);letter-spacing:2px;text-transform:uppercase;margin-top:8px;position:relative}
-.hero-note{
-  display:inline-block;margin-top:1.5rem;background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.12);border-radius:20px;
-  padding:6px 18px;font-size:12px;color:rgba(255,255,255,0.6);position:relative;
-}
+.hero-note{display:inline-block;margin-top:1.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:6px 18px;font-size:12px;color:rgba(255,255,255,0.6);position:relative}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-/* LEGEND */
 .legend{display:flex;justify-content:center;gap:20px;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .dot.g{background:var(--green)}.dot.a{background:var(--amber)}.dot.r{background:var(--red)}
 
-/* FILTERS */
 .filters{max-width:900px;margin:1.5rem auto 0;padding:0 1.25rem;display:flex;gap:10px;flex-wrap:wrap}
-.filters input{
-  flex:1;min-width:180px;height:40px;padding:0 14px;
-  border:1.5px solid var(--border);border-radius:10px;
-  background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;
-}
+.filters input{flex:1;min-width:180px;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
 .filters input:focus{outline:none;border-color:var(--accent)}
-.filter-btn{
-  height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:10px;
-  background:var(--surface);color:var(--muted);font-size:13px;cursor:pointer;
-  font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;
-}
+.filter-btn{height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap}
 .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .filter-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
 
-/* TAB FILTER */
 .tab-filters{max-width:900px;margin:.75rem auto 0;padding:0 1.25rem;display:flex;gap:6px;flex-wrap:wrap}
-.tab-f{
-  padding:4px 14px;font-size:12px;border:1.5px solid var(--border);border-radius:20px;
-  background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;
-  transition:all 0.15s;
-}
+.tab-f{padding:4px 14px;font-size:12px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .tab-f.active{background:var(--text);color:#fff;border-color:var(--text)}
 
-/* GRID */
+.last-updated{max-width:900px;margin:.75rem auto 0;padding:0 1.25rem;font-size:11px;color:var(--muted)}
+
 .grid{max-width:900px;margin:1.5rem auto 3rem;padding:0 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 
-.card{
-  background:var(--surface);border:1.5px solid var(--border);border-radius:14px;
-  padding:1rem 1.1rem;transition:all 0.2s;position:relative;overflow:hidden;
-}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.1rem;transition:all 0.2s;position:relative}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08)}
 .card.OUT{opacity:0.55}
 .card-tab{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:500}
@@ -88,15 +65,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .status-badge.OUT{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 
+.loading-state{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
+.loading-spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-state{text-align:center;padding:4rem;color:var(--red);font-size:14px;grid-column:1/-1}
 .empty{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
 
-/* FOOTER */
 .footer{text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
 
-@media(max-width:500px){
-  .hero-logo{font-size:40px}
-  .grid{grid-template-columns:1fr 1fr}
-}
+@media(max-width:500px){.hero-logo{font-size:40px}.grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -104,7 +81,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <div class="hero">
   <div class="hero-logo">🎆 <span>PYROLANDIA</span></div>
   <div class="hero-tagline">Fireworks Availability</div>
-  <div class="hero-note">Prices shown · Quantities not shown · Updated daily</div>
+  <div class="hero-note"><span class="live-dot"></span>Live inventory — updated in real time</div>
 </div>
 
 <div class="legend">
@@ -122,12 +99,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <div class="tab-filters" id="tabFilters"></div>
+<div class="last-updated" id="lastUpdated"></div>
 
-<div class="grid" id="grid"></div>
+<div class="grid" id="grid">
+  <div class="loading-state">
+    <div class="loading-spinner"></div>
+    <div>Loading live inventory...</div>
+  </div>
+</div>
 
 <div class="footer">Questions? Ask us about anything not listed — Pyrolandia &mdash; we may have it! 🎆</div>
 
 <script>
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
+
 var TABS=[
   {name:'1/1',short:'1/1 Cakes'},{name:'2/1',short:'2/1 Cakes'},
   {name:'500G',short:'500 Gram'},{name:'200G',short:'200 Gram'},
@@ -136,7 +121,8 @@ var TABS=[
   {name:'MISC',short:'Misc'}
 ];
 
-var DATA=[
+// Fallback data in case sheet is unreachable
+var FALLBACK=[
   {t:0,s:'LOW',n:'ALTER EGO',p:''},{t:0,s:'IN',n:'ASIAN KONG',p:''},{t:0,s:'IN',n:'BAD BITCH',p:''},{t:0,s:'IN',n:'BANDIDOS',p:''},{t:0,s:'IN',n:'BEAR NECESSITIES',p:''},
   {t:0,s:'IN',n:'BIG BERTHA',p:'300'},{t:0,s:'LOW',n:'BIG DEAL',p:''},{t:0,s:'LOW',n:'BURNING DOWN THE HOUSE',p:''},{t:0,s:'IN',n:"CORNHOLI'S",p:'325'},{t:0,s:'IN',n:'CROWNING THE KING',p:''},
   {t:0,s:'LOW',n:'FALLS FROM HEAVEN',p:''},{t:0,s:'IN',n:'FORTNITE',p:''},{t:0,s:'LOW',n:'FRANKENSTEIN 2.0',p:''},{t:0,s:'IN',n:'GOLD DIGGER',p:''},{t:0,s:'LOW',n:'GTA',p:''},
@@ -174,34 +160,90 @@ var DATA=[
   {t:8,s:'IN',n:'PESOS',p:''}
 ];
 
-var statusFilter='', tabFilter=-1;
+var DATA=[];
+var statusFilter='';
+var tabFilter=-1;
+var usingLive=false;
+
+// Load live data from Google Sheet via Apps Script
+function loadLiveData(){
+  var url=SCRIPT_URL+'?t='+Date.now();
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.success||!data.inventory||!data.inventory.length){
+        throw new Error('No data');
+      }
+      // Convert sheet data to our format
+      DATA=[];
+      for(var i=0;i<data.inventory.length;i++){
+        var item=data.inventory[i];
+        var qty=(parseInt(item.container)||0)+(parseInt(item.store)||0);
+        // Recalculate status based on qty
+        var status=item.status||'IN';
+        if(qty===0) status='OUT';
+        else if(qty<=2) status='LOW';
+        DATA.push({
+          t: parseInt(item.tab)||0,
+          s: status,
+          n: item.name||'',
+          p: item.price||''
+        });
+      }
+      usingLive=true;
+      var now=new Date();
+      document.getElementById('lastUpdated').textContent=
+        'Live data \u2014 last loaded '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      buildTabFilters();
+      render();
+    })
+    .catch(function(){
+      // Fall back to hardcoded data if sheet unreachable
+      DATA=FALLBACK;
+      usingLive=false;
+      document.getElementById('lastUpdated').textContent='Showing cached inventory \u2014 sheet temporarily unreachable';
+      buildTabFilters();
+      render();
+    });
+}
 
 function setStatus(s,btn){
   statusFilter=s;
-  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');render();
+  var btns=document.querySelectorAll('.filter-btn');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  render();
 }
 
 function buildTabFilters(){
   var h='<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
-  for(var i=0;i<TABS.length;i++) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TABS[i].short+'</button>';
+  for(var i=0;i<TABS.length;i++){
+    // Only show tabs that have products
+    var hasProducts=false;
+    for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){hasProducts=true;break;}}
+    if(hasProducts) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TABS[i].short+'</button>';
+  }
   document.getElementById('tabFilters').innerHTML=h;
 }
 
 function setTab(t,btn){
   tabFilter=t;
-  document.querySelectorAll('.tab-f').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');render();
+  var btns=document.querySelectorAll('.tab-f');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+  btn.classList.add('active');
+  render();
 }
 
 function render(){
   var search=(document.getElementById('search').value||'').toLowerCase();
-  var rows=DATA.filter(function(d){
-    if(tabFilter>=0&&d.t!==tabFilter)return false;
-    if(statusFilter&&d.s!==statusFilter)return false;
-    if(search&&d.n.toLowerCase().indexOf(search)===-1)return false;
-    return true;
-  });
+  var rows=[];
+  for(var i=0;i<DATA.length;i++){
+    var d=DATA[i];
+    if(tabFilter>=0&&d.t!==tabFilter) continue;
+    if(statusFilter&&d.s!==statusFilter) continue;
+    if(search&&d.n.toLowerCase().indexOf(search)===-1) continue;
+    rows.push(d);
+  }
   var grid=document.getElementById('grid');
   if(!rows.length){grid.innerHTML='<div class="empty">No products match your search.</div>';return;}
   var h='';
@@ -220,7 +262,11 @@ function render(){
   grid.innerHTML=h;
 }
 
-buildTabFilters();render();
+// Load live data on page load
+loadLiveData();
+
+// Auto-refresh every 5 minutes so page stays current
+setInterval(loadLiveData, 5*60*1000);
 </script>
 </body>
 </html>
