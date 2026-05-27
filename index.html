@@ -637,6 +637,8 @@ function renderTable(){
     rows.sort(function(a,b){return order[a.status]-order[b.status];});
   }
   else if(sort==='qty') rows.sort(function(a,b){return a.qty-b.qty;});
+  var empty=document.getElementById('emptyMsg');
+  if(!rows.length){document.getElementById('tbody').innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   var h='';
   for(var r=0;r<rows.length;r++){
