@@ -6,18 +6,14 @@
 <title>Pyrolandia — Fireworks Availability</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap');
-
 :root{
-  --bg:#faf8f4;--surface:#fff;--border:#e8e4dc;
-  --text:#1a1714;--muted:#8a8680;
-  --accent:#ff4d00;
-  --green:#16a34a;--amber:#d97706;--red:#dc2626;
+  --bg:#faf8f4;--surface:#fff;--border:#e8e4dc;--text:#1a1714;--muted:#8a8680;
+  --accent:#ff4d00;--green:#16a34a;--amber:#d97706;--red:#dc2626;
   --green-bg:#f0fdf4;--amber-bg:#fffbeb;--red-bg:#fef2f2;
   --green-border:#bbf7d0;--amber-border:#fde68a;--red-border:#fecaca;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
-
 .hero{background:linear-gradient(135deg,#0e0e0f 0%,#1a0a00 50%,#0e0e0f 100%);padding:3rem 1.5rem 2.5rem;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,77,0,0.3) 0%,transparent 60%)}
 .hero-logo{font-family:'Bebas Neue',sans-serif;font-size:56px;color:#fff;letter-spacing:4px;position:relative;line-height:1}
@@ -26,13 +22,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .hero-note{display:inline-block;margin-top:1.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:6px 18px;font-size:12px;color:rgba(255,255,255,0.6);position:relative}
 .live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 2s infinite;vertical-align:middle}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-
 .legend{display:flex;justify-content:center;gap:20px;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .dot.g{background:var(--green)}.dot.a{background:var(--amber)}.dot.r{background:var(--red)}
-
-.controls{max-width:900px;margin:1.5rem auto 0;padding:0 1.25rem}
+.controls{max-width:960px;margin:1.5rem auto 0;padding:0 1.25rem}
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.75rem}
 .filters input{flex:1;min-width:180px;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
 .filters input:focus{outline:none;border-color:var(--accent)}
@@ -40,16 +34,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .filter-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
 .sort-select{height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer}
-.sort-select:focus{outline:none;border-color:var(--accent)}
-
 .tab-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem}
 .tab-f{padding:4px 14px;font-size:12px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .tab-f.active{background:var(--text);color:#fff;border-color:var(--text)}
-
 .last-updated{font-size:11px;color:var(--muted);margin-bottom:.5rem}
-
-.grid{max-width:900px;margin:1rem auto 3rem;padding:0 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
-
+.grid{max-width:960px;margin:1rem auto 3rem;padding:0 1.25rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1rem 1.1rem;transition:all 0.2s}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08)}
 .card.OUT{opacity:0.5}
@@ -65,31 +54,25 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .status-badge.LOW{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
 .status-badge.OUT{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-
 .loading-state{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
 .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:1rem}
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
-.error-msg{text-align:center;padding:2rem;color:var(--red);font-size:13px;grid-column:1/-1}
-
 .footer{text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
 @media(max-width:500px){.hero-logo{font-size:38px}.grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
-
 <div class="hero">
   <div class="hero-logo">🎆 <span>PYROLANDIA</span></div>
   <div class="hero-tagline">Fireworks Availability</div>
   <div class="hero-note"><span class="live-dot"></span>Live inventory — updates automatically</div>
 </div>
-
 <div class="legend">
   <div class="legend-item"><div class="dot g"></div>In Stock</div>
   <div class="legend-item"><div class="dot a"></div>Low Stock — Get it while it lasts</div>
   <div class="legend-item"><div class="dot r"></div>Out of Stock</div>
 </div>
-
 <div class="controls">
   <div class="filters">
     <input type="text" id="search" placeholder="Search fireworks..." oninput="render()">
@@ -106,199 +89,176 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="tab-filters" id="tabFilters"></div>
   <div class="last-updated" id="lastUpdated"></div>
 </div>
-
 <div class="grid" id="grid">
   <div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>
 </div>
-
 <div class="footer">Questions? Ask us about anything not listed — Pyrolandia 🎆</div>
 
 <script>
 var SHEET_ID = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 
-// Each tab has a gid (sheet ID) — these match your exact tabs
+// Your exact tab names as they appear in Google Sheets
 var TABS = [
-  {name:'1/1',   short:'1/1 Cakes',   gid:'0'},
-  {name:'2/1',   short:'2/1 Cakes',   gid:''},
-  {name:'500G',  short:'500 Gram',     gid:''},
-  {name:'200G',  short:'200 Gram',     gid:''},
-  {name:'SHELLS',short:'Shells',       gid:''},
-  {name:'CANDLES',short:'Candles',     gid:''},
-  {name:'ROCKETS',short:'Rockets',     gid:''},
-  {name:'FOUNTAINS',short:'Fountains', gid:''},
-  {name:'MISC',  short:'Misc',         gid:''}
+  {name:'1/1',       short:'1/1 Cakes'},
+  {name:'2/1',       short:'2/1 Cakes'},
+  {name:'500G',      short:'500 Gram'},
+  {name:'200G',      short:'200 Gram'},
+  {name:'SHELLS',    short:'Shells'},
+  {name:'CANDLES',   short:'Candles'},
+  {name:'ROCKETS',   short:'Rockets'},
+  {name:'FOUNTAINS', short:'Fountains'},
+  {name:'MISC',      short:'Misc'}
 ];
 
 var DATA = [];
 var statusFilter = '';
 var tabFilter = -1;
 
-// Fetch a single tab as CSV and parse it
-function fetchTab(tabIndex, gid) {
-  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-            '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(TABS[tabIndex].name) +
-            '&t=' + Date.now();
-  return fetch(url)
-    .then(function(r) { return r.text(); })
-    .then(function(csv) { return parseCSV(csv, tabIndex); })
-    .catch(function() { return []; });
-}
-
-function parseCSV(csv, tabIndex) {
-  var lines = csv.split('\n');
-  if (lines.length < 2) return [];
-  
-  // Parse header row
-  var headers = parseCSVRow(lines[0]);
-  var statusCol = -1, nameCol = -1, priceCol = -1, casePriceCol = -1, qtyCol = -1;
-  
-  for (var h = 0; h < headers.length; h++) {
-    var hdr = headers[h].toUpperCase().trim();
-    if (hdr === 'STATUS')                          statusCol = h;
-    else if (hdr === 'PRODUCT NAME')               nameCol = h;
-    else if (hdr === 'PRICE' || hdr === 'RETAIL')  priceCol = h;
-    else if (hdr === 'CASE PRICE' || hdr === 'CASEPRICE') casePriceCol = h;
-    else if (hdr === 'QTY' || hdr === 'TOTAL')     qtyCol = h;
-    // Also check CONTAINER + STORE for older format
-    else if (hdr === 'CONTAINER')                  { if(qtyCol===-1) qtyCol = h; }
-  }
-
-  var items = [];
-  for (var i = 1; i < lines.length; i++) {
-    var row = parseCSVRow(lines[i]);
-    if (!row || row.length < 2) continue;
-    var name = nameCol >= 0 ? row[nameCol].trim() : '';
-    if (!name) continue;
-
-    var status = statusCol >= 0 ? row[statusCol].trim().toUpperCase() : 'IN';
-    var price  = priceCol >= 0  ? row[priceCol].replace(/[^0-9.]/g,'').trim() : '';
-    var casePrice = casePriceCol >= 0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
-    var qty    = qtyCol >= 0    ? parseInt(row[qtyCol]) || 0 : 0;
-
-    // Recalculate status from qty to keep it accurate
-    if (qty === 0)      status = 'OUT';
-    else if (qty <= 2)  status = 'LOW';
-    else                status = 'IN';
-
-    items.push({ t: tabIndex, s: status, n: name, p: price, cp: casePrice });
-  }
-  return items;
-}
-
 function parseCSVRow(row) {
-  var result = [], inQuotes = false, current = '';
-  for (var i = 0; i < row.length; i++) {
-    var ch = row[i];
-    if (ch === '"') { inQuotes = !inQuotes; }
-    else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
-    else { current += ch; }
+  var result=[], inQuotes=false, current='';
+  for (var i=0;i<row.length;i++) {
+    var ch=row[i];
+    if (ch==='"'){inQuotes=!inQuotes;}
+    else if(ch===','&&!inQuotes){result.push(current.trim());current='';}
+    else{current+=ch;}
   }
-  result.push(current);
+  result.push(current.trim());
   return result;
 }
 
-function loadAllTabs() {
-  document.getElementById('grid').innerHTML = '<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
-  
-  var promises = [];
-  for (var i = 0; i < TABS.length; i++) {
-    promises.push(fetchTab(i, TABS[i].gid));
-  }
-
-  Promise.all(promises).then(function(results) {
-    DATA = [];
-    for (var i = 0; i < results.length; i++) {
-      for (var j = 0; j < results[i].length; j++) {
-        DATA.push(results[i][j]);
+function fetchTab(tabIndex) {
+  var tabName = TABS[tabIndex].name;
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+
+            '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(tabName)+'&t='+Date.now();
+  return fetch(url)
+    .then(function(r){ return r.text(); })
+    .then(function(csv){
+      var lines = csv.split('\n');
+      if (lines.length < 2) return [];
+      var headers = parseCSVRow(lines[0]);
+      var nameCol=-1, priceCol=-1, casePriceCol=-1, statusCol=-1, contCol=-1, storeCol=-1, totalCol=-1;
+      for (var h=0;h<headers.length;h++) {
+        var hdr = headers[h].replace(/"/g,'').toUpperCase().trim();
+        if (hdr==='STATUS')                              statusCol    = h;
+        else if(hdr==='PRODUCT NAME')                    nameCol      = h;
+        else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol     = h;
+        else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol = h;
+        else if(hdr==='CONTAINER')                       contCol      = h;
+        else if(hdr==='STORE')                           storeCol     = h;
+        else if(hdr==='TOTAL'||hdr==='QTY')              totalCol     = h;
       }
+      if (nameCol===-1) return [];
+      var items=[];
+      for (var i=1;i<lines.length;i++) {
+        if (!lines[i].trim()) continue;
+        var row = parseCSVRow(lines[i]);
+        var name = nameCol>=0 ? row[nameCol].replace(/"/g,'').trim() : '';
+        if (!name || name==='PRODUCT NAME') continue;
+        var price     = priceCol>=0     ? row[priceCol].replace(/[^0-9.]/g,'').trim()     : '';
+        var casePrice = casePriceCol>=0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
+        // Calculate qty from CONTAINER+STORE or TOTAL
+        var qty = 0;
+        if (totalCol>=0 && parseInt(row[totalCol])>0) {
+          qty = parseInt(row[totalCol])||0;
+        } else {
+          var cont  = contCol>=0  ? parseInt(row[contCol])||0  : 0;
+          var store = storeCol>=0 ? parseInt(row[storeCol])||0 : 0;
+          qty = cont + store;
+        }
+        // Use STATUS from sheet but also verify with qty
+        var status = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
+        if (qty===0)      status='OUT';
+        else if(qty<=2)   status='LOW';
+        else              status='IN';
+        // Skip rows that are clearly headers or junk
+        if (status==='STATUS'||name.length<2) continue;
+        items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
+      }
+      return items;
+    })
+    .catch(function(){ return []; });
+}
+
+function loadAllTabs() {
+  document.getElementById('grid').innerHTML='<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
+  var promises=[];
+  for(var i=0;i<TABS.length;i++) promises.push(fetchTab(i));
+  Promise.all(promises).then(function(results){
+    DATA=[];
+    for(var i=0;i<results.length;i++){
+      for(var j=0;j<results[i].length;j++) DATA.push(results[i][j]);
     }
-    if (DATA.length === 0) {
-      document.getElementById('grid').innerHTML = '<div class="error-msg">Could not load inventory. Make sure the sheet is set to "Anyone with the link can view".</div>';
-      return;
-    }
-    var now = new Date();
-    document.getElementById('lastUpdated').textContent =
-      'Last updated: ' + now.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+    var now=new Date();
+    document.getElementById('lastUpdated').textContent=
+      'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     buildTabFilters();
     render();
-  }).catch(function() {
-    document.getElementById('grid').innerHTML = '<div class="error-msg">Could not load inventory. Please try again shortly.</div>';
+  }).catch(function(){
+    document.getElementById('grid').innerHTML='<div class="empty">Could not load inventory. Please try again shortly.</div>';
   });
 }
 
-function setStatus(s, btn) {
-  statusFilter = s;
-  var btns = document.querySelectorAll('.filter-btn');
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+function setStatus(s,btn){
+  statusFilter=s;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   render();
 }
 
-function buildTabFilters() {
-  var h = '<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
-  for (var i = 0; i < TABS.length; i++) {
-    var has = false;
-    for (var j = 0; j < DATA.length; j++) { if (DATA[j].t === i) { has = true; break; } }
-    if (has) h += '<button class="tab-f" onclick="setTab(' + i + ',this)">' + TABS[i].short + '</button>';
+function buildTabFilters(){
+  var h='<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
+  for(var i=0;i<TABS.length;i++){
+    var has=false;
+    for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){has=true;break;}}
+    if(has) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TABS[i].short+'</button>';
   }
-  document.getElementById('tabFilters').innerHTML = h;
+  document.getElementById('tabFilters').innerHTML=h;
 }
 
-function setTab(t, btn) {
-  tabFilter = t;
-  var btns = document.querySelectorAll('.tab-f');
-  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+function setTab(t,btn){
+  tabFilter=t;
+  document.querySelectorAll('.tab-f').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   render();
 }
 
-function render() {
-  var search = (document.getElementById('search').value || '').toLowerCase();
-  var sort   = document.getElementById('sortOrder').value;
-  var rows   = [];
-
-  for (var i = 0; i < DATA.length; i++) {
-    var d = DATA[i];
-    if (tabFilter >= 0 && d.t !== tabFilter) continue;
-    if (statusFilter && d.s !== statusFilter) continue;
-    if (search && d.n.toLowerCase().indexOf(search) === -1) continue;
+function render(){
+  var search=(document.getElementById('search').value||'').toLowerCase();
+  var sort=document.getElementById('sortOrder').value;
+  var rows=[];
+  for(var i=0;i<DATA.length;i++){
+    var d=DATA[i];
+    if(tabFilter>=0&&d.t!==tabFilter) continue;
+    if(statusFilter&&d.s!==statusFilter) continue;
+    if(search&&d.n.toLowerCase().indexOf(search)===-1) continue;
     rows.push(d);
   }
-
-  if (sort === 'az') rows.sort(function(a,b){ return a.n.localeCompare(b.n); });
-  else if (sort === 'za') rows.sort(function(a,b){ return b.n.localeCompare(a.n); });
-  else if (sort === 'status') {
-    var ord = {OUT:0, LOW:1, IN:2};
-    rows.sort(function(a,b){ return ord[a.s] - ord[b.s]; });
-  }
-
-  var grid = document.getElementById('grid');
-  if (!rows.length) { grid.innerHTML = '<div class="empty">No products match your search.</div>'; return; }
-
-  var h = '';
-  for (var r = 0; r < rows.length; r++) {
-    var d = rows[r];
-    var label = d.s === 'IN' ? 'In Stock' : d.s === 'LOW' ? 'Low Stock' : 'Out of Stock';
-    h += '<div class="card ' + d.s + '">' +
-      '<div class="card-tab">' + (TABS[d.t] ? TABS[d.t].short : '') + '</div>' +
-      '<div class="card-name">' + d.n + '</div>' +
-      '<div class="card-footer">' +
-        '<div class="card-prices">' +
-          '<div class="card-price ' + (d.p ? '' : 'none') + '">' + (d.p ? '$' + d.p : 'Price on request') + '</div>' +
-          (d.cp ? '<div class="card-case">Case: $' + d.cp + '</div>' : '') +
-        '</div>' +
-        '<div class="status-badge ' + d.s + '"><div class="status-dot"></div>' + label + '</div>' +
-      '</div>' +
+  if(sort==='az') rows.sort(function(a,b){return a.n.localeCompare(b.n);});
+  else if(sort==='za') rows.sort(function(a,b){return b.n.localeCompare(a.n);});
+  else if(sort==='status'){var ord={OUT:0,LOW:1,IN:2};rows.sort(function(a,b){return ord[a.s]-ord[b.s];});}
+  var grid=document.getElementById('grid');
+  if(!rows.length){grid.innerHTML='<div class="empty">No products match your search.</div>';return;}
+  var h='';
+  for(var r=0;r<rows.length;r++){
+    var d=rows[r];
+    var label=d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
+    h+='<div class="card '+d.s+'">'+
+      '<div class="card-tab">'+(TABS[d.t]?TABS[d.t].short:'')+'</div>'+
+      '<div class="card-name">'+d.n+'</div>'+
+      '<div class="card-footer">'+
+        '<div class="card-prices">'+
+          '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
+          (d.cp?'<div class="card-case">Case: $'+d.cp+'</div>':'')+
+        '</div>'+
+        '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>'+
+      '</div>'+
     '</div>';
   }
-  grid.innerHTML = h;
+  grid.innerHTML=h;
 }
 
-// Load on page open
 loadAllTabs();
-
-// Auto-refresh every 3 minutes
-setInterval(loadAllTabs, 3 * 60 * 1000);
+setInterval(loadAllTabs, 3*60*1000);
 </script>
 </body>
 </html>
