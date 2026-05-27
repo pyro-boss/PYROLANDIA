@@ -143,8 +143,8 @@ function fetchTab(tabIndex) {
         else if(hdr==='PRODUCT NAME')                    nameCol      = h;
         else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol     = h;
         else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol = h;
-        else if(hdr==='CONTAINER')                       contCol      = h;
-        else if(hdr==='STORE')                           storeCol     = h;
+        else if(hdr==='CASES'||hdr==='CONTAINER')           contCol      = h;
+        else if(hdr==='SINGLES'||hdr==='STORE')             storeCol     = h;
         else if(hdr==='TOTAL'||hdr==='QTY')              totalCol     = h;
       }
       if (nameCol===-1) return [];
@@ -165,11 +165,18 @@ function fetchTab(tabIndex) {
           var store = storeCol>=0 ? parseInt(row[storeCol])||0 : 0;
           qty = cont + store;
         }
-        // Use STATUS from sheet but also verify with qty
-        var status = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
-        if (qty===0)      status='OUT';
-        else if(qty<=2)   status='LOW';
-        else              status='IN';
+        // If qty is 0 but STATUS says IN or LOW, trust the STATUS column
+        var rawStatus = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
+        var status;
+        if (qty===0 && (rawStatus==='IN'||rawStatus==='LOW')) {
+          status = rawStatus;
+        } else if (qty===0) {
+          status = 'OUT';
+        } else if (qty<=2) {
+          status = 'LOW';
+        } else {
+          status = 'IN';
+        }
         // Skip rows that are clearly headers or junk
         if (status==='STATUS'||name.length<2) continue;
         items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
