@@ -187,7 +187,8 @@ function loadLiveData(){
           t: parseInt(item.tab)||0,
           s: status,
           n: item.name||'',
-          p: item.price||''
+          p: item.price||'',
+          cp: item.casePrice||''
         });
       }
       usingLive=true;
@@ -254,7 +255,10 @@ function render(){
       '<div class="card-tab">'+(TABS[d.t]?TABS[d.t].short:'')+'</div>'+
       '<div class="card-name">'+d.n+'</div>'+
       '<div class="card-footer">'+
-        '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
+        '<div>'+
+          '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
+          (d.cp?'<div style="font-size:11px;color:var(--muted);margin-top:2px">Case: $'+d.cp+'</div>':'')+
+        '</div>'+
         '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>'+
       '</div>'+
     '</div>';
