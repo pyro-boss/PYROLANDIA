@@ -346,13 +346,12 @@ function doLogout() {
 
 // ── SHEET FETCH ───────────────────────────────────────────────
 function fetchTab(tabIndex) {
-  var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-            '/gviz/tq?tqx=out:csv&sheet=' + encodeURIComponent(TABS[tabIndex].name) +
-            '&t=' + Date.now();
+  var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+
+            '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(TABS[tabIndex].name)+'&t='+Date.now();
   return fetch(url)
-    .then(function(r) { return r.text(); })
-    .then(function(csv) { return parseCSV(csv, tabIndex); })
-    .catch(function() { return []; });
+    .then(function(r){ return r.text(); })
+    .then(function(csv){ return parseCSV(csv, tabIndex); })
+    .catch(function(){ return []; });
 }
 
 function parseCSVRow(row) {
@@ -375,13 +374,13 @@ function parseCSV(csv, tabIndex) {
 
   for (var h = 0; h < headers.length; h++) {
     var hdr = headers[h].toUpperCase().replace(/"/g,'').trim();
-    if (hdr === 'STATUS')                                statusCol    = h;
-    else if (hdr === 'PRODUCT NAME')                     nameCol      = h;
-    else if (hdr === 'PRICE' || hdr === 'RETAIL')        priceCol     = h;
-    else if (hdr === 'CASE PRICE' || hdr === 'CASEPRICE') casePriceCol = h;
-    else if (hdr === 'QTY' || hdr === 'TOTAL')           qtyCol       = h;
-    else if (hdr === 'CONTAINER')                        contCol      = h;
-    else if (hdr === 'STORE')                            storeCol     = h;
+    if (hdr === 'STATUS')                                  statusCol    = h;
+    else if (hdr === 'PRODUCT NAME')                       nameCol      = h;
+    else if (hdr === 'PRICE' || hdr === 'RETAIL')          priceCol     = h;
+    else if (hdr === 'CASE PRICE' || hdr === 'CASEPRICE')  casePriceCol = h;
+    else if (hdr === 'TOTAL' || hdr === 'QTY')             qtyCol       = h;
+    else if (hdr === 'CASES' || hdr === 'CONTAINER')       contCol      = h;
+    else if (hdr === 'SINGLES' || hdr === 'STORE')         storeCol     = h;
   }
 
   var items = [];
