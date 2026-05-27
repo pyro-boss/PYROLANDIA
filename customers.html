@@ -174,14 +174,10 @@ function parseTab(csv, tabIndex) {
   var lines = csv.split('\n');
   if (!lines.length) return [];
 
-  // Find header row
-  var headerIdx = -1;
-  var headers = [];
-  for (var i=0;i<Math.min(lines.length,5);i++) {
-    var row = parseCSVRow(lines[i]);
-    if (isHeaderRow(row)) { headerIdx=i; headers=row; break; }
-  }
-  if (headerIdx===-1) return [];
+  // Row 1=headers (index 0), Row 2=blank/formula (index 1 skipped), Row 3+=products (index 2+)
+  var headers = parseCSVRow(lines[0]);
+  var headerIdx = 0;
+  if (!isHeaderRow(headers)) return [];
 
   // Map columns
   var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1;
@@ -199,7 +195,7 @@ function parseTab(csv, tabIndex) {
   if (nameCol===-1) return [];
 
   var items=[];
-  for (var i=headerIdx+1;i<lines.length;i++) {
+  for (var i=2;i<lines.length;i++) { // skip index 0 (headers) and index 1 (blank/formula)
     if (!lines[i].trim()) continue;
     var row = parseCSVRow(lines[i]);
     var name = nameCol>=0 ? row[nameCol].trim() : '';
@@ -218,18 +214,16 @@ function parseTab(csv, tabIndex) {
       qty = cases + singles;
     }
 
-    // Get status — trust sheet STATUS if qty is 0
-    var rawStatus = statusCol>=0 ? row[statusCol].trim().toUpperCase() : '';
-    var status;
-    if (qty===0 && (rawStatus==='IN'||rawStatus==='LOW')) {
-      status = rawStatus;
-    } else if (qty===0) {
-      status = 'OUT';
-    } else if (qty<=2) {
-      status = 'LOW';
-    } else {
-      status = 'IN';
-    }
+        // Determine status — qty first, then fall back to sheet STATUS
+        var rawStatus = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
+        var status;
+        if (qty>0) {
+          status = qty<=2 ? 'LOW' : 'IN';
+        } else if (rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT') {
+          status = rawStatus;
+        } else {
+          continue;
+        }
 
     if (status==='STATUS') continue;
     items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
