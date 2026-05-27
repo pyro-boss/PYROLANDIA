@@ -327,16 +327,12 @@ function parseTab(csv,tabIndex){
   var lines=csv.split('\n');
   if(lines.length<2) return [];
 
-  // Find the header row (look in first 5 lines)
-  var headerIdx=-1,headers=[];
-  for(var i=0;i<Math.min(lines.length,5);i++){
-    var row=parseCSVRow(lines[i]);
-    for(var c=0;c<row.length;c++){
-      if(row[c].toUpperCase().trim()==='PRODUCT NAME'){headerIdx=i;headers=row;break;}
-    }
-    if(headerIdx>=0) break;
-  }
-  if(headerIdx===-1) return [];
+  // Row 1=headers (index 0), Row 2=blank/formula (index 1, skipped), Row 3+=products (index 2+)
+  var headers=parseCSVRow(lines[0]);
+  var headerIdx=0;
+  var hasHeader=false;
+  for(var c=0;c<headers.length;c++){if(headers[c].toUpperCase().trim()==='PRODUCT NAME'){hasHeader=true;break;}}
+  if(!hasHeader) return [];
 
   // Map columns BY NAME — handles any column order and extra columns like PACKED
   var statusCol=-1,nameCol=-1,priceCol=-1,casePriceCol=-1,casesCol=-1,singlesCol=-1,totalCol=-1;
@@ -354,7 +350,7 @@ function parseTab(csv,tabIndex){
   if(nameCol===-1) return [];
 
   var items=[];
-  for(var i=headerIdx+1;i<lines.length;i++){
+  for(var i=2;i<lines.length;i++){ // skip index 0 (headers) and index 1 (blank/formula row)
     if(!lines[i].trim()) continue;
     var row=parseCSVRow(lines[i]);
     var name=nameCol>=0?row[nameCol].trim():'';
