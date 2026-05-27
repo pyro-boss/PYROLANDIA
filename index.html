@@ -235,6 +235,12 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <option value="LOW">LOW</option>
           <option value="OUT">OUT</option>
         </select>
+        <select id="sortOrder" onchange="renderTable()">
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+          <option value="status">By Status</option>
+          <option value="qty">By Qty</option>
+        </select>
         <button class="btn primary" onclick="openAddModal()">+ Add Product</button>
       </div>
       <div class="tab-bar" id="tabBar"></div>
@@ -623,8 +629,14 @@ function renderTable(){
     if(search&&x.name.toLowerCase().indexOf(search)===-1)continue;
     rows.push(x);
   }
-  var empty=document.getElementById('emptyMsg');
-  if(!rows.length){document.getElementById('tbody').innerHTML='';empty.style.display='block';return;}
+  var sort=document.getElementById('sortOrder').value;
+  if(sort==='az') rows.sort(function(a,b){return a.name.localeCompare(b.name);});
+  else if(sort==='za') rows.sort(function(a,b){return b.name.localeCompare(a.name);});
+  else if(sort==='status'){
+    var order={OUT:0,LOW:1,IN:2};
+    rows.sort(function(a,b){return order[a.status]-order[b.status];});
+  }
+  else if(sort==='qty') rows.sort(function(a,b){return a.qty-b.qty;});
   empty.style.display='none';
   var h='';
   for(var r=0;r<rows.length;r++){
