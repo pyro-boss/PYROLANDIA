@@ -196,7 +196,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <th id="catHeader" style="width:80px">Tab</th>
             <th style="width:72px">Price</th>
             <th style="width:82px">Case Price</th>
-            <th style="width:60px">Qty</th>
+            <th style="width:55px">Cases</th>
+            <th style="width:60px">Singles</th>
+            <th style="width:55px">Total</th>
             <th style="width:90px">Actions</th>
           </tr></thead>
           <tbody id="tbody"><tr><td colspan="7" class="loading-msg"><span class="spinner"></span>Loading from Google Sheet...</td></tr></tbody>
@@ -241,7 +243,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <th>Product</th>
             <th style="width:80px">Tab</th>
             <th style="width:72px">Price</th>
-            <th style="width:60px">Qty</th>
+            <th style="width:55px">Cases</th>
+            <th style="width:60px">Singles</th>
+            <th style="width:55px">Total</th>
             <th style="width:120px">Add Stock</th>
           </tr></thead>
           <tbody id="lowTbody"></tbody>
@@ -267,7 +271,11 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="field"><label>Tab</label><select id="mTab"></select></div>
     <div class="field"><label>Price ($)</label><input id="mPrice" type="number" min="0"></div>
     <div class="field"><label>Case Price ($) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label><input id="mCasePrice" type="number" min="0"></div>
-    <div class="field"><label>Quantity</label><input id="mQty" type="number" min="0"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Cases</label><input id="mCases" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
+      <div class="field"><label>Singles (Store)</label><input id="mSingles" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
+    </div>
+    <div class="field"><label>Total</label><input id="mTotal" type="number" readonly style="opacity:0.5;cursor:not-allowed" placeholder="Auto-calculated"></div>
     <div class="field"><label>Status</label>
       <select id="mStatus"><option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option></select>
     </div>
@@ -386,18 +394,31 @@ function parseCSV(csv, tabIndex) {
     var price     = priceCol     >= 0 ? row[priceCol].replace(/[^0-9.]/g,'').trim() : '';
     var casePrice = casePriceCol >= 0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
 
-    // Calculate qty — prefer TOTAL col, otherwise add CONTAINER+STORE
+    var cases   = contCol  >= 0 ? parseInt(row[contCol])  || 0 : 0;
+    var singles = storeCol >= 0 ? parseInt(row[storeCol]) || 0 : 0;
+
+    // Calculate qty — prefer TOTAL col, otherwise add cases+singles
     var qty = 0;
     if (qtyCol >= 0 && parseInt(row[qtyCol]) > 0) {
       qty = parseInt(row[qtyCol]) || 0;
+      // distribute into cases/singles if we only have total
+      if (cases === 0 && singles === 0) cases = qty;
     } else {
-      var cont  = contCol  >= 0 ? parseInt(row[contCol])  || 0 : 0;
-      var store = storeCol >= 0 ? parseInt(row[storeCol]) || 0 : 0;
-      qty = cont + store;
+      qty = cases + singles;
     }
 
-    // Auto-calculate status from qty
-    var status = qty === 0 ? 'OUT' : qty <= 2 ? 'LOW' : 'IN';
+    // If qty is 0 but STATUS says IN or LOW, trust the STATUS column
+    var rawStatus = statusCol >= 0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
+    var status;
+    if (qty === 0 && (rawStatus === 'IN' || rawStatus === 'LOW')) {
+      status = rawStatus;
+    } else if (qty === 0) {
+      status = 'OUT';
+    } else if (qty <= 2) {
+      status = 'LOW';
+    } else {
+      status = 'IN';
+    }
 
     items.push({
       id: nextId++,
@@ -406,6 +427,8 @@ function parseCSV(csv, tabIndex) {
       name: name,
       price: price,
       casePrice: casePrice,
+      cases: cases,
+      singles: singles,
       qty: qty
     });
   }
@@ -452,6 +475,7 @@ function setSyncStatus(type, msg) {
   el.className = 'sync-status' + (type==='ok'?' ok':type==='err'?' err':'');
 }
 function recalc(item) {
+  item.qty = (item.cases || 0) + (item.singles || 0);
   if (item.qty === 0)     item.status = 'OUT';
   else if (item.qty <= 2) item.status = 'LOW';
   else                    item.status = 'IN';
@@ -528,6 +552,8 @@ function renderTable() {
       (showCat?'<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>':'')+
       '<td>'+(item.price?'<span style="color:var(--accent2);font-weight:600">$'+item.price+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
       '<td>'+(item.casePrice?'<span style="color:var(--muted);font-size:12px">$'+item.casePrice+'</span>':'<span style="color:var(--muted);font-size:11px">—</span>')+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
+      '<td style="color:var(--accent2);font-size:12px">'+(item.singles||0)+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
       '<td>'+
         '<button class="icon-btn" onclick="openEdit('+item.id+')" title="Edit">✏️</button>'+
@@ -550,6 +576,8 @@ function renderLowStock() {
       '<td style="font-weight:500">'+item.name+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
       '<td>'+(item.price?'$'+item.price:'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
+      '<td style="color:var(--accent2);font-size:12px">'+(item.singles||0)+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
       '<td><div style="display:flex;gap:6px;align-items:center">'+
         '<input class="inline-num" type="number" min="1" value="1" id="rs_'+item.id+'">'+
@@ -575,22 +603,26 @@ function restockItem(id) {
   var item = fi(id);
   var qty  = parseInt(document.getElementById('rs_'+id).value)||0;
   if (!item||qty<=0) return;
-  var old = item.qty; item.qty += qty; recalc(item);
+  var old = item.qty;
+  item.cases = (item.cases||0) + qty;
+  recalc(item);
   updateStats(); renderTable(); renderLowStock(); populateSaleDropdown();
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice||''}});
-  logActivity('Restocked', item.name+' +'+qty+' ('+old+' → '+item.qty+')');
-  toast('Added '+qty+' to '+item.name+' ✓');
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||''}});
+  logActivity('Restocked', item.name+' +'+qty+' cases ('+old+' → '+item.qty+')');
+  toast('Added '+qty+' cases to '+item.name+' ✓');
 }
 
 function quickAdd(id) {
   var item = fi(id); if (!item) return;
-  var qty = parseInt(prompt('Add stock to "'+item.name+'"\nQty to add:'));
+  var qty = parseInt(prompt('Add cases to "'+item.name+'"\nQty to add:'));
   if (!qty||isNaN(qty)||qty<=0) return;
-  var old = item.qty; item.qty += qty; recalc(item);
+  var old = item.qty;
+  item.cases = (item.cases||0) + qty;
+  recalc(item);
   updateStats(); renderTable(); renderLowStock(); populateSaleDropdown();
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice||''}});
-  logActivity('Added stock', item.name+' +'+qty+' ('+old+' → '+item.qty+')');
-  toast('Added '+qty+' to '+item.name+' ✓');
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||''}});
+  logActivity('Added stock', item.name+' +'+qty+' cases ('+old+' → '+item.qty+')');
+  toast('Added '+qty+' cases to '+item.name+' ✓');
 }
 
 function delItem(id) {
@@ -615,8 +647,11 @@ function openEdit(id) {
   document.getElementById('mName').value=item.name;
   document.getElementById('mPrice').value=item.price||'';
   document.getElementById('mCasePrice').value=item.casePrice||'';
-  document.getElementById('mQty').value=item.qty;
+  document.getElementById('mCases').value=item.cases||0;
+  document.getElementById('mSingles').value=item.singles||0;
+  document.getElementById('mTotal').value=item.qty||0;
   document.getElementById('mStatus').value=item.status;
+  updateModalTotal();
   buildTabSelect(item.tab||0);
   document.getElementById('editOverlay').style.display='flex';
 }
@@ -627,8 +662,11 @@ function openAddModal() {
   document.getElementById('mName').value='';
   document.getElementById('mPrice').value='';
   document.getElementById('mCasePrice').value='';
-  document.getElementById('mQty').value='';
+  document.getElementById('mCases').value='';
+  document.getElementById('mSingles').value='';
+  document.getElementById('mTotal').value='';
   document.getElementById('mStatus').value='IN';
+  updateModalTotal();
   buildTabSelect(activeTab>=0?activeTab:0);
   document.getElementById('editOverlay').style.display='flex';
 }
@@ -641,26 +679,35 @@ function saveModal() {
   var tab       = parseInt(document.getElementById('mTab').value);
   var price     = document.getElementById('mPrice').value.trim();
   var casePrice = document.getElementById('mCasePrice').value.trim();
-  var qty       = parseInt(document.getElementById('mQty').value)||0;
+  var cases     = parseInt(document.getElementById('mCases').value)||0;
+  var singles   = parseInt(document.getElementById('mSingles').value)||0;
+  var qty       = cases + singles;
   var status    = document.getElementById('mStatus').value;
   var item;
   if (isAdding) {
-    item = {id:nextId++,tab:tab,status:status,name:name,price:price,casePrice:casePrice,qty:qty};
+    item = {id:nextId++,tab:tab,status:status,name:name,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty};
     recalc(item); inventory.push(item);
-    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice}});
-    logActivity('Added product', name+' (Qty: '+qty+')');
+    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice}});
+    logActivity('Added product', name+' (Cases: '+cases+' Singles: '+singles+')');
     toast('Added '+name+' ✓');
   } else {
     item=fi(editingId);
     var old=item.qty;
-    item.tab=tab; item.name=name; item.price=price; item.casePrice=casePrice; item.qty=qty; item.status=status;
+    item.tab=tab; item.name=name; item.price=price; item.casePrice=casePrice;
+    item.cases=cases; item.singles=singles;
     recalc(item);
-    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice}});
-    logActivity('Edited', name+(old!==qty?' qty: '+old+' → '+qty:''));
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice}});
+    logActivity('Edited', name+(old!==item.qty?' qty: '+old+' → '+item.qty:''));
     toast('Updated '+name+' ✓');
   }
   btn.disabled=false; btn.textContent='Save & Sync';
   closeModal(); updateStats(); renderTable(); renderLowStock(); populateSaleDropdown();
+}
+
+function updateModalTotal() {
+  var cases   = parseInt(document.getElementById('mCases').value)  || 0;
+  var singles = parseInt(document.getElementById('mSingles').value) || 0;
+  document.getElementById('mTotal').value = cases + singles;
 }
 
 function closeModal() { document.getElementById('editOverlay').style.display='none'; }
@@ -708,7 +755,16 @@ function commitSales(){
   var names=[];
   for(var s=0;s<saleItems.length;s++){
     var sale=saleItems[s];var item=fi(sale.id);if(!item)continue;
-    item.qty=Math.max(0,item.qty-sale.qty);recalc(item);
+    var deduct=Math.min(sale.qty,item.qty);
+    // Deduct from singles first, then cases
+    if((item.singles||0)>=deduct){
+      item.singles-=deduct;
+    } else {
+      deduct-=(item.singles||0);
+      item.singles=0;
+      item.cases=Math.max(0,(item.cases||0)-deduct);
+    }
+    recalc(item);
     names.push(sale.name+' x'+sale.qty);
   }
   sendWrite({action:'applySales',sales:saleItems});
