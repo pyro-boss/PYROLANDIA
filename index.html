@@ -245,6 +245,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
             <th>Product</th>
             <th id="catHeader" style="width:80px">Tab</th>
             <th style="width:72px">Price</th>
+            <th style="width:80px">Case Price</th>
             <th style="width:72px">Qty</th>
             <th style="width:90px">Actions</th>
           </tr></thead>
@@ -294,6 +295,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
             <th>Product</th>
             <th style="width:80px">Tab</th>
             <th style="width:72px">Price</th>
+            <th style="width:80px">Case Price</th>
             <th style="width:72px">Qty</th>
             <th style="width:120px">Add Stock</th>
           </tr></thead>
@@ -319,6 +321,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div class="field"><label>Product Name</label><input id="mName" type="text"></div>
     <div class="field"><label>Tab</label><select id="mTab"></select></div>
     <div class="field"><label>Price ($)</label><input id="mPrice" type="number" min="0"></div>
+    <div class="field"><label>Case Price ($) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span></label><input id="mCasePrice" type="number" min="0"></div>
     <div class="field"><label>Quantity</label><input id="mQty" type="number" min="0"></div>
     <div class="field"><label>Status</label>
       <select id="mStatus"><option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option></select>
@@ -552,7 +555,7 @@ function init(){
   inventory=[];
   for(var i=0;i<RAW.length;i++){
     var d=RAW[i];
-    inventory.push({id:i,tab:d.t,status:d.s,name:d.n,price:d.p,qty:d.q});
+    inventory.push({id:i,tab:d.t,status:d.s,name:d.n,price:d.p,casePrice:d.cp||'',qty:d.q});
   }
   nextId=inventory.length;
   updateStats();renderTable();renderLowStock();populateSaleDropdown();
@@ -630,6 +633,7 @@ function renderTable(){
       '<td style="font-weight:500">'+item.name+'</td>'+
       (showCat?'<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>':'')+
       '<td>'+(item.price?'<span style="color:var(--accent2);font-weight:600">$'+item.price+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+      '<td>'+(item.casePrice?'<span style="color:var(--muted);font-size:12px">$'+item.casePrice+'</span>':'<span style="color:var(--muted);font-size:11px">—</span>')+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
       '<td>'+
         '<button class="icon-btn" onclick="openEdit('+item.id+')" title="Edit">✏️</button>'+
@@ -650,6 +654,7 @@ function renderLowStock(){
       '<td style="font-weight:500">'+item.name+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
       '<td>'+(item.price?'$'+item.price:'—')+'</td>'+
+      '<td>'+(item.casePrice?'<span style="font-size:12px">$'+item.casePrice+'</span>':'<span style="color:var(--muted);font-size:11px">—</span>')+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
       '<td><div style="display:flex;gap:6px;align-items:center">'+
         '<input class="inline-num" type="number" min="1" value="1" id="rs_'+item.id+'">'+
@@ -665,7 +670,7 @@ function restockItem(id){
   if(!item||qty<=0)return;
   var old=item.qty;item.qty+=qty;recalc(item);
   updateStats();renderTable();renderLowStock();populateSaleDropdown();
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice||''}});
   logActivity('Restocked',item.name+' +'+qty+' ('+old+' \u2192 '+item.qty+')');
   toast('Added '+qty+' to '+item.name+' \u2713');
 }
@@ -676,7 +681,7 @@ function quickAdd(id){
   if(!qty||isNaN(qty)||qty<=0)return;
   var old=item.qty;item.qty+=qty;recalc(item);
   updateStats();renderTable();renderLowStock();populateSaleDropdown();
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice||''}});
   logActivity('Added stock',item.name+' +'+qty+' ('+old+' \u2192 '+item.qty+')');
   toast('Added '+qty+' to '+item.name+' \u2713');
 }
@@ -701,6 +706,7 @@ function openEdit(id){
   document.getElementById('modalTitle').textContent='Edit Product';
   document.getElementById('mName').value=item.name;
   document.getElementById('mPrice').value=item.price||'';
+  document.getElementById('mCasePrice').value=item.casePrice||'';
   document.getElementById('mQty').value=item.qty;
   document.getElementById('mStatus').value=item.status;
   buildTabSelect(item.tab||0);
@@ -711,6 +717,7 @@ function openAddModal(){
   isAdding=true;editingId=null;
   document.getElementById('modalTitle').textContent='Add New Product';
   document.getElementById('mName').value='';document.getElementById('mPrice').value='';
+  document.getElementById('mCasePrice').value='';
   document.getElementById('mQty').value='';document.getElementById('mStatus').value='IN';
   buildTabSelect(activeTab>=0?activeTab:0);
   document.getElementById('editOverlay').style.display='flex';
@@ -722,21 +729,22 @@ function saveModal(){
   var btn=document.getElementById('modalSaveBtn');btn.disabled=true;btn.textContent='Saving...';
   var tab=parseInt(document.getElementById('mTab').value);
   var price=document.getElementById('mPrice').value.trim();
+  var casePrice=document.getElementById('mCasePrice').value.trim();
   var qty=parseInt(document.getElementById('mQty').value)||0;
   var status=document.getElementById('mStatus').value;
   var item;
   if(isAdding){
-    item={id:nextId++,tab:tab,status:status,name:name,price:price,qty:qty};
+    item={id:nextId++,tab:tab,status:status,name:name,price:price,casePrice:casePrice,qty:qty};
     recalc(item);inventory.push(item);
-    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice}});
     logActivity('Added product',name+' (Qty: '+qty+')');
     toast('Added '+name+' \u2713');
   } else {
     item=fi(editingId);
     var old=item.qty;
-    item.tab=tab;item.name=name;item.price=price;item.qty=qty;item.status=status;
+    item.tab=tab;item.name=name;item.price=price;item.casePrice=casePrice;item.qty=qty;item.status=status;
     recalc(item);
-    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price}});
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,status:item.status,price:item.price,casePrice:item.casePrice}});
     logActivity('Edited',name+(old!==qty?' qty: '+old+' \u2192 '+qty:''));
     toast('Updated '+name+' \u2713');
   }
