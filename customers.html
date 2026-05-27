@@ -96,6 +96,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <button class="filter-btn" onclick="setStatus('IN',this)">In Stock</button>
   <button class="filter-btn" onclick="setStatus('LOW',this)">Low Stock</button>
   <button class="filter-btn" onclick="setStatus('OUT',this)">Out of Stock</button>
+  <select id="sortOrder" onchange="render()" style="height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer">
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+    <option value="status">By Status</option>
+  </select>
 </div>
 
 <div class="tab-filters" id="tabFilters"></div>
@@ -244,6 +249,13 @@ function render(){
     if(statusFilter&&d.s!==statusFilter) continue;
     if(search&&d.n.toLowerCase().indexOf(search)===-1) continue;
     rows.push(d);
+  }
+  var sort=document.getElementById('sortOrder').value;
+  if(sort==='az') rows.sort(function(a,b){return a.n.localeCompare(b.n);});
+  else if(sort==='za') rows.sort(function(a,b){return b.n.localeCompare(a.n);});
+  else if(sort==='status'){
+    var order={OUT:0,LOW:1,IN:2};
+    rows.sort(function(a,b){return order[a.s]-order[b.s];});
   }
   var grid=document.getElementById('grid');
   if(!rows.length){grid.innerHTML='<div class="empty">No products match your search.</div>';return;}
