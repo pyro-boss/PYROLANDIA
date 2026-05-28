@@ -357,6 +357,8 @@ function parseTab(csv,tabIndex){
   // Start after header — skip one row for blank/formula, then read products
   for(var i=headerIdx+1;i<lines.length;i++){
     if(!lines[i].trim()) continue;
+    // Skip rows that are all empty/quoted-empty (from ARRAYFORMULA {""; output)
+    if(lines[i].replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim()==='') continue;
     var row=parseCSVRow(lines[i]);
     var name=nameCol>=0?row[nameCol].trim():'';
     if(!name||name.toUpperCase()==='PRODUCT NAME') continue;
