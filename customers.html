@@ -179,8 +179,14 @@ function parseTab(csv, tabIndex) {
 
   // Row 1=headers (index 0), Row 2=blank/formula (index 1 skipped), Row 3+=products (index 2+)
   var headers = parseCSVRow(lines[0]);
-  var headerIdx = 0;
-  if (!isHeaderRow(headers)) return [];
+  // Find header row dynamically — don't assume it's always index 0 or 1
+  var headerIdx = -1;
+  var headers = [];
+  for (var hi=0; hi<Math.min(lines.length,5); hi++) {
+    var testRow = parseCSVRow(lines[hi]);
+    if (isHeaderRow(testRow)) { headerIdx=hi; headers=testRow; break; }
+  }
+  if (headerIdx===-1) return [];
 
   // Map columns
   var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1;
@@ -198,7 +204,8 @@ function parseTab(csv, tabIndex) {
   if (nameCol===-1) return [];
 
   var items=[];
-  for (var i=2;i<lines.length;i++) { // skip index 0 (headers) and index 1 (blank/formula)
+  // Start after header row + 1 blank/formula row, but check each row for actual content
+  for (var i=headerIdx+1;i<lines.length;i++) {
     if (!lines[i].trim()) continue;
     var row = parseCSVRow(lines[i]);
     var name = nameCol>=0 ? row[nameCol].trim() : '';
