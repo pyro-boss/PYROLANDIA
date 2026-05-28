@@ -394,7 +394,14 @@ function loadAllTabs(){
   for(var i=0;i<TABS.length;i++) promises.push(fetchTab(i));
   Promise.all(promises).then(function(results){
     inventory=[];
-    for(var i=0;i<results.length;i++) for(var j=0;j<results[i].length;j++) inventory.push(results[i][j]);
+    var seen={};
+    for(var i=0;i<results.length;i++){
+      for(var j=0;j<results[i].length;j++){
+        var itm=results[i][j];
+        var key=itm.tab+'_'+itm.name.toUpperCase();
+        if(!seen[key]){seen[key]=true;inventory.push(itm);}
+      }
+    }
     setSyncStatus('ok','Loaded '+inventory.length+' products \u2713');
     updateStats();renderTable();renderLowStock();populateSaleDropdown();
     toast('Loaded '+inventory.length+' products from Google Sheet \u2713');
@@ -580,7 +587,9 @@ function openAddModal(){
 function saveModal(){
   var name=document.getElementById('mName').value.trim().toUpperCase();
   if(!name){alert('Name required.');return;}
-  var btn=document.getElementById('modalSaveBtn');btn.disabled=true;btn.textContent='Saving...';
+  var btn=document.getElementById('modalSaveBtn');
+  if(btn.disabled) return; // prevent double submit
+  btn.disabled=true;btn.textContent='Saving...';
   var tab=parseInt(document.getElementById('mTab').value);
   var price=document.getElementById('mPrice').value.trim();
   var casePrice=document.getElementById('mCasePrice').value.trim();
