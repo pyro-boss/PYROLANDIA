@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .card-prices{display:flex;flex-direction:column;gap:2px}
 .card-price{font-weight:600;font-size:15px;color:var(--accent)}
 .card-price.none{color:var(--muted);font-size:12px;font-weight:400}
-.card-case{font-size:11px;color:var(--muted)}
+.card-meta{font-size:11px;color:var(--muted)}
 .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
 .status-badge.IN{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
 .status-badge.LOW{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
@@ -81,8 +81,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="filter-btn" onclick="setStatus('LOW',this)">Low Stock</button>
     <button class="filter-btn" onclick="setStatus('OUT',this)">Out of Stock</button>
     <select class="sort-select" id="sortOrder" onchange="render()">
-      <option value="az">A → Z</option>
-      <option value="za">Z → A</option>
+      <option value="az">A to Z</option>
+      <option value="za">Z to A</option>
       <option value="status">By Status</option>
     </select>
   </div>
@@ -93,78 +93,30 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>
 </div>
 <div class="footer">Questions? Ask us about anything not listed — Pyrolandia 🎆</div>
-
 <script>
 var SHEET_ID = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
-
-// Exact tab names in order as they appear in your sheet
-var TAB_NAMES = ['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
+var TAB_NAMES  = ['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
 var TAB_LABELS = ['1/1 Cakes','2/1 Cakes','500 Gram','200 Gram','Shells','Candles','Rockets','Fountains','Misc'];
-
-var DATA = [];
-var statusFilter = '';
-var tabFilter = -1;
+var DATA = [], statusFilter = '', tabFilter = -1;
 
 function parseCSVRow(row) {
   var result=[], inQuotes=false, current='';
   for (var i=0;i<row.length;i++) {
     var ch=row[i];
-    if(ch==='"'){inQuotes=!inQuotes;}
-    else if(ch===','&&!inQuotes){result.push(current.trim().replace(/^"|"$/g,''));current='';}
-    else{current+=ch;}
+    if (ch==='"') { inQuotes=!inQuotes; }
+    else if (ch===','&&!inQuotes) { result.push(current.trim().replace(/^"|"$/g,'')); current=''; }
+    else { current+=ch; }
   }
   result.push(current.trim().replace(/^"|"$/g,''));
   return result;
 }
 
-function isHeaderRow(row) {
-  // A header row has PRODUCT NAME or STATUS in it
-  for (var i=0;i<row.length;i++) {
-    var v = row[i].toUpperCase().trim();
-    if (v==='PRODUCT NAME' || v==='STATUS') return true;
-  }
-  return false;
+function isReallyBlank(line) {
+  // Catches truly blank lines AND lines full of empty quoted strings like "","",""
+  return line.replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim() === '';
 }
 
-function isEmptyRow(row) {
-  for (var i=0;i<row.length;i++) {
-    if (row[i].trim()) return false;
-  }
-  return true;
-}
-
-function loadData() {
-  document.getElementById('grid').innerHTML='<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
-
-  // Fetch each tab individually using the sheet name parameter
-  var promises = [];
-  for (var i=0;i<TAB_NAMES.length;i++) {
-    promises.push(fetchSingleTab(i));
-  }
-
-  Promise.all(promises).then(function(results) {
-    DATA = [];
-    var seen = {};
-    for (var i=0;i<results.length;i++) {
-      for (var j=0;j<results[i].length;j++) {
-        var item = results[i][j];
-        var key = item.t + '_' + item.n.toUpperCase();
-        if (!seen[key]) { seen[key]=true; DATA.push(item); }
-      }
-    }
-    if (!DATA.length) {
-      document.getElementById('grid').innerHTML='<div class="empty">Could not load inventory. Please try again shortly.</div>';
-      return;
-    }
-    var now = new Date();
-    document.getElementById('lastUpdated').textContent = 'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-    buildTabFilters();
-    render();
-  });
-}
-
-function fetchSingleTab(tabIndex) {
-  // Use gviz CSV export which works per-tab
+function fetchAndParseTab(tabIndex) {
   var url = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+
             '/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(TAB_NAMES[tabIndex])+'&t='+Date.now();
   return fetch(url)
@@ -177,134 +129,161 @@ function parseTab(csv, tabIndex) {
   var lines = csv.split('\n');
   if (!lines.length) return [];
 
-  // Row 1=headers (index 0), Row 2=blank/formula (index 1 skipped), Row 3+=products (index 2+)
-  var headers = parseCSVRow(lines[0]);
-  // Find header row dynamically — don't assume it's always index 0 or 1
-  var headerIdx = -1;
-  var headers = [];
+  // Find header row — scan first 5 lines for PRODUCT NAME
+  var headerIdx = -1, headers = [];
   for (var hi=0; hi<Math.min(lines.length,5); hi++) {
-    var testRow = parseCSVRow(lines[hi]);
-    if (isHeaderRow(testRow)) { headerIdx=hi; headers=testRow; break; }
+    if (isReallyBlank(lines[hi])) continue;
+    var row = parseCSVRow(lines[hi]);
+    for (var c=0; c<row.length; c++) {
+      if (row[c].toUpperCase().trim() === 'PRODUCT NAME') {
+        headerIdx = hi; headers = row; break;
+      }
+    }
+    if (headerIdx >= 0) break;
   }
-  if (headerIdx===-1) return [];
+  if (headerIdx === -1) return [];
 
-  // Map columns
-  var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1, packedCol=-1;
-  var casesCol=-1, singlesCol=-1, totalCol=-1;
-  for (var h=0;h<headers.length;h++) {
+  // Map columns by exact name
+  var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1;
+  var packedCol=-1, casesCol=-1, singlesCol=-1, totalCol=-1;
+  for (var h=0; h<headers.length; h++) {
     var hdr = headers[h].toUpperCase().trim();
-    if (hdr==='STATUS')                              statusCol   = h;
-    else if(hdr==='PRODUCT NAME')                    nameCol     = h;
-    else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol    = h;
-    else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol= h;
-    else if(hdr==='PACKED')                            packedCol   = h;
-    else if(hdr==='CASES'||hdr==='CONTAINER')        casesCol    = h;
-    else if(hdr==='SINGLES'||hdr==='STORE')          singlesCol  = h;
-    else if(hdr==='TOTAL'||hdr==='QTY')              totalCol    = h;
+    if      (hdr==='STATUS')                            statusCol    = h;
+    else if (hdr==='PRODUCT NAME')                      nameCol      = h;
+    else if (hdr==='PACKED')                            packedCol    = h;
+    else if (hdr==='PRICE'||hdr==='RETAIL')             priceCol     = h;
+    else if (hdr==='CASE PRICE'||hdr==='CASEPRICE')     casePriceCol = h;
+    else if (hdr==='CASES'||hdr==='CONTAINER')          casesCol     = h;
+    else if (hdr==='SINGLES'||hdr==='STORE')            singlesCol   = h;
+    else if (hdr==='TOTAL'||hdr==='QTY')                totalCol     = h;
   }
-  if (nameCol===-1) return [];
+  if (nameCol === -1) return [];
 
-  var items=[];
-  // Start after header row + 1 blank/formula row, but check each row for actual content
-  for (var i=headerIdx+1;i<lines.length;i++) {
+  var items = [], seen = {};
+  for (var i=headerIdx+1; i<lines.length; i++) {
+    // Skip blank and formula-output rows
     if (!lines[i].trim()) continue;
-    // Skip rows full of empty quoted strings from ARRAYFORMULA {""; output
-    if(lines[i].replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim()==='') continue;
+    if (isReallyBlank(lines[i])) continue;
+
     var row = parseCSVRow(lines[i]);
     var name = nameCol>=0 ? row[nameCol].trim() : '';
     if (!name || name.toUpperCase()==='PRODUCT NAME') continue;
 
-    var packed    = packedCol>=0    ? row[packedCol].trim()                            : '';
+    // Deduplicate
+    var key = tabIndex+'_'+name.toUpperCase();
+    if (seen[key]) continue;
+    seen[key] = true;
+
     var price     = priceCol>=0     ? row[priceCol].replace(/[^0-9.]/g,'').trim()     : '';
     var casePrice = casePriceCol>=0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
+    var packed    = packedCol>=0    ? row[packedCol].trim()                            : '';
+    var cases     = casesCol>=0     ? parseInt(row[casesCol])||0                       : 0;
+    var singles   = singlesCol>=0   ? parseInt(row[singlesCol])||0                     : 0;
+    var total     = totalCol>=0     ? parseInt(row[totalCol])||0                       : 0;
+    var qty       = total>0 ? total : cases+singles;
 
-    // Get qty — try TOTAL first, then CASES+SINGLES
-    var qty = 0;
-    if (totalCol>=0 && parseInt(row[totalCol])>0) {
-      qty = parseInt(row[totalCol])||0;
-    } else {
-      var cases   = casesCol>=0   ? parseInt(row[casesCol])||0   : 0;
-      var singles = singlesCol>=0 ? parseInt(row[singlesCol])||0 : 0;
-      qty = cases + singles;
-    }
+    var rawStatus = statusCol>=0 ? row[statusCol].trim().toUpperCase() : '';
+    var status;
+    if      (qty>0)                                                          status = qty<=2?'LOW':'IN';
+    else if (rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT')         status = rawStatus;
+    else                                                                     continue;
 
-        // Determine status — qty first, then fall back to sheet STATUS
-        var rawStatus = statusCol>=0 ? row[statusCol].replace(/"/g,'').trim().toUpperCase() : '';
-        var status;
-        if (qty>0) {
-          status = qty<=2 ? 'LOW' : 'IN';
-        } else if (rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT') {
-          status = rawStatus;
-        } else {
-          continue;
-        }
-
-    if (status==='STATUS') continue;
     items.push({t:tabIndex, s:status, n:name, pk:packed, p:price, cp:casePrice});
   }
   return items;
 }
 
-function setStatus(s,btn){
-  statusFilter=s;
-  var btns=document.querySelectorAll('.filter-btn');
-  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+function loadData() {
+  document.getElementById('grid').innerHTML = '<div class="loading-state"><div class="spinner"></div><div>Loading live inventory...</div></div>';
+  var promises = [];
+  for (var i=0; i<TAB_NAMES.length; i++) promises.push(fetchAndParseTab(i));
+
+  Promise.all(promises).then(function(results) {
+    DATA = [];
+    var seen = {};
+    for (var i=0; i<results.length; i++) {
+      for (var j=0; j<results[i].length; j++) {
+        var item = results[i][j];
+        var key  = item.t+'_'+item.n.toUpperCase();
+        if (!seen[key]) { seen[key]=true; DATA.push(item); }
+      }
+    }
+    if (!DATA.length) {
+      document.getElementById('grid').innerHTML = '<div class="empty">Could not load inventory. Please try again shortly.</div>';
+      return;
+    }
+    var now = new Date();
+    document.getElementById('lastUpdated').textContent = 'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    buildTabFilters();
+    render();
+  }).catch(function() {
+    document.getElementById('grid').innerHTML = '<div class="empty">Could not load inventory. Please try again shortly.</div>';
+  });
+}
+
+function setStatus(s,btn) {
+  statusFilter = s;
+  var btns = document.querySelectorAll('.filter-btn');
+  for (var i=0; i<btns.length; i++) btns[i].classList.remove('active');
   btn.classList.add('active');
   render();
 }
 
-function buildTabFilters(){
-  var h='<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
-  for(var i=0;i<TAB_NAMES.length;i++){
-    var has=false;
-    for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){has=true;break;}}
-    if(has) h+='<button class="tab-f" onclick="setTab('+i+',this)">'+TAB_LABELS[i]+'</button>';
+function buildTabFilters() {
+  var h = '<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
+  for (var i=0; i<TAB_NAMES.length; i++) {
+    var has = false;
+    for (var j=0; j<DATA.length; j++) { if (DATA[j].t===i) { has=true; break; } }
+    if (has) h += '<button class="tab-f" onclick="setTab('+i+',this)">'+TAB_LABELS[i]+'</button>';
   }
-  document.getElementById('tabFilters').innerHTML=h;
+  document.getElementById('tabFilters').innerHTML = h;
 }
 
-function setTab(t,btn){
-  tabFilter=t;
-  var btns=document.querySelectorAll('.tab-f');
-  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+function setTab(t,btn) {
+  tabFilter = t;
+  var btns = document.querySelectorAll('.tab-f');
+  for (var i=0; i<btns.length; i++) btns[i].classList.remove('active');
   btn.classList.add('active');
   render();
 }
 
-function render(){
-  var search=(document.getElementById('search').value||'').toLowerCase();
-  var sort=document.getElementById('sortOrder').value;
-  var rows=[];
-  for(var i=0;i<DATA.length;i++){
-    var d=DATA[i];
-    if(tabFilter>=0&&d.t!==tabFilter) continue;
-    if(statusFilter&&d.s!==statusFilter) continue;
-    if(search&&d.n.toLowerCase().indexOf(search)===-1) continue;
+function render() {
+  var search = (document.getElementById('search').value||'').toLowerCase();
+  var sort   = document.getElementById('sortOrder').value;
+  var rows   = [];
+  for (var i=0; i<DATA.length; i++) {
+    var d = DATA[i];
+    if (tabFilter>=0 && d.t!==tabFilter) continue;
+    if (statusFilter && d.s!==statusFilter) continue;
+    if (search && d.n.toLowerCase().indexOf(search)===-1) continue;
     rows.push(d);
   }
-  if(sort==='az') rows.sort(function(a,b){return a.n.localeCompare(b.n);});
-  else if(sort==='za') rows.sort(function(a,b){return b.n.localeCompare(a.n);});
-  else if(sort==='status'){var ord={OUT:0,LOW:1,IN:2};rows.sort(function(a,b){return ord[a.s]-ord[b.s];});}
-  var grid=document.getElementById('grid');
-  if(!rows.length){grid.innerHTML='<div class="empty">No products match your search.</div>';return;}
-  var h='';
-  for(var r=0;r<rows.length;r++){
-    var d=rows[r];
-    var label=d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
-    h+='<div class="card '+d.s+'">'+
-      '<div class="card-tab">'+TAB_LABELS[d.t]+'</div>'+
-      '<div class="card-name">'+d.n+'</div>'+
-      '<div class="card-footer">'+
-        '<div class="card-prices">'+
-          '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
-          (d.cp?'<div class="card-case">Case: $'+d.cp+'</div>':'')+
-          (d.pk?'<div class="card-case">Packed: '+d.pk+'</div>':'')+
-        '</div>'+
-        '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>'+
-      '</div>'+
+  if (sort==='az') rows.sort(function(a,b){return a.n.localeCompare(b.n);});
+  else if (sort==='za') rows.sort(function(a,b){return b.n.localeCompare(a.n);});
+  else if (sort==='status') {
+    var ord={OUT:0,LOW:1,IN:2};
+    rows.sort(function(a,b){return ord[a.s]-ord[b.s];});
+  }
+  var grid = document.getElementById('grid');
+  if (!rows.length) { grid.innerHTML='<div class="empty">No products match your search.</div>'; return; }
+  var h = '';
+  for (var r=0; r<rows.length; r++) {
+    var d     = rows[r];
+    var label = d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
+    h += '<div class="card '+d.s+'">' +
+      '<div class="card-tab">'+TAB_LABELS[d.t]+'</div>' +
+      '<div class="card-name">'+d.n+'</div>' +
+      '<div class="card-footer">' +
+        '<div class="card-prices">' +
+          '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>' +
+          (d.cp ? '<div class="card-meta">Case: $'+d.cp+'</div>' : '') +
+          (d.pk ? '<div class="card-meta">Packed: '+d.pk+'</div>' : '') +
+        '</div>' +
+        '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>' +
+      '</div>' +
     '</div>';
   }
-  grid.innerHTML=h;
+  grid.innerHTML = h;
 }
 
 loadData();
