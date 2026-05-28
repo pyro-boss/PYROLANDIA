@@ -172,6 +172,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <th>Product</th>
             <th id="catHeader" style="width:72px">Tab</th>
             <th style="width:68px">Price</th>
+            <th style="width:72px">Packed</th>
             <th style="width:82px">Case Price</th>
             <th style="width:58px">Cases</th>
             <th style="width:62px">Singles</th>
@@ -218,6 +219,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <th>Product</th>
             <th style="width:72px">Tab</th>
             <th style="width:68px">Price</th>
+            <th style="width:72px">Packed</th>
             <th style="width:58px">Cases</th>
             <th style="width:62px">Singles</th>
             <th style="width:55px">Total</th>
@@ -243,6 +245,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="field"><label>Product Name</label><input id="mName" type="text"></div>
     <div class="field"><label>Tab</label><select id="mTab"></select></div>
     <div class="field"><label>Price ($)</label><input id="mPrice" type="number" min="0"></div>
+    <div class="field"><label>Packed <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(e.g. 4/1, 12/1)</span></label><input id="mPacked" type="text" placeholder="e.g. 4/1"></div>
     <div class="field"><label>Case Price ($) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label><input id="mCasePrice" type="number" min="0"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Cases</label><input id="mCases" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
@@ -339,13 +342,14 @@ function parseTab(csv,tabIndex){
   if(headerIdx===-1) return [];
 
   // Map columns BY NAME — handles any column order and extra columns like PACKED
-  var statusCol=-1,nameCol=-1,priceCol=-1,casePriceCol=-1,casesCol=-1,singlesCol=-1,totalCol=-1;
+  var statusCol=-1,nameCol=-1,priceCol=-1,casePriceCol=-1,packedCol=-1,casesCol=-1,singlesCol=-1,totalCol=-1;
   for(var h=0;h<headers.length;h++){
     var hdr=headers[h].toUpperCase().replace(/"/g,'').trim();
     if     (hdr==='STATUS')                            statusCol   =h;
     else if(hdr==='PRODUCT NAME')                      nameCol     =h;
     else if(hdr==='PRICE'||hdr==='RETAIL')             priceCol    =h;
     else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')     casePriceCol=h;
+    else if(hdr==='PACKED')                            packedCol   =h;
     else if(hdr==='CASES'||hdr==='CONTAINER')          casesCol    =h;
     else if(hdr==='SINGLES'||hdr==='STORE')            singlesCol  =h;
     else if(hdr==='TOTAL'||hdr==='QTY')                totalCol    =h;
@@ -363,6 +367,7 @@ function parseTab(csv,tabIndex){
     var name=nameCol>=0?row[nameCol].trim():'';
     if(!name||name.toUpperCase()==='PRODUCT NAME') continue;
 
+    var packed   =packedCol>=0   ?row[packedCol].trim()                          :'';
     var price    =priceCol>=0    ?row[priceCol].replace(/[^0-9.]/g,'').trim()    :'';
     var casePrice=casePriceCol>=0?row[casePriceCol].replace(/[^0-9.]/g,'').trim():'';
     var cases    =casesCol>=0    ?parseInt(row[casesCol])||0                      :0;
@@ -383,7 +388,7 @@ function parseTab(csv,tabIndex){
       continue; // skip blank rows
     }
 
-    items.push({id:nextId++,tab:tabIndex,status:status,name:name,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty});
+    items.push({id:nextId++,tab:tabIndex,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty});
   }
   return items;
 }
@@ -476,6 +481,7 @@ function renderTable(){
       '<td style="font-weight:500">'+item.name+'</td>'+
       (showCat?'<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>':'')+
       '<td>'+(item.price?'<span style="color:var(--accent2);font-weight:600">$'+item.price+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(item.packed||'—')+'</td>'+
       '<td>'+(item.casePrice?'<span style="color:var(--muted);font-size:12px">$'+item.casePrice+'</span>':'<span style="color:var(--muted);font-size:11px">—</span>')+'</td>'+
       '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
       '<td style="color:var(--accent2);font-size:12px">'+(item.singles||0)+'</td>'+
@@ -501,6 +507,7 @@ function renderLowStock(){
       '<td style="font-weight:500">'+item.name+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
       '<td>'+(item.price?'$'+item.price:'—')+'</td>'+
+      '<td style="color:var(--muted);font-size:12px">'+(item.packed||'—')+'</td>'+
       '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
       '<td style="color:var(--accent2);font-size:12px">'+(item.singles||0)+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
@@ -571,6 +578,7 @@ function openEdit(id){
   document.getElementById('modalTitle').textContent='Edit Product';
   document.getElementById('mName').value=item.name;
   document.getElementById('mPrice').value=item.price||'';
+  document.getElementById('mPacked').value=item.packed||'';
   document.getElementById('mCasePrice').value=item.casePrice||'';
   document.getElementById('mCases').value=item.cases||0;
   document.getElementById('mSingles').value=item.singles||0;
@@ -584,6 +592,7 @@ function openAddModal(){
   isAdding=true;editingId=null;
   document.getElementById('modalTitle').textContent='Add New Product';
   document.getElementById('mName').value='';document.getElementById('mPrice').value='';
+  document.getElementById('mPacked').value='';
   document.getElementById('mCasePrice').value='';document.getElementById('mCases').value='';
   document.getElementById('mSingles').value='';document.getElementById('mTotal').value='';
   document.getElementById('mStatus').value='IN';
@@ -599,20 +608,21 @@ function saveModal(){
   btn.disabled=true;btn.textContent='Saving...';
   var tab=parseInt(document.getElementById('mTab').value);
   var price=document.getElementById('mPrice').value.trim();
+  var packed=document.getElementById('mPacked').value.trim();
   var casePrice=document.getElementById('mCasePrice').value.trim();
   var cases=parseInt(document.getElementById('mCases').value)||0;
   var singles=parseInt(document.getElementById('mSingles').value)||0;
   var status=document.getElementById('mStatus').value;
   var item;
   if(isAdding){
-    item={id:nextId++,tab:tab,status:status,name:name,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:cases+singles};
+    item={id:nextId++,tab:tab,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:cases+singles};
     recalc(item);inventory.push(item);
     sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice}});
     logActivity('Added product',name+' (Cases:'+cases+' Singles:'+singles+')');
     toast('Added '+name+' \u2713');
   } else {
     item=fi(editingId);var old=item.qty;
-    item.tab=tab;item.name=name;item.price=price;item.casePrice=casePrice;item.cases=cases;item.singles=singles;
+    item.tab=tab;item.name=name;item.packed=packed;item.price=price;item.casePrice=casePrice;item.cases=cases;item.singles=singles;
     recalc(item);
     sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice}});
     logActivity('Edited',name+(old!==item.qty?' qty:'+old+'\u2192'+item.qty:''));
