@@ -144,9 +144,12 @@ function loadData() {
 
   Promise.all(promises).then(function(results) {
     DATA = [];
+    var seen = {};
     for (var i=0;i<results.length;i++) {
       for (var j=0;j<results[i].length;j++) {
-        DATA.push(results[i][j]);
+        var item = results[i][j];
+        var key = item.t + '_' + item.n.toUpperCase();
+        if (!seen[key]) { seen[key]=true; DATA.push(item); }
       }
     }
     if (!DATA.length) {
