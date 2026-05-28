@@ -213,6 +213,7 @@ function parseTab(csv, tabIndex) {
     var name = nameCol>=0 ? row[nameCol].trim() : '';
     if (!name || name.toUpperCase()==='PRODUCT NAME') continue;
 
+    var packed    = packedCol>=0    ? row[packedCol].trim()                            : '';
     var price     = priceCol>=0     ? row[priceCol].replace(/[^0-9.]/g,'').trim()     : '';
     var casePrice = casePriceCol>=0 ? row[casePriceCol].replace(/[^0-9.]/g,'').trim() : '';
 
@@ -238,7 +239,7 @@ function parseTab(csv, tabIndex) {
         }
 
     if (status==='STATUS') continue;
-    items.push({t:tabIndex, s:status, n:name, p:price, cp:casePrice});
+    items.push({t:tabIndex, s:status, n:name, pk:packed, p:price, cp:casePrice});
   }
   return items;
 }
@@ -296,6 +297,7 @@ function render(){
         '<div class="card-prices">'+
           '<div class="card-price '+(d.p?'':'none')+'">'+(d.p?'$'+d.p:'Price on request')+'</div>'+
           (d.cp?'<div class="card-case">Case: $'+d.cp+'</div>':'')+
+          (d.pk?'<div class="card-case">Packed: '+d.pk+'</div>':'')+
         '</div>'+
         '<div class="status-badge '+d.s+'"><div class="status-dot"></div>'+label+'</div>'+
       '</div>'+
