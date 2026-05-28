@@ -189,7 +189,7 @@ function parseTab(csv, tabIndex) {
   if (headerIdx===-1) return [];
 
   // Map columns
-  var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1;
+  var statusCol=-1, nameCol=-1, priceCol=-1, casePriceCol=-1, packedCol=-1;
   var casesCol=-1, singlesCol=-1, totalCol=-1;
   for (var h=0;h<headers.length;h++) {
     var hdr = headers[h].toUpperCase().trim();
@@ -197,6 +197,7 @@ function parseTab(csv, tabIndex) {
     else if(hdr==='PRODUCT NAME')                    nameCol     = h;
     else if(hdr==='PRICE'||hdr==='RETAIL')           priceCol    = h;
     else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')   casePriceCol= h;
+    else if(hdr==='PACKED')                            packedCol   = h;
     else if(hdr==='CASES'||hdr==='CONTAINER')        casesCol    = h;
     else if(hdr==='SINGLES'||hdr==='STORE')          singlesCol  = h;
     else if(hdr==='TOTAL'||hdr==='QTY')              totalCol    = h;
