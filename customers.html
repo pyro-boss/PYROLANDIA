@@ -59,6 +59,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty{text-align:center;padding:4rem;color:var(--muted);font-size:14px;grid-column:1/-1}
 .footer{text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+.deal-card{background:linear-gradient(135deg,#1a0800,#2d1000);border:1.5px solid rgba(255,77,0,0.4);border-radius:14px;padding:.9rem 1rem;position:relative;overflow:hidden}
+.deal-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,77,0,0.15) 0%,transparent 60%)}
+.deal-card-name{font-weight:700;font-size:13px;color:#fff;margin-bottom:4px;position:relative}
+.deal-card-tab{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;position:relative}
+.deal-card-price{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#ff4d00;letter-spacing:1px;line-height:1;position:relative}
+.deal-card-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;position:relative}
+.deal-badge{display:inline-block;background:linear-gradient(135deg,#ff4d00,#ff8c00);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:0.5px}
 @media(max-width:500px){.hero-logo{font-size:38px}.grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -75,6 +82,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="legend-item"><div class="dot g"></div>In Stock</div>
   <div class="legend-item"><div class="dot a"></div>Low Stock — Get it while it lasts</div>
   <div class="legend-item"><div class="dot r"></div>Out of Stock</div>
+</div>
+<div id="dealsSection" style="display:none;max-width:960px;margin:1.5rem auto 0;padding:0 1.25rem">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);letter-spacing:2px">🔥 HOT DEALS</div>
+    <div style="height:2px;flex:1;background:linear-gradient(to right,var(--accent),transparent)"></div>
+  </div>
+  <div id="dealsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:1.5rem"></div>
 </div>
 <div class="controls">
   <div class="filters">
@@ -115,6 +129,58 @@ var SHEET_ID = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 var TAB_NAMES  = ['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
 var TAB_LABELS = ['1/1 Cakes','2/1 Cakes','500 Gram','200 Gram','Shells','Candles','Rockets','Fountains','Misc'];
 var DATA = [], statusFilter = '', tabFilter = -1;
+var CUSTOMER_DEALS = [];
+
+function loadDeals(){
+  try {
+    // Read from localStorage — synced from staff portal
+    var stored = localStorage.getItem('pyrolandia_deals');
+    CUSTOMER_DEALS = stored ? JSON.parse(stored) : [];
+  } catch(e){ CUSTOMER_DEALS = []; }
+}
+
+function getBestCustomerDeal(productName){
+  var productDeals = CUSTOMER_DEALS.filter(function(d){return d.productName.toUpperCase()===productName.toUpperCase();});
+  if(!productDeals.length) return null;
+  var best = productDeals[0];
+  for(var i=1;i<productDeals.length;i++){
+    if((productDeals[i].price/productDeals[i].qty)<(best.price/best.qty)) best=productDeals[i];
+  }
+  return best;
+}
+
+function renderDealsSection(){
+  loadDeals();
+  var section = document.getElementById('dealsSection');
+  var grid    = document.getElementById('dealsGrid');
+  if(!CUSTOMER_DEALS.length){ section.style.display='none'; return; }
+
+  // Show best deal per product only
+  var seen={}, bestDeals=[];
+  for(var i=0;i<CUSTOMER_DEALS.length;i++){
+    var d=CUSTOMER_DEALS[i];
+    var key=d.productName.toUpperCase();
+    if(!seen[key]){ seen[key]=getBestCustomerDeal(d.productName); bestDeals.push(seen[key]); }
+  }
+
+  var tabLabels=['1/1 Cakes','2/1 Cakes','500 Gram','200 Gram','Shells','Candles','Rockets','Fountains','Misc'];
+  var h='';
+  for(var i=0;i<bestDeals.length;i++){
+    var d=bestDeals[i];
+    var perUnit=(d.price/d.qty).toFixed(2);
+    var tabLabel=tabLabels[d.tab]||'';
+    h+='<div class="deal-card">'+
+      '<div class="deal-card-tab">'+tabLabel+'</div>'+
+      '<div class="deal-card-name">'+d.productName+'</div>'+
+      '<div class="deal-card-price">'+d.qty+' for $'+d.price+'</div>'+
+      '<div class="deal-card-sub">$'+perUnit+' each'+
+        (d.note?' &mdash; '+d.note:'')+
+      '</div>'+
+    '</div>';
+  }
+  grid.innerHTML=h;
+  section.style.display='block';
+}
 
 function parseCSVRow(row) {
   var result=[], inQuotes=false, current='';
@@ -231,6 +297,7 @@ function loadData() {
     }
     var now = new Date();
     document.getElementById('lastUpdated').textContent = 'Last updated: '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    renderDealsSection();
     buildTabFilters();
     render();
   }).catch(function() {
