@@ -43,7 +43,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .main{max-width:1200px;margin:0 auto;padding:1.5rem}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;align-items:start}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1}
@@ -98,7 +98,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:.5rem}
 .inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;position:relative;transition:border-color 0.15s}
 .inv-card:hover{border-color:rgba(255,77,0,0.4)}
-.inv-card.OUT{opacity:0.7}
+.inv-card.LOW{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25)}
+.inv-card.LOW:hover{border-color:rgba(245,158,11,0.5)}
+.inv-card.OUT{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25);opacity:0.85}
+.inv-card.OUT:hover{border-color:rgba(239,68,68,0.5)}
 .inv-card-status-strip{display:none;padding:4px 8px;border-radius:6px 6px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-align:center;margin:-10px -10px 8px -10px}
 .inv-card.LOW .inv-card-status-strip{display:block;background:rgba(245,158,11,0.25);color:var(--amber)}
 .inv-card.OUT .inv-card-status-strip{display:block;background:rgba(239,68,68,0.25);color:var(--red)}
@@ -389,33 +392,25 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- PRICING -->
     <div class="view" id="view-pricing">
+      <div style="margin-bottom:.75rem;font-size:13px;color:var(--muted)">Showing items with missing price, case price, or packed info. Fill in and hit Save.</div>
       <div class="toolbar">
-        <input type="text" id="priceSearch" placeholder="Search products..." oninput="renderPricingTable()">
-        <select id="priceTabFilter" onchange="renderPricingTable()">
+        <input type="text" id="priceSearch" placeholder="Search..." oninput="renderPricingCards()">
+        <select id="priceTabFilter" onchange="renderPricingCards()">
           <option value="-1">All Tabs</option>
         </select>
-        <select id="priceFilter" onchange="renderPricingTable()">
-          <option value="">All Items</option>
+        <select id="priceFilter" onchange="renderPricingCards()">
+          <option value="incomplete" selected>Missing Something</option>
           <option value="noprice">No Price</option>
           <option value="nopacked">No Packed Info</option>
-          <option value="both">Missing Both</option>
+          <option value="nocaseprice">No Case Price</option>
+          <option value="both">Missing Price &amp; Packed</option>
+          <option value="">All Items</option>
         </select>
+        <button class="btn primary" onclick="saveAllPricing()">💾 Save All</button>
+        <span style="font-size:12px;color:var(--green);align-self:center" id="pricingSaveStatus"></span>
       </div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr>
-            <th>Product</th><th style="width:72px">Tab</th>
-            <th style="width:110px">Price ($)</th><th style="width:120px">Packed</th>
-            <th style="width:120px">Case Price ($)</th><th style="width:72px">Save</th>
-          </tr></thead>
-          <tbody id="pricingTbody"></tbody>
-        </table>
-      </div>
-      <div class="empty" id="pricingEmpty" style="display:none">No products match filter.</div>
-      <div style="margin-top:1rem;display:flex;gap:8px">
-        <button class="btn primary" onclick="saveAllPricing()">💾 Save All Changes</button>
-        <span style="font-size:12px;color:var(--muted);align-self:center" id="pricingSaveStatus"></span>
-      </div>
+      <div id="pricingCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+      <div class="empty" id="pricingEmpty" style="display:none">🎉 All items are fully priced!</div>
     </div>
 
     <!-- ACTIVITY LOG -->
@@ -736,13 +731,57 @@ function logActivity(action,detail){
 
 // ── STATS ─────────────────────────────────────────────────────
 function updateStats(){
-  var inC=0,lowC=0,outC=0;
-  for(var i=0;i<inventory.length;i++){if(inventory[i].status==='IN')inC++;else if(inventory[i].status==='LOW')lowC++;else outC++;}
+  var inC=0,lowC=0,outC=0,total=inventory.length;
+  var tabCounts={};
+  for(var i=0;i<inventory.length;i++){
+    var x=inventory[i];
+    if(x.status==='IN')inC++;else if(x.status==='LOW')lowC++;else outC++;
+    if(!tabCounts[x.tab]) tabCounts[x.tab]={low:0,out:0,total:0};
+    tabCounts[x.tab].total++;
+    if(x.status==='LOW') tabCounts[x.tab].low++;
+    if(x.status==='OUT') tabCounts[x.tab].out++;
+  }
+  var pctIn=total?Math.round(inC/total*100):0;
+  var pctLow=total?Math.round(lowC/total*100):0;
+  var pctOut=total?Math.round(outC/total*100):0;
+
+  // Find top 3 most depleted tabs
+  var tabArr=[];
+  var keys=Object.keys(tabCounts);
+  for(var k=0;k<keys.length;k++){
+    var t=parseInt(keys[k]);
+    var tc=tabCounts[t];
+    if(tc.low+tc.out>0) tabArr.push({tab:t,issues:tc.low+tc.out,total:tc.total});
+  }
+  tabArr.sort(function(a,b){return b.issues-a.issues;});
+
+  var tabBadges='';
+  for(var i=0;i<Math.min(tabArr.length,4);i++){
+    var ta=tabArr[i];
+    var tabName=TABS[ta.tab]?TABS[ta.tab].short:'';
+    tabBadges+='<span style="background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted);white-space:nowrap">'+
+      tabName+' <b style="color:'+(ta.issues>2?'var(--red)':'var(--amber)')+'">'+ta.issues+' issues</b></span>';
+  }
+
   document.getElementById('stats').innerHTML=
-    '<div class="stat"><div class="stat-label">Total Products</div><div class="stat-val">'+inventory.length+'</div></div>'+
+    // Row 1: counts
+    '<div class="stat"><div class="stat-label">Total Products</div><div class="stat-val">'+total+'</div></div>'+
     '<div class="stat"><div class="stat-label">In Stock</div><div class="stat-val g">'+inC+'</div></div>'+
     '<div class="stat"><div class="stat-label">Running Low</div><div class="stat-val a">'+lowC+'</div></div>'+
-    '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>';
+    '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>'+
+    // Row 2: visual bar + tab breakdown
+    '<div style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+        '<span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Stock Health</span>'+
+        '<span style="font-size:12px;color:var(--muted)">'+pctIn+'% in stock</span>'+
+      '</div>'+
+      '<div style="height:10px;border-radius:20px;overflow:hidden;background:var(--surface2);display:flex;margin-bottom:10px">'+
+        '<div style="width:'+pctIn+'%;background:var(--green);transition:width 0.6s"></div>'+
+        '<div style="width:'+pctLow+'%;background:var(--amber);transition:width 0.6s"></div>'+
+        '<div style="width:'+pctOut+'%;background:var(--red);transition:width 0.6s"></div>'+
+      '</div>'+
+      (tabBadges?'<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);align-self:center">Needs attention:</span>'+tabBadges+'</div>':'<div style="font-size:12px;color:var(--green)">✓ All tabs looking good</div>')+
+    '</div>';
 }
 
 // ── VIEW MODE ─────────────────────────────────────────────────
@@ -852,6 +891,18 @@ function adjustCount(id,field,delta,event){
   if(sEl) sEl.textContent=item.singles||0;
   if(tEl) tEl.textContent=item.qty;
   if(card) card.className='inv-card '+item.status;
+  // Flash the changed count green/red to confirm save
+  var flashEl=field==='cases'?cEl:sEl;
+  if(flashEl){
+    var origColor=flashEl.style.color;
+    flashEl.style.color=delta>0?'var(--green)':'var(--red)';
+    flashEl.style.transition='color 0.4s';
+    setTimeout(function(){flashEl.style.color=origColor||'';},600);
+  }
+  if(tEl){
+    tEl.style.color='var(--green)';
+    setTimeout(function(){tEl.style.color='var(--accent)';},600);
+  }
   // Update status strip
   var strip=card?card.querySelector('.inv-card-status-strip'):null;
   if(strip){
@@ -1415,39 +1466,87 @@ function buildPriceTabFilter(){
   sel.innerHTML=h;
 }
 
-function renderPricingTable(){
+function renderPricingCards(){
   var search=(document.getElementById('priceSearch').value||'').toLowerCase();
   var tabF=parseInt(document.getElementById('priceTabFilter').value);
-  var priceF=document.getElementById('priceFilter').value;
+  var filter=document.getElementById('priceFilter').value;
   var rows=[];
+
   for(var i=0;i<inventory.length;i++){
     var x=inventory[i];
     if(tabF>=0&&x.tab!==tabF) continue;
     if(search&&x.name.toLowerCase().indexOf(search)===-1) continue;
-    if(priceF==='noprice'&&x.price) continue;
-    if(priceF==='nopacked'&&x.packed) continue;
-    if(priceF==='both'&&(x.price||x.packed)) continue;
+    // Filter logic
+    var missingPrice=!x.price;
+    var missingPacked=!x.packed;
+    var missingCasePrice=!x.casePrice;
+    if(filter==='incomplete'&&!missingPrice&&!missingPacked&&!missingCasePrice) continue;
+    if(filter==='noprice'&&!missingPrice) continue;
+    if(filter==='nopacked'&&!missingPacked) continue;
+    if(filter==='nocaseprice'&&!missingCasePrice) continue;
+    if(filter==='both'&&(!missingPrice||!missingPacked)) continue;
     rows.push(x);
   }
   rows.sort(function(a,b){return a.name.localeCompare(b.name);});
+
   var empty=document.getElementById('pricingEmpty');
-  if(!rows.length){document.getElementById('pricingTbody').innerHTML='';empty.style.display='block';return;}
+  var grid=document.getElementById('pricingCards');
+
+  if(!rows.length){
+    grid.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
   empty.style.display='none';
+
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
-    var missing=((!item.price)?'<span style="color:var(--red);font-size:10px">No price</span> ':'')+
-                ((!item.packed)?'<span style="color:var(--amber);font-size:10px">No packed</span>':'');
-    h+='<tr>'+
-      '<td><div style="font-weight:500">'+item.name+'</div>'+(missing?'<div style="margin-top:2px">'+missing+'</div>':'')+' </td>'+
-      '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
-      '<td><input type="number" min="0" placeholder="—" value="'+(item.price||'')+'" id="pp_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
-      '<td><input type="text" placeholder="e.g. 4/1" value="'+(item.packed||'')+'" id="ppk_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
-      '<td><input type="number" min="0" placeholder="—" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
-      '<td><button class="btn" style="padding:4px 10px;font-size:12px" onclick="saveSinglePrice('+item.id+')">Save</button></td>'+
-    '</tr>';
+    var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
+    var missingPrice=!item.price;
+    var missingPacked=!item.packed;
+    var missingCasePrice=!item.casePrice;
+
+    // Missing tags
+    var tags='';
+    if(missingPrice) tags+='<span style="background:rgba(239,68,68,0.15);color:var(--red);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px">No Price</span>';
+    if(missingCasePrice) tags+='<span style="background:rgba(245,158,11,0.15);color:var(--amber);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px">No Case $</span>';
+    if(missingPacked) tags+='<span style="background:rgba(136,136,132,0.2);color:var(--muted);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600">No Packed</span>';
+
+    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'+
+        '<div style="font-weight:600;font-size:13px;line-height:1.3;color:var(--text);flex:1">'+item.name+'</div>'+
+        '<span style="font-size:10px;color:var(--muted);flex-shrink:0;margin-left:6px">'+tabLabel+'</span>'+
+      '</div>'+
+      '<div style="margin-bottom:8px">'+tags+'</div>'+
+      // Price field
+      '<div style="margin-bottom:6px">'+
+        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Price ($)</div>'+
+        '<input type="number" min="0" placeholder="Enter price" value="'+(item.price||'')+'" id="pp_'+item.id+'" '+
+          'oninput="markPricingDirty('+item.id+')" '+
+          'style="width:100%;padding:7px 10px;border:1px solid '+(missingPrice?'rgba(239,68,68,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+      '</div>'+
+      // Case Price field
+      '<div style="margin-bottom:6px">'+
+        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Case Price ($)</div>'+
+        '<input type="number" min="0" placeholder="Enter case price" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" '+
+          'oninput="markPricingDirty('+item.id+')" '+
+          'style="width:100%;padding:7px 10px;border:1px solid '+(missingCasePrice?'rgba(245,158,11,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+      '</div>'+
+      // Packed field
+      '<div style="margin-bottom:10px">'+
+        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Packed</div>'+
+        '<input type="text" placeholder="e.g. 4/1" value="'+(item.packed||'')+'" id="ppk_'+item.id+'" '+
+          'oninput="markPricingDirty('+item.id+')" '+
+          'style="width:100%;padding:7px 10px;border:1px solid '+(missingPacked?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+      '</div>'+
+      '<button onclick="saveSinglePrice('+item.id+')" '+
+        'style="width:100%;padding:7px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        'Save ✓'+
+      '</button>'+
+    '</div>';
   }
-  document.getElementById('pricingTbody').innerHTML=h;
+  grid.innerHTML=h;
   document.getElementById('pricingSaveStatus').textContent='';
 }
 
@@ -1463,22 +1562,32 @@ function saveSinglePrice(id){
   item.packed=packedEl?packedEl.value.trim():'';
   item.casePrice=cpEl?cpEl.value.trim():'';
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
-  logActivity('Updated pricing',item.name+' price:'+(item.price?'$'+item.price:'—')+' packed:'+(item.packed||'—'));
+  logActivity('Updated pricing',item.name+' $'+(item.price||'—')+' case:$'+(item.casePrice||'—')+' packed:'+(item.packed||'—'));
   delete pricingDirty[id];
-  var row=priceEl.closest('tr');
-  if(row){row.style.background='rgba(34,197,94,0.1)';setTimeout(function(){row.style.background='';},1000);}
-  toast('Saved '+item.name+' \u2713');
+  // Flash green and optionally remove from list if now complete
+  var card=priceEl.closest('div[style*="border-radius:12px"]');
+  if(card){
+    card.style.borderColor='var(--green)';
+    card.style.background='rgba(34,197,94,0.06)';
+    setTimeout(function(){
+      renderPricingCards(); // refresh to remove completed items
+    },800);
+  }
+  toast('Saved '+item.name+' ✓');
 }
 
 function saveAllPricing(){
   var ids=Object.keys(pricingDirty);
   if(!ids.length){toast('No changes to save');return;}
   for(var i=0;i<ids.length;i++) saveSinglePrice(parseInt(ids[i]));
-  document.getElementById('pricingSaveStatus').textContent='Saved '+ids.length+' items \u2713';
-  document.getElementById('pricingSaveStatus').style.color='var(--green)';
-  toast('Saved '+ids.length+' pricing updates \u2713');
-  renderPricingTable();
+  var el=document.getElementById('pricingSaveStatus');
+  el.textContent='Saved '+ids.length+' items ✓';
+  setTimeout(function(){el.textContent='';},3000);
 }
+
+// Keep old name as alias for backward compat
+function renderPricingTable(){ renderPricingCards(); }
+
 
 // ── SWITCH VIEW ───────────────────────────────────────────────
 function switchView(view,btn){
@@ -1489,7 +1598,7 @@ function switchView(view,btn){
   if(view==='actlog'){renderActLog();updateActLogFilter();}
   if(view==='restock') renderRestockList();
   if(view==='settings') renderStaffList();
-  if(view==='pricing'){buildPriceTabFilter();renderPricingTable();}
+  if(view==='pricing'){buildPriceTabFilter();renderPricingCards();}
   if(view==='deals'){populateDealDropdown();renderDealsList();}
 }
 
