@@ -173,6 +173,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .toast.show{opacity:1}
 
+.ham-item{display:block;width:100%;padding:11px 16px;border:none;background:none;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;transition:background 0.15s;border-bottom:1px solid var(--border)}
+.ham-item:last-child{border-bottom:none}
+.ham-item:hover{background:var(--surface2);color:var(--accent)}
+.ham-item.active{color:var(--accent);background:var(--surface2)}
 @media print{
   .topbar,.nav,.toolbar,.tab-bar,.card-grid,#view-sales,#view-lowstock,#view-actlog,#view-restock,#view-report,#view-settings,#view-pricing,#view-deals,.modal,.toast,.qe-overlay,.qe-modal,.overlay{display:none!important}
   body{background:#fff;color:#000}
@@ -222,14 +226,20 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="stats" id="stats"></div>
     <div class="nav">
       <button class="nav-btn active" onclick="switchView('inventory',this)">📦 Inventory</button>
-      <button class="nav-btn" onclick="switchView('sales',this)">🧾 End of Day Sales</button>
       <button class="nav-btn" onclick="switchView('restock',this)">📥 Bulk Restock</button>
-      <button class="nav-btn" onclick="switchView('lowstock',this)">⚠️ Low / Out</button>
-      <button class="nav-btn" onclick="switchView('report',this)">📊 Sales Report</button>
       <button class="nav-btn" onclick="switchView('deals',this)">🔥 Deals</button>
       <button class="nav-btn" onclick="switchView('pricing',this)">💲 Pricing</button>
-      <button class="nav-btn" onclick="switchView('actlog',this)">📋 Activity Log</button>
-      <button class="nav-btn" onclick="switchView('settings',this)">⚙️ Settings</button>
+      <button class="nav-btn" onclick="switchView('lowstock',this)">⚠️ Low / Out</button>
+      <!-- Hamburger -->
+      <div style="margin-left:auto;position:relative">
+        <button class="nav-btn" onclick="toggleHamburger(event)" id="hamburgerBtn" style="border:1px solid var(--border);border-radius:8px;padding:6px 14px;margin-bottom:0">☰ More</button>
+        <div id="hamburgerMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:200;overflow:hidden">
+          <button class="ham-item" onclick="switchViewHam('sales',this)">🧾 End of Day Sales</button>
+          <button class="ham-item" onclick="switchViewHam('report',this)">📊 Sales Report</button>
+          <button class="ham-item" onclick="switchViewHam('actlog',this)">📋 Activity Log</button>
+          <button class="ham-item" onclick="switchViewHam('settings',this)">⚙️ Settings</button>
+        </div>
+      </div>
     </div>
 
     <!-- INVENTORY -->
@@ -409,7 +419,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <button class="btn primary" onclick="saveAllPricing()">💾 Save All</button>
         <span style="font-size:12px;color:var(--green);align-self:center" id="pricingSaveStatus"></span>
       </div>
-      <div id="pricingCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px"></div>
+      <div id="pricingCards" class="card-grid"></div>
       <div class="empty" id="pricingEmpty" style="display:none">🎉 All items are fully priced!</div>
     </div>
 
@@ -732,56 +742,16 @@ function logActivity(action,detail){
 // ── STATS ─────────────────────────────────────────────────────
 function updateStats(){
   var inC=0,lowC=0,outC=0,total=inventory.length;
-  var tabCounts={};
   for(var i=0;i<inventory.length;i++){
-    var x=inventory[i];
-    if(x.status==='IN')inC++;else if(x.status==='LOW')lowC++;else outC++;
-    if(!tabCounts[x.tab]) tabCounts[x.tab]={low:0,out:0,total:0};
-    tabCounts[x.tab].total++;
-    if(x.status==='LOW') tabCounts[x.tab].low++;
-    if(x.status==='OUT') tabCounts[x.tab].out++;
+    if(inventory[i].status==='IN')inC++;
+    else if(inventory[i].status==='LOW')lowC++;
+    else outC++;
   }
-  var pctIn=total?Math.round(inC/total*100):0;
-  var pctLow=total?Math.round(lowC/total*100):0;
-  var pctOut=total?Math.round(outC/total*100):0;
-
-  // Find top 3 most depleted tabs
-  var tabArr=[];
-  var keys=Object.keys(tabCounts);
-  for(var k=0;k<keys.length;k++){
-    var t=parseInt(keys[k]);
-    var tc=tabCounts[t];
-    if(tc.low+tc.out>0) tabArr.push({tab:t,issues:tc.low+tc.out,total:tc.total});
-  }
-  tabArr.sort(function(a,b){return b.issues-a.issues;});
-
-  var tabBadges='';
-  for(var i=0;i<Math.min(tabArr.length,4);i++){
-    var ta=tabArr[i];
-    var tabName=TABS[ta.tab]?TABS[ta.tab].short:'';
-    tabBadges+='<span style="background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--muted);white-space:nowrap">'+
-      tabName+' <b style="color:'+(ta.issues>2?'var(--red)':'var(--amber)')+'">'+ta.issues+' issues</b></span>';
-  }
-
   document.getElementById('stats').innerHTML=
-    // Row 1: counts
     '<div class="stat"><div class="stat-label">Total Products</div><div class="stat-val">'+total+'</div></div>'+
     '<div class="stat"><div class="stat-label">In Stock</div><div class="stat-val g">'+inC+'</div></div>'+
     '<div class="stat"><div class="stat-label">Running Low</div><div class="stat-val a">'+lowC+'</div></div>'+
-    '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>'+
-    // Row 2: visual bar + tab breakdown
-    '<div style="grid-column:1/-1;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
-        '<span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Stock Health</span>'+
-        '<span style="font-size:12px;color:var(--muted)">'+pctIn+'% in stock</span>'+
-      '</div>'+
-      '<div style="height:10px;border-radius:20px;overflow:hidden;background:var(--surface2);display:flex;margin-bottom:10px">'+
-        '<div style="width:'+pctIn+'%;background:var(--green);transition:width 0.6s"></div>'+
-        '<div style="width:'+pctLow+'%;background:var(--amber);transition:width 0.6s"></div>'+
-        '<div style="width:'+pctOut+'%;background:var(--red);transition:width 0.6s"></div>'+
-      '</div>'+
-      (tabBadges?'<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:11px;color:var(--muted);align-self:center">Needs attention:</span>'+tabBadges+'</div>':'<div style="font-size:12px;color:var(--green)">✓ All tabs looking good</div>')+
-    '</div>';
+    '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>';
 }
 
 // ── VIEW MODE ─────────────────────────────────────────────────
@@ -1506,42 +1476,42 @@ function renderPricingCards(){
     var missingPrice=!item.price;
     var missingPacked=!item.packed;
     var missingCasePrice=!item.casePrice;
+    // Small colored dots for what's missing
+    var dots='';
+    if(missingPrice)     dots+='<span style="background:var(--red-bg);color:var(--red);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">$</span>';
+    if(missingCasePrice) dots+='<span style="background:var(--amber-bg);color:var(--amber);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">C$</span>';
+    if(missingPacked)    dots+='<span style="background:var(--surface2);color:var(--muted);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700">PKD</span>';
 
-    // Missing tags
-    var tags='';
-    if(missingPrice) tags+='<span style="background:rgba(239,68,68,0.15);color:var(--red);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px">No Price</span>';
-    if(missingCasePrice) tags+='<span style="background:rgba(245,158,11,0.15);color:var(--amber);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-right:4px">No Case $</span>';
-    if(missingPacked) tags+='<span style="background:rgba(136,136,132,0.2);color:var(--muted);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600">No Packed</span>';
-
-    h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'+
-        '<div style="font-weight:600;font-size:13px;line-height:1.3;color:var(--text);flex:1">'+item.name+'</div>'+
-        '<span style="font-size:10px;color:var(--muted);flex-shrink:0;margin-left:6px">'+tabLabel+'</span>'+
+    h+='<div class="inv-card" style="'+(missingPrice?'border-color:rgba(239,68,68,0.3);':missingCasePrice?'border-color:rgba(245,158,11,0.3);':'')+'">'+
+      // Name + tab + missing dots
+      '<div class="inv-card-top">'+
+        '<div class="inv-card-name">'+item.name+'</div>'+
+        '<span style="font-size:10px;color:var(--muted)">'+tabLabel+'</span>'+
       '</div>'+
-      '<div style="margin-bottom:8px">'+tags+'</div>'+
-      // Price field
-      '<div style="margin-bottom:6px">'+
-        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Price ($)</div>'+
-        '<input type="number" min="0" placeholder="Enter price" value="'+(item.price||'')+'" id="pp_'+item.id+'" '+
+      '<div style="margin-bottom:7px">'+dots+'</div>'+
+      // Price
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+
+        '<span style="font-size:10px;color:var(--muted);width:28px">$</span>'+
+        '<input type="number" min="0" placeholder="Price" value="'+(item.price||'')+'" id="pp_'+item.id+'" '+
           'oninput="markPricingDirty('+item.id+')" '+
-          'style="width:100%;padding:7px 10px;border:1px solid '+(missingPrice?'rgba(239,68,68,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:4px 7px;border:1px solid '+(missingPrice?'rgba(239,68,68,0.5)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
       '</div>'+
-      // Case Price field
-      '<div style="margin-bottom:6px">'+
-        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Case Price ($)</div>'+
-        '<input type="number" min="0" placeholder="Enter case price" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" '+
+      // Case price
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+
+        '<span style="font-size:10px;color:var(--muted);width:28px">C$</span>'+
+        '<input type="number" min="0" placeholder="Case $" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" '+
           'oninput="markPricingDirty('+item.id+')" '+
-          'style="width:100%;padding:7px 10px;border:1px solid '+(missingCasePrice?'rgba(245,158,11,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:4px 7px;border:1px solid '+(missingCasePrice?'rgba(245,158,11,0.5)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">'+
       '</div>'+
-      // Packed field
-      '<div style="margin-bottom:10px">'+
-        '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Packed</div>'+
+      // Packed
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:8px">'+
+        '<span style="font-size:10px;color:var(--muted);width:28px">PKD</span>'+
         '<input type="text" placeholder="e.g. 4/1" value="'+(item.packed||'')+'" id="ppk_'+item.id+'" '+
           'oninput="markPricingDirty('+item.id+')" '+
-          'style="width:100%;padding:7px 10px;border:1px solid '+(missingPacked?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:4px 7px;border:1px solid '+(missingPacked?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:DM Sans,sans-serif">'+
       '</div>'+
       '<button onclick="saveSinglePrice('+item.id+')" '+
-        'style="width:100%;padding:7px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        'style="width:100%;padding:5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
         'Save ✓'+
       '</button>'+
     '</div>';
@@ -1590,7 +1560,44 @@ function renderPricingTable(){ renderPricingCards(); }
 
 
 // ── SWITCH VIEW ───────────────────────────────────────────────
+// ── HAMBURGER MENU ───────────────────────────────────────────
+function toggleHamburger(e){
+  e.stopPropagation();
+  var menu=document.getElementById('hamburgerMenu');
+  menu.style.display=menu.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',function(){
+  var menu=document.getElementById('hamburgerMenu');
+  if(menu) menu.style.display='none';
+});
+
+function switchViewHam(view,btn){
+  // Close menu
+  document.getElementById('hamburgerMenu').style.display='none';
+  // Deactivate all main nav buttons
+  var bs=document.querySelectorAll('.nav-btn');
+  for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
+  // Mark hamburger btn as active
+  document.getElementById('hamburgerBtn').classList.add('active');
+  // Mark this ham item active
+  var hams=document.querySelectorAll('.ham-item');
+  for(var i=0;i<hams.length;i++) hams[i].classList.remove('active');
+  btn.classList.add('active');
+  // Switch view
+  var vs=document.querySelectorAll('.view');
+  for(var i=0;i<vs.length;i++) vs[i].classList.remove('active');
+  document.getElementById('view-'+view).classList.add('active');
+  if(view==='actlog'){renderActLog();updateActLogFilter();}
+  if(view==='settings') renderStaffList();
+}
+
 function switchView(view,btn){
+  // Close hamburger if open
+  var menu=document.getElementById('hamburgerMenu');
+  if(menu) menu.style.display='none';
+  // Clear ham item active states
+  var hams=document.querySelectorAll('.ham-item');
+  for(var i=0;i<hams.length;i++) hams[i].classList.remove('active');
   var vs=document.querySelectorAll('.view');for(var i=0;i<vs.length;i++) vs[i].classList.remove('active');
   var bs=document.querySelectorAll('.nav-btn');for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
   document.getElementById('view-'+view).classList.add('active');btn.classList.add('active');
