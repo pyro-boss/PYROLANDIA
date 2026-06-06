@@ -80,8 +80,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 <div class="legend">
   <div class="legend-item"><div class="dot g"></div>In Stock</div>
-  <div class="legend-item"><div class="dot a"></div>Low Stock — Get it while it lasts</div>
+  <div class="legend-item"><div class="dot a"></div>Low Stock</div>
   <div class="legend-item"><div class="dot r"></div>Out of Stock</div>
+  <div style="width:1px;background:var(--border);margin:0 4px"></div>
+  <div class="legend-item">🎂 Cakes</div>
+  <div class="legend-item">💥 Aerial</div>
+  <div class="legend-item">🐚 Shells</div>
+  <div class="legend-item">🕯️ Candles</div>
+  <div class="legend-item">🚀 Rockets</div>
+  <div class="legend-item">⛲ Fountains</div>
+  <div class="legend-item">✨ Misc</div>
 </div>
 <div id="dealsSection" style="display:none;max-width:960px;margin:1.5rem auto 0;padding:0 1.25rem">
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
@@ -129,6 +137,15 @@ var SHEET_ID = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 var TAB_NAMES  = ['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
 var TAB_LABELS = ['1/1 Cakes','2/1 Cakes','500 Gram','200 Gram','Shells','Candles','Rockets','Fountains','Misc'];
 var DATA = [], statusFilter = '', tabFilter = -1;
+
+var TAB_ICONS = ['🎂','🎂','💥','💥','🐚','🕯️','🚀','⛲','✨'];
+var TAB_COLORS = [
+  '#e91e8c','#e91e8c',  // 1/1 2/1 pink
+  '#ff4d00','#ff8c00',  // 500g 200g orange
+  '#9c27b0','#ffd700',  // shells purple candles gold
+  '#2196f3','#00bcd4',  // rockets blue fountains teal
+  '#4caf50'             // misc green
+];
 var CUSTOMER_DEALS = [];
 
 function loadDeals(){
@@ -314,11 +331,14 @@ function setStatus(s,btn) {
 }
 
 function buildTabFilters() {
-  var h = '<button class="tab-f active" onclick="setTab(-1,this)">All Types</button>';
+  var h = '<button class="tab-f active" onclick="setTab(-1,this)">🎆 All</button>';
   for (var i=0; i<TAB_NAMES.length; i++) {
     var has = false;
     for (var j=0; j<DATA.length; j++) { if (DATA[j].t===i) { has=true; break; } }
-    if (has) h += '<button class="tab-f" onclick="setTab('+i+',this)">'+TAB_LABELS[i]+'</button>';
+    if (has) {
+      var icon = TAB_ICONS[i] || '🎆';
+      h += '<button class="tab-f" onclick="setTab('+i+',this)">'+icon+' '+TAB_LABELS[i]+'</button>';
+    }
   }
   document.getElementById('tabFilters').innerHTML = h;
 }
@@ -355,7 +375,7 @@ function render() {
     var d     = rows[r];
     var label = d.s==='IN'?'In Stock':d.s==='LOW'?'Low Stock':'Out of Stock';
     h += '<div class="card '+d.s+'">' +
-      '<div class="card-tab">'+TAB_LABELS[d.t]+'</div>' +
+      '<div class="card-tab">'+(TAB_ICONS[d.t]||'')+' '+TAB_LABELS[d.t]+'</div>' +
       '<div class="card-name">'+d.n+'</div>' +
       '<div class="card-footer">' +
         '<div class="card-prices">' +
