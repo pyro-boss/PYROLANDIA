@@ -324,11 +324,22 @@ tr:hover td{background:rgba(255,255,255,0.02)}
               <button class="btn" style="padding:4px 10px;font-size:12px" onclick="clearRestockSelection()">Clear</button>
             </div>
           </div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+            <select id="restockTabFilter" onchange="renderRestockList()" style="flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
+              <option value="-1">All Types</option>
+            </select>
+            <select id="restockStatusFilter" onchange="renderRestockList()" style="flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
+              <option value="">All Statuses</option>
+              <option value="OUT">Out of Stock</option>
+              <option value="LOW">Low Stock</option>
+              <option value="IN">In Stock</option>
+            </select>
+          </div>
           <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
             <label style="font-size:13px;color:var(--muted)">Add qty to selected:</label>
             <input class="inline-num" type="number" id="bulkQty" min="1" value="1" style="width:70px">
           </div>
-          <div id="restockList" style="max-height:400px;overflow-y:auto"></div>
+          <div id="restockList" style="max-height:360px;overflow-y:auto"></div>
           <button class="btn primary" id="bulkRestockBtn" onclick="commitBulkRestock()" style="width:100%;margin-top:1rem" disabled>Apply Restock & Sync</button>
         </div></div>
         <div><div class="panel">
@@ -378,7 +389,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div class="two-col">
         <div><div class="panel">
           <div class="panel-title">➕ Add New Deal</div>
-          <div class="field"><label>Product</label>
+          <div class="field"><label>1. Product Type</label>
+            <select id="dealTabFilter" onchange="filterDealProducts()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
+              <option value="-1">All Types</option>
+            </select>
+          </div>
+          <div class="field"><label>2. Product Name</label>
             <select id="dealProduct" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
               <option value="">Select product...</option>
             </select>
@@ -539,8 +555,8 @@ var DEFAULT_USERS={
   'pyrohead':{pass:'staff1pass',role:'Staff'},
   'pyroprincess':{pass:'staff2pass',role:'Staff'},
   'sam':{pass:'staff3pass',role:'Staff'},
-  'staff4':{pass:'staff4pass',role:'Staff'},
-  'staff5':{pass:'staff5pass',role:'Staff'}
+  'george':{pass:'george1pass',role:'Staff'},
+  'billy':{pass:'billy1pass',role:'Staff'}
 };
 
 var TABS=[
@@ -577,6 +593,7 @@ function doLogin(){
     document.getElementById('reportTo').value=today.toISOString().split('T')[0];
     document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
     loadDealsFromDB();
+    loadActivityLog();
     loadAllTabs();
     renderStaffList();
   } else {
@@ -735,8 +752,20 @@ function nowTime(){return new Date().toLocaleTimeString('en-US',{hour:'2-digit',
 function todayDate(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 
 function logActivity(action,detail){
-  activityLog.unshift({user:currentUser,time:nowTime(),date:todayDate(),action:action,detail:detail});
+  var entry={user:currentUser,time:nowTime(),date:todayDate(),action:action,detail:detail};
+  activityLog.unshift(entry);
+  // Keep last 200 entries only
+  if(activityLog.length>200) activityLog=activityLog.slice(0,200);
+  // Persist to localStorage
+  try{localStorage.setItem('pyrolandia_actlog',JSON.stringify(activityLog));}catch(e){}
   if(document.getElementById('view-actlog').classList.contains('active')) renderActLog();
+}
+
+function loadActivityLog(){
+  try{
+    var stored=localStorage.getItem('pyrolandia_actlog');
+    if(stored) activityLog=JSON.parse(stored);
+  }catch(e){}
 }
 
 // ── STATS ─────────────────────────────────────────────────────
@@ -1222,18 +1251,32 @@ function renderSalesLog(){
 }
 
 // ── BULK RESTOCK ──────────────────────────────────────────────
+function buildRestockFilters(){
+  var tabSel=document.getElementById('restockTabFilter');
+  if(!tabSel) return;
+  var cur=tabSel.value;
+  var h='<option value="-1">All Types</option>';
+  for(var i=0;i<TABS.length;i++) h+='<option value="'+i+'"'+(String(i)===cur?' selected':'')+'>'+TABS[i].short+'</option>';
+  tabSel.innerHTML=h;
+}
+
 function renderRestockList(){
+  buildRestockFilters();
+  var tabF=parseInt((document.getElementById('restockTabFilter')||{value:'-1'}).value);
+  var statusF=(document.getElementById('restockStatusFilter')||{value:''}).value;
   var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var h='';
   for(var i=0;i<sorted.length;i++){
     var item=sorted[i];
-    h+='<div class="checkbox-item" onclick="toggleRestock('+item.id+',this)">'+
+    if(tabF>=0&&item.tab!==tabF) continue;
+    if(statusF&&item.status!==statusF) continue;
+    h+='<div class="checkbox-item" onclick="toggleRestock('+item.id+')">'+
       '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()">'+
       '<label for="rc_'+item.id+'">'+item.name+' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span></label>'+
       '<span class="item-qty"><span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span> '+item.qty+'</span>'+
     '</div>';
   }
-  document.getElementById('restockList').innerHTML=h||'<div class="empty">No products.</div>';
+  document.getElementById('restockList').innerHTML=h||'<div class="empty">No products match.</div>';
   updateBulkBtn();
 }
 
@@ -1241,9 +1284,21 @@ function toggleRestock(id){var cb=document.getElementById('rc_'+id);cb.checked=!
 function updateBulkBtn(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');document.getElementById('bulkRestockBtn').disabled=cbs.length===0;}
 function selectAllRestock(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=true;updateBulkBtn();}
 function selectLowRestock(){
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=false;
+  // Set status filter to Low/Out and re-render
+  var sf=document.getElementById('restockStatusFilter');
+  if(sf) sf.value='';
+  renderRestockList();
+  // Then check all visible LOW and OUT
   var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  for(var i=0;i<sorted.length;i++){if(sorted[i].status==='LOW'||sorted[i].status==='OUT'){var cb=document.getElementById('rc_'+sorted[i].id);if(cb)cb.checked=true;}}
+  var tabF=parseInt((document.getElementById('restockTabFilter')||{value:'-1'}).value);
+  for(var i=0;i<sorted.length;i++){
+    var x=sorted[i];
+    if(tabF>=0&&x.tab!==tabF) continue;
+    if(x.status==='LOW'||x.status==='OUT'){
+      var cb=document.getElementById('rc_'+x.id);
+      if(cb) cb.checked=true;
+    }
+  }
   updateBulkBtn();
 }
 function clearRestockSelection(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=false;updateBulkBtn();}
@@ -1353,9 +1408,25 @@ function getBestDeal(productName){
 }
 
 function populateDealDropdown(){
+  // Build tab filter
+  var tabSel=document.getElementById('dealTabFilter');
+  if(tabSel){
+    var th='<option value="-1">All Types</option>';
+    for(var i=0;i<TABS.length;i++) th+='<option value="'+i+'">'+TABS[i].short+'</option>';
+    tabSel.innerHTML=th;
+  }
+  filterDealProducts();
+}
+
+function filterDealProducts(){
+  var tabF=parseInt(document.getElementById('dealTabFilter').value);
   var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var h='<option value="">Select product...</option>';
-  for(var i=0;i<sorted.length;i++) h+='<option value="'+sorted[i].id+'">'+sorted[i].name+' ('+tl(sorted[i])+')</option>';
+  for(var i=0;i<sorted.length;i++){
+    var x=sorted[i];
+    if(tabF>=0&&x.tab!==tabF) continue;
+    h+='<option value="'+x.id+'">'+x.name+'</option>';
+  }
   document.getElementById('dealProduct').innerHTML=h;
 }
 
