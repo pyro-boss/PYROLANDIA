@@ -13,60 +13,68 @@
   --green-bg:rgba(34,197,94,0.12);--amber-bg:rgba(245,158,11,0.12);--red-bg:rgba(239,68,68,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:DM Sans,sans-serif;min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+
+/* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,rgba(255,77,0,0.15) 0%,transparent 60%),var(--bg)}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;width:100%;max-width:380px;box-shadow:0 32px 80px rgba(0,0,0,0.6)}
-.login-logo{font-family:Bebas Neue,sans-serif;font-size:42px;color:var(--accent);letter-spacing:2px;margin-bottom:4px}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--accent);letter-spacing:2px;margin-bottom:4px}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:2rem}
 .login-box label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.login-box input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;margin-bottom:1rem;font-family:DM Sans,sans-serif}
+.login-box input{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;margin-bottom:1rem;font-family:'DM Sans',sans-serif}
 .login-box input:focus{outline:none;border-color:var(--accent)}
-.login-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif}
+.login-btn{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .login-btn:hover{opacity:0.88}
 .login-err{color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none}
+
+/* APP */
 #appShell{display:none;min-height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:16px}
-.logo{font-family:Bebas Neue,sans-serif;font-size:26px;color:var(--accent);letter-spacing:2px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);letter-spacing:2px}
 .user-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--muted)}
 .user-badge span{color:var(--text);font-weight:500}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .sync-status{font-size:11px;color:var(--muted)}
 .sync-status.ok{color:var(--green)}.sync-status.err{color:var(--red)}
-.topbar-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.2s;white-space:nowrap}
+.topbar-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap}
 .topbar-btn:hover{border-color:var(--accent);color:var(--accent)}
 .topbar-btn.logout:hover{border-color:var(--red);color:var(--red)}
-.main{max-width:1100px;margin:0 auto;padding:1.5rem}
+.main{max-width:1200px;margin:0 auto;padding:1.5rem}
+
+/* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
 .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.stat-val{font-family:Bebas Neue,sans-serif;font-size:36px;line-height:1}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1}
 .stat-val.g{color:var(--green)}.stat-val.a{color:var(--amber)}.stat-val.r{color:var(--red)}
+
+/* NAV */
 .nav{display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.nav-btn{padding:8px 14px;font-size:13px;font-weight:500;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:DM Sans,sans-serif;transition:color 0.2s;white-space:nowrap}
+.nav-btn{padding:8px 14px;font-size:13px;font-weight:500;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:color 0.2s;white-space:nowrap}
 .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .nav-btn:hover{color:var(--text)}
 .view{display:none}.view.active{display:block}
+
+/* TOOLBAR */
 .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;position:sticky;top:56px;z-index:90;background:var(--bg);padding:.5rem 0}
-.toolbar input,.toolbar select{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif}
+.toolbar input,.toolbar select{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif}
 .toolbar input{flex:1;min-width:160px}
 .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--accent)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;font-weight:500;white-space:nowrap;font-family:DM Sans,sans-serif;transition:all 0.15s}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;cursor:pointer;font-weight:500;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn.primary:hover{opacity:0.88;color:#fff}
-.btn.success{background:var(--green);color:#fff;border-color:var(--green)}
-.btn.success:hover{opacity:0.88;color:#fff}
 .btn:disabled{opacity:0.4;cursor:not-allowed}
 .tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
-.tab-btn{padding:4px 12px;font-size:12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:DM Sans,sans-serif}
+.tab-btn{padding:4px 12px;font-size:12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'DM Sans',sans-serif}
 .tab-btn:hover{border-color:var(--accent);color:var(--accent)}
 .tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* TABLE */
 .tbl-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:var(--surface2);padding:8px 12px;text-align:left;font-weight:500;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border);white-space:nowrap}
-th.sortable{cursor:pointer}
-th.sortable:hover{color:var(--text)}
 td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,0.02)}
@@ -82,12 +90,31 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .loading-msg{text-align:center;padding:3rem;color:var(--muted);font-size:13px}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* CARD VIEW */
+.view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px}
+.view-toggle-btn{padding:5px 12px;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.view-toggle-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:.5rem}
+.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;position:relative;transition:border-color 0.15s}
+.inv-card:hover{border-color:rgba(255,77,0,0.4)}
+.inv-card.OUT{opacity:0.7}
+.inv-card-status-strip{display:none;padding:4px 8px;border-radius:6px 6px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-align:center;margin:-10px -10px 8px -10px}
+.inv-card.LOW .inv-card-status-strip{display:block;background:rgba(245,158,11,0.25);color:var(--amber)}
+.inv-card.OUT .inv-card-status-strip{display:block;background:rgba(239,68,68,0.25);color:var(--red)}
+.inv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:5px}
+.inv-card-name{font-weight:600;font-size:12px;line-height:1.3;color:var(--text);flex:1}
+.inv-card-edit{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;flex-shrink:0}
+.inv-card-edit:hover{border-color:var(--accent);color:var(--accent)}
+.inv-card-deal{font-size:10px;color:var(--accent);font-weight:700;margin-top:4px}
+
+/* PANELS */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
-.panel-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .sale-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
-.sale-row select{flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif}
-.sale-row input{width:64px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;text-align:center;font-family:DM Sans,sans-serif}
+.sale-row select{flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif}
+.sale-row input{width:64px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;text-align:center;font-family:'DM Sans',sans-serif}
 .sale-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px}
 .sale-item-name{font-weight:500;font-size:13px}
 .sale-item-qty{color:var(--muted);font-size:12px}
@@ -96,65 +123,55 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .log-item:last-child{border-bottom:none}
 .log-meta{display:flex;justify-content:space-between;margin-bottom:3px;flex-wrap:wrap;gap:4px}
 .log-user{font-weight:600;color:var(--accent2)}
-.log-time{color:var(--muted)}
 .log-action{color:var(--accent);font-size:11px;font-weight:500}
+.log-time{color:var(--muted)}
 .log-detail{color:var(--muted)}
 .log-detail b{color:var(--text)}
-.inline-num{width:64px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;text-align:center;font-family:DM Sans,sans-serif}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
-.modal-title{font-family:Bebas Neue,sans-serif;font-size:24px;color:var(--accent);letter-spacing:1px;margin-bottom:1.25rem}
-.field{margin-bottom:1rem}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
-.field input[readonly]{opacity:0.5;cursor:not-allowed}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
-.toast.show{opacity:1}
-.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem}
-.report-stat{background:var(--surface2);border-radius:10px;padding:.75rem 1rem}
-.report-stat-label{font-size:11px;color:var(--muted);margin-bottom:4px}
-.report-stat-val{font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--accent)}
+.inline-num{width:64px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;text-align:center;font-family:'DM Sans',sans-serif}
 .checkbox-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:6px;cursor:pointer}
 .checkbox-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
 .checkbox-item label{font-size:13px;cursor:pointer;flex:1}
 .checkbox-item .item-qty{color:var(--muted);font-size:12px}
-/* CARD VIEW */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-top:.5rem}
-.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;position:relative;transition:border-color 0.15s;cursor:default}
-.inv-card:hover{border-color:rgba(255,77,0,0.4)}
-.inv-card.OUT{opacity:0.75}
-.inv-card-status-strip{display:none;padding:4px 8px;border-radius:6px 6px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-align:center;margin:-10px -10px 8px -10px}
-.inv-card.LOW .inv-card-status-strip{display:block;background:rgba(245,158,11,0.25);color:var(--amber)}
-.inv-card.OUT .inv-card-status-strip{display:block;background:rgba(239,68,68,0.25);color:var(--red)}
-.inv-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:4px;margin-bottom:5px}
-.inv-card-name{font-weight:600;font-size:12px;line-height:1.3;color:var(--text);flex:1}
-.inv-card-edit{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif;transition:all 0.15s;white-space:nowrap;flex-shrink:0}
-.inv-card-edit:hover{border-color:var(--accent);color:var(--accent)}
-.inv-card-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.inv-card-price{font-size:12px;color:var(--accent2);font-weight:600}
-.inv-card-tab{font-size:10px;color:var(--muted)}
-.inv-card-counts{display:flex;gap:5px;margin-top:6px}
-.inv-card-count{background:var(--surface2);border-radius:6px;padding:3px 6px;font-size:10px;color:var(--muted);flex:1;text-align:center}
-.inv-card-count b{display:block;font-size:14px;color:var(--text);font-family:Bebas Neue,sans-serif;line-height:1}
-.inv-card-deal{font-size:10px;color:var(--accent);font-weight:700;margin-top:4px}
-.view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px}
-.view-toggle-btn{padding:5px 12px;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:6px;font-size:13px;font-family:DM Sans,sans-serif;transition:all 0.15s}
-.view-toggle-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
-/* QUICK EDIT POPUP */
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);letter-spacing:1px;margin-bottom:1.25rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.field input[readonly]{opacity:0.5;cursor:not-allowed}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
+
+/* QUICK EDIT */
 .qe-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;padding:1rem;backdrop-filter:blur(3px)}
-.qe-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;width:100%;max-width:340px;box-shadow:0 16px 48px rgba(0,0,0,0.5)}
+.qe-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;width:100%;max-width:320px;box-shadow:0 16px 48px rgba(0,0,0,0.5)}
 .qe-title{font-weight:600;font-size:15px;color:var(--text);margin-bottom:.1rem}
-.qe-sub{font-size:11px;color:var(--muted);margin-bottom:1rem}
+.qe-sub{font-size:11px;color:var(--muted);margin-bottom:.75rem}
 .qe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
 .qe-field label{display:block;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-.qe-field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif}
+.qe-field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
 .qe-field input:focus{outline:none;border-color:var(--accent)}
 .qe-actions{display:flex;gap:8px}
 .qe-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:.75rem}
+
+/* SELL MODAL */
+.sell-num-btn{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:24px;cursor:pointer;font-family:'DM Sans',sans-serif;line-height:1;transition:all 0.15s}
+.sell-num-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem}
+.report-stat{background:var(--surface2);border-radius:10px;padding:.75rem 1rem}
+.report-stat-label{font-size:11px;color:var(--muted);margin-bottom:4px}
+.report-stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.toast.show{opacity:1}
+
 @media print{
-  .topbar,.nav,.toolbar,.tab-bar,#view-sales,#view-lowstock,#view-actlog,#view-restock,#view-report,#view-settings,#view-pricing,#view-deals,.modal,.toast,#sellOverlay,#qeOverlay{display:none!important}
+  .topbar,.nav,.toolbar,.tab-bar,.card-grid,#view-sales,#view-lowstock,#view-actlog,#view-restock,#view-report,#view-settings,#view-pricing,#view-deals,.modal,.toast,.qe-overlay,.qe-modal,.overlay{display:none!important}
   body{background:#fff;color:#000}
   .tbl-wrap{border:1px solid #ccc}
   th{background:#f0f0f0;color:#333}
@@ -169,6 +186,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">🎆 PYROLANDIA</div>
@@ -182,6 +200,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   </div>
 </div>
 
+<!-- APP -->
 <div id="appShell">
   <div class="topbar">
     <div class="topbar-left">
@@ -191,7 +210,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="topbar-right">
       <span class="sync-status" id="syncStatus"></span>
       <button class="topbar-btn" onclick="loadAllTabs()">↻ Reload</button>
-      <button class="topbar-btn" onclick="printInventory()">🖨 Print</button>
+      <button class="topbar-btn" onclick="window.print()">🖨 Print</button>
       <button class="topbar-btn logout" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
@@ -204,10 +223,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <button class="nav-btn" onclick="switchView('restock',this)">📥 Bulk Restock</button>
       <button class="nav-btn" onclick="switchView('lowstock',this)">⚠️ Low / Out</button>
       <button class="nav-btn" onclick="switchView('report',this)">📊 Sales Report</button>
+      <button class="nav-btn" onclick="switchView('deals',this)">🔥 Deals</button>
+      <button class="nav-btn" onclick="switchView('pricing',this)">💲 Pricing</button>
       <button class="nav-btn" onclick="switchView('actlog',this)">📋 Activity Log</button>
       <button class="nav-btn" onclick="switchView('settings',this)">⚙️ Settings</button>
-      <button class="nav-btn" onclick="switchView('pricing',this)">💲 Pricing</button>
-      <button class="nav-btn" onclick="switchView('deals',this)">🔥 Deals</button>
     </div>
 
     <!-- INVENTORY -->
@@ -228,12 +247,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         </select>
         <button class="btn primary" onclick="openAddModal()">+ Add Product</button>
         <div class="view-toggle">
-          <button class="view-toggle-btn active" id="toggleTable" onclick="setViewMode('table')">☰ Table</button>
-          <button class="view-toggle-btn" id="toggleCard" onclick="setViewMode('card')">⊞ Cards</button>
+          <button class="view-toggle-btn" id="toggleTable" onclick="setViewMode('table')">☰ Table</button>
+          <button class="view-toggle-btn active" id="toggleCard" onclick="setViewMode('card')">⊞ Cards</button>
         </div>
       </div>
       <div class="tab-bar" id="tabBar"></div>
-      <div class="tbl-wrap">
+      <div class="tbl-wrap" id="tblWrap">
         <table id="printTable">
           <thead><tr>
             <th style="width:68px">Status</th>
@@ -245,9 +264,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <th style="width:58px">Cases</th>
             <th style="width:62px">Singles</th>
             <th style="width:55px">Total</th>
-            <th class="no-print" style="width:88px">Actions</th>
+            <th style="width:88px">Actions</th>
           </tr></thead>
-          <tbody id="tbody"><tr><td colspan="10" class="loading-msg"><span class="spinner"></span>Loading from Google Sheet...</td></tr></tbody>
+          <tbody id="tbody"><tr><td colspan="10" class="loading-msg"><span class="spinner"></span>Loading...</td></tr></tbody>
         </table>
       </div>
       <div id="cardGrid" class="card-grid" style="display:none"></div>
@@ -256,7 +275,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- SALES -->
     <div class="view" id="view-sales">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Log what sold today — stock updates automatically.</div>
+      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Log what sold today.</div>
       <div class="two-col">
         <div><div class="panel">
           <div class="panel-title">🛒 Add Sales</div>
@@ -282,19 +301,18 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- BULK RESTOCK -->
     <div class="view" id="view-restock">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Select multiple products and add stock to all at once.</div>
       <div class="two-col">
         <div><div class="panel">
           <div class="panel-title">
             <span>📥 Select Items to Restock</span>
             <div style="display:flex;gap:6px">
               <button class="btn" style="padding:4px 10px;font-size:12px" onclick="selectAllRestock()">All</button>
-              <button class="btn" style="padding:4px 10px;font-size:12px" onclick="selectLowRestock()">Low/Out Only</button>
+              <button class="btn" style="padding:4px 10px;font-size:12px" onclick="selectLowRestock()">Low/Out</button>
               <button class="btn" style="padding:4px 10px;font-size:12px" onclick="clearRestockSelection()">Clear</button>
             </div>
           </div>
           <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
-            <label style="font-size:13px;color:var(--muted)">Add qty to all selected:</label>
+            <label style="font-size:13px;color:var(--muted)">Add qty to selected:</label>
             <input class="inline-num" type="number" id="bulkQty" min="1" value="1" style="width:70px">
           </div>
           <div id="restockList" style="max-height:400px;overflow-y:auto"></div>
@@ -309,18 +327,13 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- LOW/OUT -->
     <div class="view" id="view-lowstock">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Items needing restock.</div>
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th style="width:68px">Status</th>
-            <th>Product</th>
-            <th style="width:72px">Tab</th>
-            <th style="width:68px">Price</th>
-            <th style="width:58px">Cases</th>
-            <th style="width:62px">Singles</th>
-            <th style="width:55px">Total</th>
-            <th style="width:120px">Add Stock</th>
+            <th style="width:68px">Status</th><th>Product</th>
+            <th style="width:72px">Tab</th><th style="width:68px">Price</th>
+            <th style="width:58px">Cases</th><th style="width:62px">Singles</th>
+            <th style="width:55px">Total</th><th style="width:120px">Add Stock</th>
           </tr></thead>
           <tbody id="lowTbody"></tbody>
         </table>
@@ -329,16 +342,15 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- SALES REPORT -->
     <div class="view" id="view-report">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">View sales history by date.</div>
       <div class="panel" style="margin-bottom:1rem">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <div>
             <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">From</label>
-            <input type="date" id="reportFrom" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">
+            <input type="date" id="reportFrom" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
           </div>
           <div>
             <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">To</label>
-            <input type="date" id="reportTo" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">
+            <input type="date" id="reportTo" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
           </div>
           <div style="align-self:flex-end">
             <button class="btn primary" onclick="generateReport()">Generate Report</button>
@@ -348,36 +360,22 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div id="reportOutput"></div>
     </div>
 
-    <!-- ACTIVITY LOG -->
-    <div class="view" id="view-actlog">
-      <div class="panel" style="max-height:600px;overflow-y:auto">
-        <div class="panel-title">
-          <span>📋 Activity Log</span>
-          <select id="actLogFilter" onchange="renderActLog()" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:DM Sans,sans-serif">
-            <option value="">All Users</option>
-          </select>
-        </div>
-        <div id="actLog"><div class="empty">No activity yet.</div></div>
-      </div>
-    </div>
-
     <!-- DEALS -->
     <div class="view" id="view-deals">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Create special deals like "3 for $100". Only the best deal per product shows to customers.</div>
       <div class="two-col">
         <div><div class="panel">
           <div class="panel-title">➕ Add New Deal</div>
           <div class="field"><label>Product</label>
-            <select id="dealProduct" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif">
+            <select id="dealProduct" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
               <option value="">Select product...</option>
             </select>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field"><label>Quantity</label><input type="number" id="dealQty" min="1" placeholder="e.g. 3" oninput="updateDealPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif"></div>
-            <div class="field"><label>Deal Price ($)</label><input type="number" id="dealPrice" min="0" placeholder="e.g. 100" oninput="updateDealPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif"></div>
+            <div class="field"><label>Quantity</label><input type="number" id="dealQty" min="1" placeholder="e.g. 3" oninput="updateDealPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif"></div>
+            <div class="field"><label>Deal Price ($)</label><input type="number" id="dealPrice" min="0" placeholder="e.g. 100" oninput="updateDealPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif"></div>
           </div>
-          <div class="field"><label>Note <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional — e.g. "Mix and match")</span></label>
-            <input type="text" id="dealNote" placeholder="Optional note" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif">
+          <div class="field"><label>Note <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label>
+            <input type="text" id="dealNote" placeholder="e.g. Mix and match" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
           </div>
           <div id="dealPreview" style="background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--accent);margin-bottom:1rem;display:none"></div>
           <button class="btn primary" onclick="addDeal()" style="width:100%">Add Deal</button>
@@ -391,7 +389,6 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
     <!-- PRICING -->
     <div class="view" id="view-pricing">
-      <div style="margin-bottom:1rem;font-size:13px;color:var(--muted)">Quickly update prices and packed info. Filter to find unpriced items.</div>
       <div class="toolbar">
         <input type="text" id="priceSearch" placeholder="Search products..." oninput="renderPricingTable()">
         <select id="priceTabFilter" onchange="renderPricingTable()">
@@ -407,20 +404,30 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div class="tbl-wrap">
         <table>
           <thead><tr>
-            <th>Product</th>
-            <th style="width:72px">Tab</th>
-            <th style="width:110px">Price ($)</th>
-            <th style="width:120px">Packed</th>
-            <th style="width:120px">Case Price ($)</th>
-            <th style="width:72px">Save</th>
+            <th>Product</th><th style="width:72px">Tab</th>
+            <th style="width:110px">Price ($)</th><th style="width:120px">Packed</th>
+            <th style="width:120px">Case Price ($)</th><th style="width:72px">Save</th>
           </tr></thead>
           <tbody id="pricingTbody"></tbody>
         </table>
       </div>
       <div class="empty" id="pricingEmpty" style="display:none">No products match filter.</div>
       <div style="margin-top:1rem;display:flex;gap:8px">
-        <button class="btn success" onclick="saveAllPricing()">💾 Save All Changes</button>
+        <button class="btn primary" onclick="saveAllPricing()">💾 Save All Changes</button>
         <span style="font-size:12px;color:var(--muted);align-self:center" id="pricingSaveStatus"></span>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="view" id="view-actlog">
+      <div class="panel" style="max-height:600px;overflow-y:auto">
+        <div class="panel-title">
+          <span>📋 Activity Log</span>
+          <select id="actLogFilter" onchange="renderActLog()" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif">
+            <option value="">All Users</option>
+          </select>
+        </div>
+        <div id="actLog"><div class="empty">No activity yet.</div></div>
       </div>
     </div>
 
@@ -438,7 +445,6 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <div><div class="panel">
           <div class="panel-title">👥 Staff Accounts</div>
           <div id="staffList" style="font-size:13px"></div>
-          <div style="margin-top:1rem;font-size:12px;color:var(--muted)">Only admins can see all accounts. Contact admin to reset other passwords.</div>
         </div></div>
       </div>
     </div>
@@ -451,16 +457,16 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="qe-title" id="sellTitle">How many sold?</div>
     <div class="qe-sub" id="sellSub" style="margin-bottom:1rem"></div>
     <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:1.5rem">
-      <button onclick="changeSellQty(-1)" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-size:24px;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1">−</button>
+      <button class="sell-num-btn" onclick="changeSellQty(-1)">−</button>
       <div style="text-align:center">
-        <div id="sellQtyDisplay" style="font-family:Bebas Neue,sans-serif;font-size:64px;color:var(--accent);line-height:1">1</div>
+        <div id="sellQtyDisplay" style="font-family:'Bebas Neue',sans-serif;font-size:64px;color:var(--accent);line-height:1">1</div>
         <div id="sellStockInfo" style="font-size:12px;color:var(--muted)"></div>
       </div>
-      <button onclick="changeSellQty(1)" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--accent);background:rgba(255,77,0,0.1);color:var(--accent);font-size:24px;cursor:pointer;font-family:DM Sans,sans-serif;line-height:1">+</button>
+      <button class="sell-num-btn" onclick="changeSellQty(1)" style="border-color:var(--accent);background:rgba(255,77,0,0.1);color:var(--accent)">+</button>
     </div>
     <div class="qe-actions">
       <button class="btn" onclick="closeSell()" style="flex:1">Cancel</button>
-      <button class="btn primary" onclick="confirmSell()" style="flex:2;font-size:15px">✅ Confirm Sale</button>
+      <button class="btn primary" onclick="confirmSell()" style="flex:2">✅ Confirm Sale</button>
     </div>
   </div>
 </div>
@@ -474,14 +480,16 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="qe-grid">
       <div class="qe-field"><label>Price ($)</label><input type="number" id="qePrice" min="0" placeholder="—"></div>
       <div class="qe-field"><label>Packed</label><input type="text" id="qePacked" placeholder="e.g. 4/1"></div>
-      <div class="qe-field"><label>Cases</label><input type="number" id="qeCases" min="0" oninput="updateQETotal()"></div>
-      <div class="qe-field"><label>Singles</label><input type="number" id="qeSingles" min="0" oninput="updateQETotal()"></div>
+      <div class="qe-field"><label>Case Price ($)</label><input type="number" id="qeCasePrice" min="0" placeholder="—"></div>
+      <div class="qe-field"><label>Tab</label><select id="qeTab" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif"></select></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+      <span style="font-size:12px;color:var(--muted)">Cases:</span>
+      <input type="number" id="qeCases" min="0" oninput="updateQETotal()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
+      <span style="font-size:12px;color:var(--muted)">Singles:</span>
+      <input type="number" id="qeSingles" min="0" oninput="updateQETotal()" style="width:70px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif">
       <span style="font-size:12px;color:var(--muted)">Total:</span>
-      <span id="qeTotal" style="font-family:Bebas Neue,sans-serif;font-size:24px;color:var(--accent)">0</span>
-      <button class="btn" style="padding:4px 12px;font-size:12px;margin-left:auto" onclick="quickSaleQE()">🛒 −1 Sale</button>
-      <button class="btn" style="padding:4px 12px;font-size:12px" onclick="quickAddQE()">➕ Add</button>
+      <span id="qeTotal" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent)">0</span>
     </div>
     <div class="qe-actions">
       <button class="btn" onclick="closeQE()" style="flex:1">Cancel</button>
@@ -498,11 +506,11 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="field"><label>Product Name</label><input id="mName" type="text"></div>
     <div class="field"><label>Tab</label><select id="mTab"></select></div>
     <div class="field"><label>Price ($)</label><input id="mPrice" type="number" min="0"></div>
-    <div class="field"><label>Packed <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(e.g. 4/1, 12/1)</span></label><input id="mPacked" type="text" placeholder="e.g. 4/1"></div>
-    <div class="field"><label>Case Price ($) <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);font-size:10px">(optional)</span></label><input id="mCasePrice" type="number" min="0"></div>
+    <div class="field"><label>Packed</label><input id="mPacked" type="text" placeholder="e.g. 4/1"></div>
+    <div class="field"><label>Case Price ($)</label><input id="mCasePrice" type="number" min="0"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="field"><label>Cases</label><input id="mCases" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
-      <div class="field"><label>Singles (Store)</label><input id="mSingles" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
+      <div class="field"><label>Singles</label><input id="mSingles" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
     </div>
     <div class="field"><label>Total</label><input id="mTotal" type="number" readonly placeholder="Auto-calculated"></div>
     <div class="field"><label>Status</label>
@@ -518,20 +526,19 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <div class="toast" id="toast"></div>
 
 <script>
-var SHEET_ID   = '16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
+var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
 
-// Passwords stored in localStorage so they persist and can be changed
-var DEFAULT_USERS = {
-  'admin':        {pass:'pyro2024!',  role:'Admin'},
-  'pyrohead':     {pass:'staff1pass', role:'Staff'},
-  'pyroprincess': {pass:'staff2pass', role:'Staff'},
-  'sam':          {pass:'staff3pass', role:'Staff'},
-  'staff4':       {pass:'staff4pass', role:'Staff'},
-  'staff5':       {pass:'staff5pass', role:'Staff'}
+var DEFAULT_USERS={
+  'admin':{pass:'pyro2024!',role:'Admin'},
+  'pyrohead':{pass:'staff1pass',role:'Staff'},
+  'pyroprincess':{pass:'staff2pass',role:'Staff'},
+  'sam':{pass:'staff3pass',role:'Staff'},
+  'staff4':{pass:'staff4pass',role:'Staff'},
+  'staff5':{pass:'staff5pass',role:'Staff'}
 };
 
-var TABS = [
+var TABS=[
   {name:'1/1',short:'1/1'},{name:'2/1',short:'2/1'},
   {name:'500G',short:'500G'},{name:'200G',short:'200G'},
   {name:'SHELLS',short:'Shells'},{name:'CANDLES',short:'Candles'},
@@ -541,45 +548,39 @@ var TABS = [
 
 var inventory=[],nextId=0,activeTab=-1,editingId=null,isAdding=false;
 var saleItems=[],salesLog=[],activityLog=[],restockLog=[];
-var currentUser=null;
+var deals=[],dealNextId=0;
+var currentUser=null,viewMode='card';
+var sellItemId=null,sellQty=1,qeCurrentId=null;
+var pricingDirty={};
 
-// ── PASSWORD MANAGEMENT ───────────────────────────────────────
-function getUsers() {
-  try {
-    var stored = localStorage.getItem('pyrolandia_users');
-    return stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(DEFAULT_USERS));
-  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_USERS)); }
-}
-function saveUsers(users) {
-  try { localStorage.setItem('pyrolandia_users', JSON.stringify(users)); } catch(e) {}
-}
+// ── PASSWORD ──────────────────────────────────────────────────
+function getUsers(){try{var s=localStorage.getItem('pyrolandia_users');return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_USERS));}catch(e){return JSON.parse(JSON.stringify(DEFAULT_USERS));}}
+function saveUsers(u){try{localStorage.setItem('pyrolandia_users',JSON.stringify(u));}catch(e){}}
 
 // ── AUTH ──────────────────────────────────────────────────────
-function doLogin() {
-  var u = document.getElementById('loginUser').value.trim().toLowerCase();
-  var p = document.getElementById('loginPass').value;
-  var users = getUsers();
-  if (users[u] && users[u].pass === p) {
-    currentUser = u;
-    document.getElementById('currentUserLabel').textContent = u + ' (' + users[u].role + ')';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appShell').style.display = 'block';
-    document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-    // Set default date range for report (last 30 days)
-    var today = new Date();
-    var prior = new Date(today); prior.setDate(prior.getDate()-30);
-    document.getElementById('reportTo').value   = today.toISOString().split('T')[0];
-    document.getElementById('reportFrom').value = prior.toISOString().split('T')[0];
-    loadAllTabs();
+function doLogin(){
+  var u=document.getElementById('loginUser').value.trim().toLowerCase();
+  var p=document.getElementById('loginPass').value;
+  var users=getUsers();
+  if(users[u]&&users[u].pass===p){
+    currentUser=u;
+    document.getElementById('currentUserLabel').textContent=u+' ('+users[u].role+')';
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').style.display='block';
+    document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    var today=new Date(),prior=new Date(today);prior.setDate(prior.getDate()-30);
+    document.getElementById('reportTo').value=today.toISOString().split('T')[0];
+    document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
     loadDealsFromDB();
+    loadAllTabs();
     renderStaffList();
   } else {
-    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginErr').style.display='block';
   }
 }
 
-function doLogout() {
-  currentUser=null; inventory=[]; saleItems=[]; salesLog=[]; activityLog=[]; restockLog=[];
+function doLogout(){
+  currentUser=null;inventory=[];saleItems=[];salesLog=[];activityLog=[];restockLog=[];
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('appShell').style.display='none';
   document.getElementById('loginUser').value='';
@@ -587,49 +588,36 @@ function doLogout() {
   document.getElementById('loginErr').style.display='none';
 }
 
-function changePassword() {
-  var cur  = document.getElementById('pwCurrent').value;
-  var nw   = document.getElementById('pwNew').value;
-  var conf = document.getElementById('pwConfirm').value;
-  var msg  = document.getElementById('pwMsg');
-  var users = getUsers();
-
-  msg.style.display = 'block';
-  if (!users[currentUser] || users[currentUser].pass !== cur) {
-    msg.style.color = 'var(--red)'; msg.textContent = 'Current password is incorrect.'; return;
-  }
-  if (nw.length < 6) {
-    msg.style.color = 'var(--red)'; msg.textContent = 'New password must be at least 6 characters.'; return;
-  }
-  if (nw !== conf) {
-    msg.style.color = 'var(--red)'; msg.textContent = 'Passwords do not match.'; return;
-  }
-  users[currentUser].pass = nw;
-  saveUsers(users);
-  msg.style.color = 'var(--green)'; msg.textContent = 'Password updated successfully!';
-  document.getElementById('pwCurrent').value = '';
-  document.getElementById('pwNew').value = '';
-  document.getElementById('pwConfirm').value = '';
-  logActivity('Changed password', currentUser + ' updated their password');
+function changePassword(){
+  var cur=document.getElementById('pwCurrent').value;
+  var nw=document.getElementById('pwNew').value;
+  var conf=document.getElementById('pwConfirm').value;
+  var msg=document.getElementById('pwMsg');
+  var users=getUsers();
+  msg.style.display='block';
+  if(!users[currentUser]||users[currentUser].pass!==cur){msg.style.color='var(--red)';msg.textContent='Current password is incorrect.';return;}
+  if(nw.length<6){msg.style.color='var(--red)';msg.textContent='Must be at least 6 characters.';return;}
+  if(nw!==conf){msg.style.color='var(--red)';msg.textContent='Passwords do not match.';return;}
+  users[currentUser].pass=nw;saveUsers(users);
+  msg.style.color='var(--green)';msg.textContent='Password updated!';
+  document.getElementById('pwCurrent').value='';document.getElementById('pwNew').value='';document.getElementById('pwConfirm').value='';
   toast('Password updated \u2713');
 }
 
-function renderStaffList() {
-  var users = getUsers();
-  var html = '';
-  var keys = Object.keys(users);
-  for (var i=0;i<keys.length;i++) {
-    var u = keys[i];
-    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">' +
-      '<div><b style="color:var(--text)">'+u+'</b> <span style="color:var(--muted);font-size:11px">('+users[u].role+')</span></div>' +
-      (u===currentUser ? '<span style="font-size:11px;color:var(--accent)">You</span>' : '') +
+function renderStaffList(){
+  var users=getUsers(),h='',keys=Object.keys(users);
+  for(var i=0;i<keys.length;i++){
+    var u=keys[i];
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
+      '<div><b style="color:var(--text)">'+u+'</b> <span style="color:var(--muted);font-size:11px">('+users[u].role+')</span></div>'+
+      (u===currentUser?'<span style="font-size:11px;color:var(--accent)">You</span>':'')+
     '</div>';
   }
-  document.getElementById('staffList').innerHTML = html;
+  document.getElementById('staffList').innerHTML=h;
 }
 
-// ── CSV PARSING ───────────────────────────────────────────────
-function parseCSVRow(row) {
+// ── CSV ───────────────────────────────────────────────────────
+function parseCSVRow(row){
   var result=[],inQuotes=false,current='';
   for(var i=0;i<row.length;i++){
     var ch=row[i];
@@ -641,11 +629,9 @@ function parseCSVRow(row) {
   return result;
 }
 
-function isReallyBlank(line) {
-  return line.replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim()==='';
-}
+function isReallyBlank(line){return line.replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim()==='';}
 
-function parseTab(csv, tabIndex) {
+function parseTab(csv,tabIndex){
   var lines=csv.split('\n');
   if(!lines.length) return [];
   var headerIdx=-1,headers=[];
@@ -662,14 +648,14 @@ function parseTab(csv, tabIndex) {
   var statusCol=-1,nameCol=-1,priceCol=-1,casePriceCol=-1,packedCol=-1,casesCol=-1,singlesCol=-1,totalCol=-1;
   for(var h=0;h<headers.length;h++){
     var hdr=headers[h].toUpperCase().trim();
-    if     (hdr==='STATUS')                           statusCol   =h;
-    else if(hdr==='PRODUCT NAME')                     nameCol     =h;
-    else if(hdr==='PACKED')                           packedCol   =h;
-    else if(hdr==='PRICE'||hdr==='RETAIL')            priceCol    =h;
-    else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')    casePriceCol=h;
-    else if(hdr==='CASES'||hdr==='CONTAINER')         casesCol    =h;
-    else if(hdr==='SINGLES'||hdr==='STORE')           singlesCol  =h;
-    else if(hdr==='TOTAL'||hdr==='QTY')               totalCol    =h;
+    if(hdr==='STATUS') statusCol=h;
+    else if(hdr==='PRODUCT NAME') nameCol=h;
+    else if(hdr==='PACKED') packedCol=h;
+    else if(hdr==='PRICE'||hdr==='RETAIL') priceCol=h;
+    else if(hdr==='CASE PRICE'||hdr==='CASEPRICE') casePriceCol=h;
+    else if(hdr==='CASES'||hdr==='CONTAINER') casesCol=h;
+    else if(hdr==='SINGLES'||hdr==='STORE') singlesCol=h;
+    else if(hdr==='TOTAL'||hdr==='QTY') totalCol=h;
   }
   if(nameCol===-1) return [];
 
@@ -683,19 +669,19 @@ function parseTab(csv, tabIndex) {
     if(seen[key]) continue;
     seen[key]=true;
 
-    var price    =priceCol>=0    ?row[priceCol].replace(/[^0-9.]/g,'').trim()    :'';
+    var price=priceCol>=0?row[priceCol].replace(/[^0-9.]/g,'').trim():'';
     var casePrice=casePriceCol>=0?row[casePriceCol].replace(/[^0-9.]/g,'').trim():'';
-    var packed   =packedCol>=0   ?row[packedCol].trim()                           :'';
-    var cases    =casesCol>=0    ?parseInt(row[casesCol])||0                      :0;
-    var singles  =singlesCol>=0  ?parseInt(row[singlesCol])||0                    :0;
-    var total    =totalCol>=0    ?parseInt(row[totalCol])||0                      :0;
-    var qty      =total>0?total:cases+singles;
+    var packed=packedCol>=0?row[packedCol].trim():'';
+    var cases=casesCol>=0?parseInt(row[casesCol])||0:0;
+    var singles=singlesCol>=0?parseInt(row[singlesCol])||0:0;
+    var total=totalCol>=0?parseInt(row[totalCol])||0:0;
+    var qty=total>0?total:cases+singles;
 
     var rawStatus=statusCol>=0?row[statusCol].trim().toUpperCase():'';
     var status;
-    if     (qty>0)                                                        status=qty<=2?'LOW':'IN';
-    else if(rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT')       status=rawStatus;
-    else                                                                  continue;
+    if(qty>0) status=qty<=2?'LOW':'IN';
+    else if(rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT') status=rawStatus;
+    else continue;
 
     items.push({id:nextId++,tab:tabIndex,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty});
   }
@@ -724,10 +710,10 @@ function loadAllTabs(){
       }
     }
     setSyncStatus('ok','Loaded '+inventory.length+' products \u2713');
-    updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
+    updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();populateDealDropdown();
     toast('Loaded '+inventory.length+' products \u2713');
   }).catch(function(){
-    setSyncStatus('err','Could not load sheet');
+    setSyncStatus('err','Could not load');
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="empty">Could not load. Try reloading.</td></tr>';
   });
 }
@@ -740,13 +726,12 @@ function setSyncStatus(type,msg){var el=document.getElementById('syncStatus');el
 function recalc(item){item.qty=(item.cases||0)+(item.singles||0);item.status=item.qty===0?'OUT':item.qty<=2?'LOW':'IN';}
 function tl(item){return TABS[item.tab]?TABS[item.tab].short:'';}
 function fi(id){for(var i=0;i<inventory.length;i++){if(inventory[i].id===id)return inventory[i];}return null;}
-function now(){return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
-function today(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function nowTime(){return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+function todayDate(){return new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 
 function logActivity(action,detail){
-  activityLog.unshift({user:currentUser,time:now(),date:today(),action:action,detail:detail});
-  renderActLog();
-  updateActLogFilter();
+  activityLog.unshift({user:currentUser,time:nowTime(),date:todayDate(),action:action,detail:detail});
+  if(document.getElementById('view-actlog').classList.contains('active')) renderActLog();
 }
 
 // ── STATS ─────────────────────────────────────────────────────
@@ -758,6 +743,14 @@ function updateStats(){
     '<div class="stat"><div class="stat-label">In Stock</div><div class="stat-val g">'+inC+'</div></div>'+
     '<div class="stat"><div class="stat-label">Running Low</div><div class="stat-val a">'+lowC+'</div></div>'+
     '<div class="stat"><div class="stat-label">Out of Stock</div><div class="stat-val r">'+outC+'</div></div>';
+}
+
+// ── VIEW MODE ─────────────────────────────────────────────────
+function setViewMode(mode){
+  viewMode=mode;
+  document.getElementById('toggleTable').className='view-toggle-btn'+(mode==='table'?' active':'');
+  document.getElementById('toggleCard').className='view-toggle-btn'+(mode==='card'?' active':'');
+  renderTable();
 }
 
 // ── TABLE ─────────────────────────────────────────────────────
@@ -774,6 +767,7 @@ function renderTable(){
   var sort=document.getElementById('sortOrder').value;
   var showCat=activeTab===-1;
   document.getElementById('catHeader').style.display=showCat?'':'none';
+
   var rows=[];
   for(var i=0;i<inventory.length;i++){
     var x=inventory[i];
@@ -787,21 +781,28 @@ function renderTable(){
   else if(sort==='status'){var ord={OUT:0,LOW:1,IN:2};rows.sort(function(a,b){return ord[a.status]-ord[b.status];});}
   else if(sort==='qty') rows.sort(function(a,b){return a.qty-b.qty;});
 
-  var empty=document.getElementById('emptyMsg');
-  var tblWrap=document.querySelector('#view-inventory .tbl-wrap');
+  var tblWrap=document.getElementById('tblWrap');
   var cardGrid=document.getElementById('cardGrid');
-  if(tblWrap) tblWrap.style.display=viewMode==='table'?'':'none';
-  if(cardGrid) cardGrid.style.display=viewMode==='card'?'':'none';
-  if(!rows.length){document.getElementById('tbody').innerHTML='';if(cardGrid)cardGrid.innerHTML='';empty.style.display='block';return;}
+  tblWrap.style.display=viewMode==='table'?'':'none';
+  cardGrid.style.display=viewMode==='card'?'':'none';
+
+  var empty=document.getElementById('emptyMsg');
+  if(!rows.length){
+    document.getElementById('tbody').innerHTML='';
+    cardGrid.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
   empty.style.display='none';
+
+  // Table view
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
+    var deal=getBestDeal(item.name);
     h+='<tr>'+
       '<td><span class="badge '+item.status+'">'+item.status+'</span></td>'+
-      '<td style="font-weight:500">'+item.name+
-        (getBestDeal(item.name)?'<span style="background:rgba(255,77,0,0.15);color:var(--accent);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:7px">🔥 DEAL</span>':'')+
-      '</td>'+
+      '<td style="font-weight:500">'+item.name+(deal?'<span style="background:rgba(255,77,0,0.15);color:var(--accent);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:7px">🔥 DEAL</span>':'')+'</td>'+
       (showCat?'<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>':'')+
       '<td>'+(item.price?'<span style="color:var(--accent2);font-weight:600">$'+item.price+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
       '<td style="color:var(--muted);font-size:12px">'+(item.packed||'—')+'</td>'+
@@ -809,28 +810,178 @@ function renderTable(){
       '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
       '<td style="color:var(--accent2);font-size:12px">'+(item.singles||0)+'</td>'+
       '<td><span class="qty-pill">'+item.qty+'</span></td>'+
-      '<td class="no-print">'+
+      '<td>'+
         '<button class="icon-btn" onclick="openEdit('+item.id+')" title="Edit">✏️</button>'+
         '<button class="icon-btn" onclick="quickAdd('+item.id+')" title="Add cases">➕</button>'+
         '<button class="icon-btn del" onclick="delItem('+item.id+')" title="Delete">🗑</button>'+
       '</td></tr>';
   }
   document.getElementById('tbody').innerHTML=h;
+
+  // Card view
   if(viewMode==='card') renderCardGrid(rows);
 }
 
+// ── CARD VIEW ─────────────────────────────────────────────────
+function saveCardPriceEl(el){
+  var id=parseInt(el.getAttribute('data-id'));
+  var field=el.getAttribute('data-field');
+  saveCardPrice(id,el.value,field);
+}
+
+function saveCardPrice(id,val,field){
+  var item=fi(id);if(!item) return;
+  if(field==='casePrice') item.casePrice=String(val).trim();
+  else item.price=String(val).trim();
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  logActivity('Price updated',item.name+(field==='casePrice'?' case:$'+item.casePrice:' $'+item.price));
+  toast(item.name+' saved ✓');
+}
+
+function adjustCount(id,field,delta,event){
+  event.stopPropagation();
+  var item=fi(id);if(!item) return;
+  if(field==='cases') item.cases=Math.max(0,(item.cases||0)+delta);
+  else item.singles=Math.max(0,(item.singles||0)+delta);
+  recalc(item);
+  var cEl=document.getElementById('cc_'+id);
+  var sEl=document.getElementById('cs_'+id);
+  var tEl=document.getElementById('ct_'+id);
+  var card=document.getElementById('card_'+id);
+  if(cEl) cEl.textContent=item.cases||0;
+  if(sEl) sEl.textContent=item.singles||0;
+  if(tEl) tEl.textContent=item.qty;
+  if(card) card.className='inv-card '+item.status;
+  // Update status strip
+  var strip=card?card.querySelector('.inv-card-status-strip'):null;
+  if(strip){
+    strip.textContent=item.status==='LOW'?'\u26a0\ufe0f LOW STOCK':item.status==='OUT'?'\ud83d\udeab OUT OF STOCK':'';
+    strip.style.display=(item.status==='LOW'||item.status==='OUT')?'block':'none';
+  }
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  logActivity(delta>0?'Added stock':'Removed stock',item.name+' '+field+(delta>0?' +':' ')+delta+' (total: '+item.qty+')');
+  updateStats();
+}
+
+function renderCardGrid(rows){
+  var grid=document.getElementById('cardGrid');
+  if(!rows.length){grid.innerHTML='';return;}
+  var h='';
+  for(var r=0;r<rows.length;r++){
+    var item=rows[r];
+    var deal=getBestDeal(item.name);
+    var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
+    var statusStrip=item.status==='LOW'?'\u26a0\ufe0f LOW STOCK':item.status==='OUT'?'\ud83d\udeab OUT OF STOCK':'';
+    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">'+
+      '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
+      // Name + edit
+      '<div class="inv-card-top">'+
+        '<div class="inv-card-name">'+item.name+'</div>'+
+        '<button class="inv-card-edit" onclick="openQE('+item.id+')">✏️</button>'+
+      '</div>'+
+      // Inline price + case price + tab
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'+
+        '<span style="font-size:10px;color:var(--muted)">$</span>'+
+        '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="Price" min="0" '+
+          'data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" '+
+          'style="width:58px;padding:3px 5px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--accent2);font-size:12px;font-weight:600">'+
+        '<span style="font-size:10px;color:var(--muted);margin-left:auto">'+tabLabel+'</span>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">'+
+        '<span style="font-size:10px;color:var(--muted)">Case $</span>'+
+        '<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="—" min="0" '+
+          'data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" '+
+          'style="width:65px;padding:3px 5px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px">'+
+      '</div>'+
+      // Cases
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:3px 6px">'+
+        '<span style="font-size:10px;color:var(--muted);width:40px">Cases</span>'+
+        '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">&#8722;</button>'+
+        '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:24px;text-align:center">'+(item.cases||0)+'</span>'+
+        '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">&#43;</button>'+
+      '</div>'+
+      // Singles
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:3px 6px">'+
+        '<span style="font-size:10px;color:var(--muted);width:40px">Singles</span>'+
+        '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">&#8722;</button>'+
+        '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:24px;text-align:center">'+(item.singles||0)+'</span>'+
+        '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">&#43;</button>'+
+      '</div>'+
+      // Total
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-top:1px solid var(--border);margin-top:2px">'+
+        '<span style="font-size:10px;color:var(--muted)">Total</span>'+
+        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">'+item.qty+'</span>'+
+      '</div>'+
+      (deal?'<div class="inv-card-deal">🔥 '+deal.qty+' for $'+deal.price+'</div>':'')+
+    '</div>';
+  }
+  grid.innerHTML=h;
+}
+
+// ── QUICK EDIT ────────────────────────────────────────────────
+function buildQETabSelect(sel){
+  var h='';for(var i=0;i<TABS.length;i++) h+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+TABS[i].name+'</option>';
+  document.getElementById('qeTab').innerHTML=h;
+}
+
+function openQE(id){
+  var item=fi(id);if(!item) return;
+  qeCurrentId=id;
+  document.getElementById('qeTitle').textContent=item.name;
+  document.getElementById('qeSub').textContent=tl(item)+(item.packed?' · '+item.packed:'');
+  var badge=document.getElementById('qeBadge');
+  badge.textContent=item.status;badge.className='qe-badge badge '+item.status;
+  document.getElementById('qePrice').value=item.price||'';
+  document.getElementById('qePacked').value=item.packed||'';
+  document.getElementById('qeCasePrice').value=item.casePrice||'';
+  document.getElementById('qeCases').value=item.cases||0;
+  document.getElementById('qeSingles').value=item.singles||0;
+  document.getElementById('qeTotal').textContent=item.qty||0;
+  buildQETabSelect(item.tab||0);
+  document.getElementById('qeOverlay').style.display='flex';
+}
+
+function updateQETotal(){
+  var c=parseInt(document.getElementById('qeCases').value)||0;
+  var s=parseInt(document.getElementById('qeSingles').value)||0;
+  document.getElementById('qeTotal').textContent=c+s;
+}
+
+function closeQE(){document.getElementById('qeOverlay').style.display='none';qeCurrentId=null;}
+
+function saveQE(){
+  var item=fi(qeCurrentId);if(!item) return;
+  var oldQty=item.qty;
+  item.price=document.getElementById('qePrice').value.trim();
+  item.packed=document.getElementById('qePacked').value.trim();
+  item.casePrice=document.getElementById('qeCasePrice').value.trim();
+  item.tab=parseInt(document.getElementById('qeTab').value);
+  item.cases=parseInt(document.getElementById('qeCases').value)||0;
+  item.singles=parseInt(document.getElementById('qeSingles').value)||0;
+  recalc(item);
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
+  logActivity('Quick Edit',item.name+' qty:'+(oldQty!==item.qty?oldQty+' → '+item.qty:item.qty)+' price:'+(item.price?'$'+item.price:'—'));
+  closeQE();
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
+  toast('Saved '+item.name+' \u2713');
+}
+
+function deleteQE(){
+  var item=fi(qeCurrentId);
+  if(!item||!confirm('Delete "'+item.name+'"?')) return;
+  closeQE();delItem(qeCurrentId);
+}
+
+// ── LOW STOCK ─────────────────────────────────────────────────
 function renderLowStock(){
-  var rows=[];
-  for(var i=0;i<inventory.length;i++){if(inventory[i].status==='LOW'||inventory[i].status==='OUT')rows.push(inventory[i]);}
-  if(!rows.length){document.getElementById('lowTbody').innerHTML='<tr><td colspan="8" class="empty">All good — nothing low or out!</td></tr>';return;}
+  var rows=[];for(var i=0;i<inventory.length;i++){if(inventory[i].status==='LOW'||inventory[i].status==='OUT')rows.push(inventory[i]);}
+  if(!rows.length){document.getElementById('lowTbody').innerHTML='<tr><td colspan="8" class="empty">All good!</td></tr>';return;}
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
     h+='<tr>'+
       '<td><span class="badge '+item.status+'">'+item.status+'</span></td>'+
-      '<td style="font-weight:500">'+item.name+
-        (getBestDeal(item.name)?'<span style="background:rgba(255,77,0,0.15);color:var(--accent);border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:7px">🔥 DEAL</span>':'')+
-      '</td>'+
+      '<td style="font-weight:500">'+item.name+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
       '<td>'+(item.price?'$'+item.price:'—')+'</td>'+
       '<td style="color:var(--muted);font-size:12px">'+(item.cases||0)+'</td>'+
@@ -844,44 +995,7 @@ function renderLowStock(){
   document.getElementById('lowTbody').innerHTML=h;
 }
 
-// ── PRINT ─────────────────────────────────────────────────────
-function printInventory(){
-  window.print();
-}
-
-// ── ACTIVITY LOG ─────────────────────────────────────────────
-function updateActLogFilter(){
-  var sel=document.getElementById('actLogFilter');
-  var cur=sel.value;
-  var users={};
-  for(var i=0;i<activityLog.length;i++) users[activityLog[i].user]=true;
-  var h='<option value="">All Users</option>';
-  var keys=Object.keys(users);
-  for(var i=0;i<keys.length;i++) h+='<option value="'+keys[i]+'"'+(keys[i]===cur?' selected':'')+'>'+keys[i]+'</option>';
-  sel.innerHTML=h;
-}
-
-function renderActLog(){
-  var filter=document.getElementById('actLogFilter')?document.getElementById('actLogFilter').value:'';
-  var el=document.getElementById('actLog');
-  var logs=filter?activityLog.filter(function(e){return e.user===filter;}):activityLog;
-  if(!logs.length){el.innerHTML='<div class="empty">No activity yet.</div>';return;}
-  var h='';
-  for(var i=0;i<logs.length;i++){
-    var e=logs[i];
-    h+='<div class="log-item">'+
-      '<div class="log-meta">'+
-        '<span class="log-user">'+e.user+'</span>'+
-        '<span class="log-action">'+e.action+'</span>'+
-        '<span class="log-time">'+e.date+' '+e.time+'</span>'+
-      '</div>'+
-      '<div class="log-detail"><b>'+e.detail+'</b></div>'+
-    '</div>';
-  }
-  el.innerHTML=h;
-}
-
-// ── ACTIONS ──────────────────────────────────────────────────
+// ── ACTIONS ───────────────────────────────────────────────────
 function restockItem(id){
   var item=fi(id);var qty=parseInt(document.getElementById('rs_'+id).value)||0;
   if(!item||qty<=0) return;
@@ -894,7 +1008,7 @@ function restockItem(id){
 
 function quickAdd(id){
   var item=fi(id);if(!item) return;
-  var qty=parseInt(prompt('Add cases to "'+item.name+'"\nQty to add:'));
+  var qty=parseInt(prompt('Add cases to "'+item.name+'" — Qty:'));
   if(!qty||isNaN(qty)||qty<=0) return;
   var old=item.qty;item.cases=(item.cases||0)+qty;recalc(item);
   updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
@@ -912,95 +1026,38 @@ function delItem(id){
   toast('Deleted '+item.name);
 }
 
-// ── BULK RESTOCK ──────────────────────────────────────────────
-function renderRestockList(){
-  var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  var h='';
-  for(var i=0;i<sorted.length;i++){
-    var item=sorted[i];
-    h+='<div class="checkbox-item" onclick="toggleRestock('+item.id+',this)">'+
-      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()">'+
-      '<label for="rc_'+item.id+'">'+item.name+' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span></label>'+
-      '<span class="item-qty"><span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span> '+item.qty+'</span>'+
-    '</div>';
-  }
-  document.getElementById('restockList').innerHTML=h||'<div class="empty">No products loaded.</div>';
-  updateBulkBtn();
+// ── SELL MODAL ────────────────────────────────────────────────
+function openSellModal(id){
+  var item=fi(id);if(!item) return;
+  if(item.qty<=0){toast('Out of stock!');return;}
+  sellItemId=id;sellQty=1;
+  document.getElementById('sellTitle').textContent=item.name;
+  document.getElementById('sellSub').textContent=tl(item)+(item.price?' · $'+item.price:'');
+  document.getElementById('sellQtyDisplay').textContent='1';
+  document.getElementById('sellStockInfo').textContent=item.qty+' in stock';
+  document.getElementById('sellOverlay').style.display='flex';
 }
 
-function toggleRestock(id,el){
-  var cb=document.getElementById('rc_'+id);
-  cb.checked=!cb.checked;
-  updateBulkBtn();
+function changeSellQty(delta){
+  var item=fi(sellItemId);if(!item) return;
+  sellQty=Math.max(1,Math.min(item.qty,sellQty+delta));
+  document.getElementById('sellQtyDisplay').textContent=sellQty;
+  document.getElementById('sellStockInfo').textContent=item.qty+' in stock · '+(item.qty-sellQty)+' remaining';
 }
 
-function updateBulkBtn(){
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');
-  document.getElementById('bulkRestockBtn').disabled=cbs.length===0;
-}
+function closeSell(){document.getElementById('sellOverlay').style.display='none';sellItemId=null;sellQty=1;}
 
-function selectAllRestock(){
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]');
-  for(var i=0;i<cbs.length;i++) cbs[i].checked=true;
-  updateBulkBtn();
-}
-
-function selectLowRestock(){
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]');
-  for(var i=0;i<cbs.length;i++) cbs[i].checked=false;
-  var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  for(var i=0;i<sorted.length;i++){
-    if(sorted[i].status==='LOW'||sorted[i].status==='OUT'){
-      var cb=document.getElementById('rc_'+sorted[i].id);
-      if(cb) cb.checked=true;
-    }
-  }
-  updateBulkBtn();
-}
-
-function clearRestockSelection(){
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]');
-  for(var i=0;i<cbs.length;i++) cbs[i].checked=false;
-  updateBulkBtn();
-}
-
-function commitBulkRestock(){
-  var qty=parseInt(document.getElementById('bulkQty').value)||1;
-  var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');
-  if(!cbs.length) return;
-  var btn=document.getElementById('bulkRestockBtn');
-  btn.disabled=true;btn.textContent='Applying...';
-  var names=[];
-  for(var i=0;i<cbs.length;i++){
-    var id=parseInt(cbs[i].id.replace('rc_',''));
-    var item=fi(id);if(!item) continue;
-    var old=item.qty;
-    item.cases=(item.cases||0)+qty;
-    recalc(item);
-    names.push(item.name);
-    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
-  }
-  var entry={date:today(),user:currentUser,items:names.slice(),qty:qty};
-  restockLog.unshift(entry);
-  renderRestockLog();
-  updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
-  logActivity('Bulk Restock',names.length+' items +'+qty+' each: '+names.join(', '));
-  btn.textContent='Apply Restock & Sync';btn.disabled=false;
-  toast('Restocked '+names.length+' products \u2713');
-}
-
-function renderRestockLog(){
-  var log=document.getElementById('restockLog');
-  if(!restockLog.length){log.innerHTML='<div class="empty">No restocks logged yet.</div>';return;}
-  var h='';
-  for(var i=0;i<restockLog.length;i++){
-    var e=restockLog[i];
-    h+='<div class="log-item">'+
-      '<div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+'</span></div>'+
-      '<div class="log-detail">+'+e.qty+' to '+e.items.length+' items: <b>'+e.items.join(', ')+'</b></div>'+
-    '</div>';
-  }
-  log.innerHTML=h;
+function confirmSell(){
+  var item=fi(sellItemId);if(!item) return;
+  if(sellQty>item.qty){toast('Not enough stock!');return;}
+  var d=sellQty;
+  if((item.singles||0)>=d){item.singles-=d;}
+  else{d-=(item.singles||0);item.singles=0;item.cases=Math.max(0,(item.cases||0)-d);}
+  recalc(item);
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  logActivity('Sold',item.name+' x'+sellQty+' ('+(item.qty+sellQty)+' \u2192 '+item.qty+' left)');
+  toast('Sold '+sellQty+' x '+item.name+' \u2713');
+  closeSell();updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
 }
 
 // ── MODAL ─────────────────────────────────────────────────────
@@ -1016,9 +1073,7 @@ function buildTabSelect(sel){
 }
 
 function openEdit(id){
-  isAdding=false;editingId=id;
-  if(document.getElementById('modalSaveBtn').disabled) return;
-  var item=fi(id);
+  isAdding=false;editingId=id;var item=fi(id);
   document.getElementById('modalTitle').textContent='Edit Product';
   document.getElementById('mName').value=item.name;
   document.getElementById('mPrice').value=item.price||'';
@@ -1035,10 +1090,8 @@ function openEdit(id){
 function openAddModal(){
   isAdding=true;editingId=null;
   document.getElementById('modalTitle').textContent='Add New Product';
-  document.getElementById('mName').value='';document.getElementById('mPrice').value='';
-  document.getElementById('mPacked').value='';document.getElementById('mCasePrice').value='';
-  document.getElementById('mCases').value='';document.getElementById('mSingles').value='';
-  document.getElementById('mTotal').value='';document.getElementById('mStatus').value='IN';
+  ['mName','mPrice','mPacked','mCasePrice','mCases','mSingles','mTotal'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('mStatus').value='IN';
   buildTabSelect(activeTab>=0?activeTab:0);
   document.getElementById('editOverlay').style.display='flex';
 }
@@ -1118,20 +1171,17 @@ function clearSales(){saleItems=[];document.getElementById('applyBtn').disabled=
 function commitSales(){
   if(!saleItems.length) return;
   var btn=document.getElementById('applyBtn');btn.disabled=true;btn.textContent='Syncing...';
-  var date=today();
-  var names=[];
+  var date=todayDate(),names=[];
   for(var s=0;s<saleItems.length;s++){
     var sale=saleItems[s];var item=fi(sale.id);if(!item) continue;
-    var deduct=Math.min(sale.qty,item.qty);
-    if((item.singles||0)>=deduct){item.singles-=deduct;}
-    else{deduct-=(item.singles||0);item.singles=0;item.cases=Math.max(0,(item.cases||0)-deduct);}
+    var d=Math.min(sale.qty,item.qty);
+    if((item.singles||0)>=d){item.singles-=d;}
+    else{d-=(item.singles||0);item.singles=0;item.cases=Math.max(0,(item.cases||0)-d);}
     recalc(item);names.push(sale.name+' x'+sale.qty);
   }
   sendWrite({action:'applySales',sales:saleItems});
   logActivity('End of Day Sales',names.join(', '));
-  // Store for report
-  var entry={date:date,user:currentUser,items:saleItems.map(function(s){return {name:s.name,qty:s.qty,tab:s.tab,price:s.price||'0'};})};
-  salesLog.unshift(entry);
+  salesLog.unshift({date:date,user:currentUser,items:saleItems.map(function(s){return {name:s.name,qty:s.qty,tab:s.tab,price:s.price||'0'};})});
   clearSales();renderSalesLog();
   updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
   btn.textContent='Apply & Sync';btn.disabled=false;
@@ -1150,175 +1200,191 @@ function renderSalesLog(){
   log.innerHTML=h;
 }
 
+// ── BULK RESTOCK ──────────────────────────────────────────────
+function renderRestockList(){
+  var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var h='';
+  for(var i=0;i<sorted.length;i++){
+    var item=sorted[i];
+    h+='<div class="checkbox-item" onclick="toggleRestock('+item.id+',this)">'+
+      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()">'+
+      '<label for="rc_'+item.id+'">'+item.name+' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span></label>'+
+      '<span class="item-qty"><span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span> '+item.qty+'</span>'+
+    '</div>';
+  }
+  document.getElementById('restockList').innerHTML=h||'<div class="empty">No products.</div>';
+  updateBulkBtn();
+}
+
+function toggleRestock(id){var cb=document.getElementById('rc_'+id);cb.checked=!cb.checked;updateBulkBtn();}
+function updateBulkBtn(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');document.getElementById('bulkRestockBtn').disabled=cbs.length===0;}
+function selectAllRestock(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=true;updateBulkBtn();}
+function selectLowRestock(){
+  var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=false;
+  var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  for(var i=0;i<sorted.length;i++){if(sorted[i].status==='LOW'||sorted[i].status==='OUT'){var cb=document.getElementById('rc_'+sorted[i].id);if(cb)cb.checked=true;}}
+  updateBulkBtn();
+}
+function clearRestockSelection(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=false;updateBulkBtn();}
+
+function commitBulkRestock(){
+  var qty=parseInt(document.getElementById('bulkQty').value)||1;
+  var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');
+  if(!cbs.length) return;
+  var btn=document.getElementById('bulkRestockBtn');btn.disabled=true;btn.textContent='Applying...';
+  var names=[];
+  for(var i=0;i<cbs.length;i++){
+    var id=parseInt(cbs[i].id.replace('rc_',''));
+    var item=fi(id);if(!item) continue;
+    item.cases=(item.cases||0)+qty;recalc(item);names.push(item.name);
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  }
+  restockLog.unshift({date:todayDate(),user:currentUser,items:names.slice(),qty:qty});
+  renderRestockLog();
+  updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
+  logActivity('Bulk Restock',names.length+' items +'+qty+' each: '+names.join(', '));
+  btn.textContent='Apply Restock & Sync';btn.disabled=false;
+  toast('Restocked '+names.length+' products \u2713');
+}
+
+function renderRestockLog(){
+  var log=document.getElementById('restockLog');
+  if(!restockLog.length){log.innerHTML='<div class="empty">No restocks logged yet.</div>';return;}
+  var h='';
+  for(var i=0;i<restockLog.length;i++){
+    var e=restockLog[i];
+    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+'</span></div><div class="log-detail">+'+e.qty+' to '+e.items.length+' items: <b>'+e.items.join(', ')+'</b></div></div>';
+  }
+  log.innerHTML=h;
+}
+
+// ── ACTIVITY LOG ──────────────────────────────────────────────
+function updateActLogFilter(){
+  var sel=document.getElementById('actLogFilter');var cur=sel.value;
+  var users={};for(var i=0;i<activityLog.length;i++) users[activityLog[i].user]=true;
+  var h='<option value="">All Users</option>';
+  var keys=Object.keys(users);
+  for(var i=0;i<keys.length;i++) h+='<option value="'+keys[i]+'"'+(keys[i]===cur?' selected':'')+'>'+keys[i]+'</option>';
+  sel.innerHTML=h;
+}
+
+function renderActLog(){
+  var filter=document.getElementById('actLogFilter')?document.getElementById('actLogFilter').value:'';
+  var logs=filter?activityLog.filter(function(e){return e.user===filter;}):activityLog;
+  var el=document.getElementById('actLog');
+  if(!logs.length){el.innerHTML='<div class="empty">No activity yet.</div>';return;}
+  var h='';
+  for(var i=0;i<logs.length;i++){
+    var e=logs[i];
+    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-action">'+e.action+'</span><span class="log-time">'+e.date+' '+e.time+'</span></div><div class="log-detail"><b>'+e.detail+'</b></div></div>';
+  }
+  el.innerHTML=h;
+}
+
 // ── SALES REPORT ──────────────────────────────────────────────
 function generateReport(){
   var from=document.getElementById('reportFrom').value;
   var to=document.getElementById('reportTo').value;
   if(!from||!to){alert('Please select a date range.');return;}
-  var fromDate=new Date(from);
-  var toDate=new Date(to);toDate.setHours(23,59,59);
-
-  // Filter sales log by date range
-  var filtered=salesLog.filter(function(e){
-    var d=new Date(e.date);
-    return d>=fromDate&&d<=toDate;
-  });
-
+  var fromDate=new Date(from),toDate=new Date(to);toDate.setHours(23,59,59);
+  var filtered=salesLog.filter(function(e){var d=new Date(e.date);return d>=fromDate&&d<=toDate;});
   var output=document.getElementById('reportOutput');
-  if(!filtered.length){
-    output.innerHTML='<div class="panel"><div class="empty">No sales found in this date range.</div></div>';
-    return;
-  }
-
-  // Aggregate by product
-  var totals={};var totalUnits=0;var byUser={};
+  if(!filtered.length){output.innerHTML='<div class="panel"><div class="empty">No sales in this date range.</div></div>';return;}
+  var totals={},totalUnits=0,byUser={};
   for(var i=0;i<filtered.length;i++){
-    var e=filtered[i];
-    byUser[e.user]=(byUser[e.user]||0);
+    var e=filtered[i];byUser[e.user]=(byUser[e.user]||0);
     for(var j=0;j<e.items.length;j++){
-      var item=e.items[j];
-      if(!totals[item.name]) totals[item.name]={qty:0,tab:item.tab};
-      totals[item.name].qty+=item.qty;
-      totalUnits+=item.qty;
-      byUser[e.user]+=item.qty;
+      var itm=e.items[j];
+      if(!totals[itm.name]) totals[itm.name]={qty:0,tab:itm.tab};
+      totals[itm.name].qty+=itm.qty;totalUnits+=itm.qty;byUser[e.user]+=itm.qty;
     }
   }
-
-  // Sort by qty sold desc
-  var sorted=[];
-  var keys=Object.keys(totals);
+  var sorted=[];var keys=Object.keys(totals);
   for(var k=0;k<keys.length;k++) sorted.push({name:keys[k],qty:totals[keys[k]].qty,tab:totals[keys[k]].tab});
   sorted.sort(function(a,b){return b.qty-a.qty;});
-
-  var html='<div class="report-grid">';
-  html+='<div class="report-stat"><div class="report-stat-label">Total Units Sold</div><div class="report-stat-val">'+totalUnits+'</div></div>';
-  html+='<div class="report-stat"><div class="report-stat-label">Unique Products</div><div class="report-stat-val">'+sorted.length+'</div></div>';
-  html+='<div class="report-stat"><div class="report-stat-label">Sales Sessions</div><div class="report-stat-val">'+filtered.length+'</div></div>';
-  html+='</div>';
-
-  // By user
+  var html='<div class="report-grid">'+
+    '<div class="report-stat"><div class="report-stat-label">Total Units Sold</div><div class="report-stat-val">'+totalUnits+'</div></div>'+
+    '<div class="report-stat"><div class="report-stat-label">Unique Products</div><div class="report-stat-val">'+sorted.length+'</div></div>'+
+    '<div class="report-stat"><div class="report-stat-label">Sales Sessions</div><div class="report-stat-val">'+filtered.length+'</div></div>'+
+  '</div>';
   html+='<div class="panel" style="margin-bottom:1rem"><div class="panel-title">Sales by Staff Member</div>';
   var ukeys=Object.keys(byUser);
-  for(var u=0;u<ukeys.length;u++){
-    html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">'+
-      '<span style="color:var(--accent2);font-weight:600">'+ukeys[u]+'</span>'+
-      '<span class="qty-pill">'+byUser[ukeys[u]]+' units</span>'+
-    '</div>';
-  }
-  html+='</div>';
-
-  // Product breakdown
-  html+='<div class="panel"><div class="panel-title">Top Selling Products ('+from+' to '+to+')</div>';
-  html+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
-  html+='<thead><tr><th style="text-align:left;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border)">Product</th><th style="text-align:left;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);width:72px">Tab</th><th style="text-align:right;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);width:80px">Units Sold</th></tr></thead><tbody>';
+  for(var u=0;u<ukeys.length;u++) html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--accent2);font-weight:600">'+ukeys[u]+'</span><span class="qty-pill">'+byUser[ukeys[u]]+' units</span></div>';
+  html+='</div><div class="panel"><div class="panel-title">Top Selling Products</div><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border)">Product</th><th style="text-align:left;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);width:72px">Tab</th><th style="text-align:right;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--border);width:80px">Units Sold</th></tr></thead><tbody>';
   for(var p=0;p<sorted.length;p++){
-    var row=sorted[p];
-    var tabName=TABS[row.tab]?TABS[row.tab].short:'';
-    html+='<tr style="border-bottom:1px solid var(--border)">'+
-      '<td style="padding:8px 12px;font-weight:500">'+row.name+'</td>'+
-      '<td style="padding:8px 12px;font-size:11px;color:var(--muted)">'+tabName+'</td>'+
-      '<td style="padding:8px 12px;text-align:right"><span class="qty-pill">'+row.qty+'</span></td>'+
-    '</tr>';
+    var row=sorted[p];var tabName=TABS[row.tab]?TABS[row.tab].short:'';
+    html+='<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 12px;font-weight:500">'+row.name+'</td><td style="padding:8px 12px;font-size:11px;color:var(--muted)">'+tabName+'</td><td style="padding:8px 12px;text-align:right"><span class="qty-pill">'+row.qty+'</span></td></tr>';
   }
   html+='</tbody></table></div>';
   output.innerHTML=html;
 }
 
-// ── DEALS ────────────────────────────────────────────────────
-var deals = []; // {id, productId, productName, tab, qty, price, note}
-var dealNextId = 0;
-
-function populateDealDropdown(){
-  var sorted = inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  var h = '<option value="">Select product...</option>';
-  for(var i=0;i<sorted.length;i++){
-    h += '<option value="'+sorted[i].id+'">'+sorted[i].name+' ('+tl(sorted[i])+')</option>';
-  }
-  document.getElementById('dealProduct').innerHTML = h;
-}
-
-function updateDealPreview(){
-  var qty   = document.getElementById('dealQty').value;
-  var price = document.getElementById('dealPrice').value;
-  var prev  = document.getElementById('dealPreview');
-  if(qty && price){
-    prev.style.display = 'block';
-    prev.textContent = '🔥 Preview: '+qty+' for $'+price;
-  } else {
-    prev.style.display = 'none';
-  }
-}
-
-function addDeal(){
-  var prodId = parseInt(document.getElementById('dealProduct').value);
-  var qty    = parseInt(document.getElementById('dealQty').value);
-  var price  = parseFloat(document.getElementById('dealPrice').value);
-  var note   = document.getElementById('dealNote').value.trim();
-  if(!prodId){ alert('Please select a product.'); return; }
-  if(!qty||qty<1){ alert('Please enter a valid quantity.'); return; }
-  if(!price||price<=0){ alert('Please enter a valid price.'); return; }
-  var item = fi(prodId);
-  if(!item) return;
-  deals.push({id:dealNextId++, productId:prodId, productName:item.name, tab:item.tab, qty:qty, price:price, note:note});
-  // Clear form
-  document.getElementById('dealProduct').value = '';
-  document.getElementById('dealQty').value = '';
-  document.getElementById('dealPrice').value = '';
-  document.getElementById('dealNote').value = '';
-  document.getElementById('dealPreview').style.display = 'none';
-  saveDealsToDB();
-  renderDealsList();
-  renderTable(); // refresh to show deal badges
-  logActivity('Added deal', item.name+': '+qty+' for $'+price);
-  toast('Deal added ✓');
-}
-
-function removeDeal(id){
-  var deal = null;
-  for(var i=0;i<deals.length;i++){if(deals[i].id===id){deal=deals[i];break;}}
-  if(!deal||!confirm('Remove this deal?')) return;
-  deals = deals.filter(function(d){return d.id!==id;});
-  saveDealsToDB();
-  renderDealsList();
-  renderTable();
-  logActivity('Removed deal', deal.productName+': '+deal.qty+' for $'+deal.price);
-  toast('Deal removed');
-}
+// ── DEALS ─────────────────────────────────────────────────────
+function loadDealsFromDB(){try{var s=localStorage.getItem('pyrolandia_deals');if(s){deals=JSON.parse(s);dealNextId=deals.length?Math.max.apply(null,deals.map(function(d){return d.id;}))+1:0;}}catch(e){}}
+function saveDealsToDB(){try{localStorage.setItem('pyrolandia_deals',JSON.stringify(deals));}catch(e){}}
 
 function getBestDeal(productName){
-  // Best deal = lowest price per unit
-  var productDeals = deals.filter(function(d){return d.productName.toUpperCase()===productName.toUpperCase();});
-  if(!productDeals.length) return null;
-  var best = productDeals[0];
-  for(var i=1;i<productDeals.length;i++){
-    if((productDeals[i].price/productDeals[i].qty) < (best.price/best.qty)) best = productDeals[i];
-  }
+  var pd=deals.filter(function(d){return d.productName.toUpperCase()===productName.toUpperCase();});
+  if(!pd.length) return null;
+  var best=pd[0];
+  for(var i=1;i<pd.length;i++){if((pd[i].price/pd[i].qty)<(best.price/best.qty))best=pd[i];}
   return best;
 }
 
-function saveDealsToDB(){
-  try { localStorage.setItem('pyrolandia_deals', JSON.stringify(deals)); } catch(e){}
+function populateDealDropdown(){
+  var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var h='<option value="">Select product...</option>';
+  for(var i=0;i<sorted.length;i++) h+='<option value="'+sorted[i].id+'">'+sorted[i].name+' ('+tl(sorted[i])+')</option>';
+  document.getElementById('dealProduct').innerHTML=h;
 }
 
-function loadDealsFromDB(){
-  try {
-    var stored = localStorage.getItem('pyrolandia_deals');
-    if(stored){ deals = JSON.parse(stored); dealNextId = deals.length ? Math.max.apply(null, deals.map(function(d){return d.id;}))+1 : 0; }
-  } catch(e){}
+function updateDealPreview(){
+  var qty=document.getElementById('dealQty').value;
+  var price=document.getElementById('dealPrice').value;
+  var prev=document.getElementById('dealPreview');
+  if(qty&&price){prev.style.display='block';prev.textContent='🔥 Preview: '+qty+' for $'+price;}
+  else prev.style.display='none';
+}
+
+function addDeal(){
+  var prodId=parseInt(document.getElementById('dealProduct').value);
+  var qty=parseInt(document.getElementById('dealQty').value);
+  var price=parseFloat(document.getElementById('dealPrice').value);
+  var note=document.getElementById('dealNote').value.trim();
+  if(!prodId){alert('Please select a product.');return;}
+  if(!qty||qty<1){alert('Please enter a valid quantity.');return;}
+  if(!price||price<=0){alert('Please enter a valid price.');return;}
+  var item=fi(prodId);if(!item) return;
+  deals.push({id:dealNextId++,productId:prodId,productName:item.name,tab:item.tab,qty:qty,price:price,note:note});
+  document.getElementById('dealProduct').value='';
+  document.getElementById('dealQty').value='';
+  document.getElementById('dealPrice').value='';
+  document.getElementById('dealNote').value='';
+  document.getElementById('dealPreview').style.display='none';
+  saveDealsToDB();renderDealsList();renderTable();
+  logActivity('Added deal',item.name+': '+qty+' for $'+price);
+  toast('Deal added \u2713');
+}
+
+function removeDeal(id){
+  var deal=null;for(var i=0;i<deals.length;i++){if(deals[i].id===id){deal=deals[i];break;}}
+  if(!deal||!confirm('Remove this deal?')) return;
+  deals=deals.filter(function(d){return d.id!==id;});
+  saveDealsToDB();renderDealsList();renderTable();
+  logActivity('Removed deal',deal.productName+': '+deal.qty+' for $'+deal.price);
+  toast('Deal removed');
 }
 
 function renderDealsList(){
-  var el = document.getElementById('dealsList');
+  var el=document.getElementById('dealsList');
   if(!deals.length){el.innerHTML='<div class="empty">No active deals yet.</div>';return;}
-  // Group by product
-  var grouped = {};
+  var grouped={};
   for(var i=0;i<deals.length;i++){
-    var d = deals[i];
-    if(!grouped[d.productName]) grouped[d.productName]={name:d.productName,tab:d.tab,deals:[]};
+    var d=deals[i];
+    if(!grouped[d.productName]) grouped[d.productName]={name:d.productName,deals:[]};
     grouped[d.productName].deals.push(d);
   }
-  var h='';
-  var keys=Object.keys(grouped).sort();
+  var h='',keys=Object.keys(grouped).sort();
   for(var k=0;k<keys.length;k++){
     var g=grouped[keys[k]];
     h+='<div style="margin-bottom:1rem;background:var(--surface2);border-radius:10px;padding:10px 12px">'+
@@ -1328,11 +1394,10 @@ function renderDealsList(){
       var perUnit=(d.price/d.qty).toFixed(2);
       var isBest=getBestDeal(g.name)&&getBestDeal(g.name).id===d.id;
       h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--border)">'+
-        '<div>'+
-          '<span style="color:var(--accent);font-weight:600">'+d.qty+' for $'+d.price+'</span>'+
-          '<span style="color:var(--muted);font-size:11px;margin-left:8px">($'+perUnit+'/each)</span>'+
-          (isBest?'<span style="background:rgba(255,170,0,0.15);color:var(--accent2);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-left:6px">BEST</span>':'')+
-          (d.note?'<div style="font-size:11px;color:var(--muted);margin-top:2px">'+d.note+'</div>':'')+
+        '<div><span style="color:var(--accent);font-weight:600">'+d.qty+' for $'+d.price+'</span>'+
+        '<span style="color:var(--muted);font-size:11px;margin-left:8px">($'+perUnit+'/each)</span>'+
+        (isBest?'<span style="background:rgba(255,170,0,0.15);color:var(--accent2);border-radius:20px;padding:1px 7px;font-size:10px;font-weight:600;margin-left:6px">BEST</span>':'')+
+        (d.note?'<div style="font-size:11px;color:var(--muted);margin-top:2px">'+d.note+'</div>':'')+
         '</div>'+
         '<button class="icon-btn del" onclick="removeDeal('+d.id+')" title="Remove">🗑</button>'+
       '</div>';
@@ -1342,172 +1407,7 @@ function renderDealsList(){
   el.innerHTML=h;
 }
 
-// ── CARD VIEW ─────────────────────────────────────────────────
-var viewMode = 'table';
-
-function setViewMode(mode){
-  viewMode = mode;
-  document.getElementById('toggleTable').className = 'view-toggle-btn'+(mode==='table'?' active':'');
-  document.getElementById('toggleCard').className  = 'view-toggle-btn'+(mode==='card'?' active':'');
-  document.getElementById('tblWrap') && (document.getElementById('tblWrap').style.display = mode==='table'?'':'none');
-  var tblWrap = document.querySelector('.tbl-wrap');
-  if(tblWrap) tblWrap.style.display = mode==='table'?'':'none';
-  document.getElementById('cardGrid').style.display = mode==='card'?'':'none';
-  renderTable();
-}
-
-
-
-var qeCurrentId = null;
-
-function openQE(id){
-  var item = fi(id); if(!item) return;
-  qeCurrentId = id;
-  document.getElementById('qeTitle').textContent = item.name;
-  document.getElementById('qeSub').textContent = (TABS[item.tab]?TABS[item.tab].short:'') + (item.packed?' · Packed: '+item.packed:'');
-  var badge = document.getElementById('qeBadge');
-  badge.textContent = item.status;
-  badge.className = 'qe-badge badge '+item.status;
-  document.getElementById('qePrice').value   = item.price||'';
-  document.getElementById('qePacked').value  = item.packed||'';
-  document.getElementById('qeCases').value   = item.cases||0;
-  document.getElementById('qeSingles').value = item.singles||0;
-  document.getElementById('qeTotal').textContent = item.qty||0;
-  document.getElementById('qeOverlay').style.display = 'flex';
-}
-
-function updateQETotal(){
-  var c = parseInt(document.getElementById('qeCases').value)||0;
-  var s = parseInt(document.getElementById('qeSingles').value)||0;
-  document.getElementById('qeTotal').textContent = c+s;
-}
-
-function closeQE(){ document.getElementById('qeOverlay').style.display='none'; qeCurrentId=null; }
-
-function saveQE(){
-  var item = fi(qeCurrentId); if(!item) return;
-  item.price     = document.getElementById('qePrice').value.trim();
-  item.packed    = document.getElementById('qePacked').value.trim();
-  item.cases     = parseInt(document.getElementById('qeCases').value)||0;
-  item.singles   = parseInt(document.getElementById('qeSingles').value)||0;
-  recalc(item);
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed}});
-  logActivity('Quick Edit',item.name+' qty:'+item.qty+' price:'+(item.price?'$'+item.price:'—'));
-  closeQE();
-  updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
-  toast('Saved '+item.name+' ✓');
-}
-
-function quickSaleQE(){
-  var item = fi(qeCurrentId); if(!item) return;
-  if(item.qty<=0){ toast('No stock!'); return; }
-  if((item.singles||0)>0){ item.singles--; }
-  else if((item.cases||0)>0){ item.cases--; }
-  document.getElementById('qeCases').value   = item.cases||0;
-  document.getElementById('qeSingles').value = item.singles||0;
-  updateQETotal();
-  recalc(item);
-  // Update badge
-  var badge=document.getElementById('qeBadge');
-  badge.textContent=item.status;badge.className='qe-badge badge '+item.status;
-}
-
-function quickAddQE(){
-  var qty = parseInt(prompt('Add cases to "'+fi(qeCurrentId).name+'": Qty:'))||0;
-
-  if(qty<=0) return;
-  var item=fi(qeCurrentId);
-  item.cases=(item.cases||0)+qty;
-  document.getElementById('qeCases').value=item.cases;
-  updateQETotal();
-  recalc(item);
-  var badge=document.getElementById('qeBadge');
-  badge.textContent=item.status;badge.className='qe-badge badge '+item.status;
-}
-
-function deleteQE(){
-  var item=fi(qeCurrentId);
-  if(!item||!confirm('Delete "'+item.name+'"?')) return;
-  closeQE();
-  delItem(qeCurrentId);
-}
-
-function adjustCount(id, field, delta, event){
-  event.stopPropagation();
-  var item = fi(id); if(!item) return;
-  if(field==='cases'){
-    item.cases = Math.max(0,(item.cases||0)+delta);
-  } else {
-    item.singles = Math.max(0,(item.singles||0)+delta);
-  }
-  recalc(item);
-  // Update card counts in place
-  var cEl = document.getElementById('cc_'+id);
-  var sEl = document.getElementById('cs_'+id);
-  var tEl = document.getElementById('ct_'+id);
-  var card= document.getElementById('card_'+id);
-  if(cEl) cEl.textContent = item.cases||0;
-  if(sEl) sEl.textContent = item.singles||0;
-  if(tEl) tEl.textContent = item.qty;
-  if(card){ card.className='inv-card '+item.status; }
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
-  logActivity(delta>0?'Added stock':'Sold/Removed',item.name+' '+field+(delta>0?' +':' ')+delta+' (total: '+item.qty+')');
-  // Refresh stats silently
-  updateStats();
-}
-
-function renderCardGrid(rows){
-  var grid = document.getElementById('cardGrid');
-  if(!rows.length){ grid.innerHTML=''; return; }
-  var h='';
-  for(var r=0;r<rows.length;r++){
-    var item = rows[r];
-    var deal = getBestDeal(item.name);
-    var tabLabel = TABS[item.tab]?TABS[item.tab].short:'';
-    var priceStr = item.price?'$'+item.price:'—';
-    var statusStrip = item.status==='LOW'?'⚠️ LOW STOCK':item.status==='OUT'?'🚫 OUT OF STOCK':'';
-    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'" onclick="openQE('+item.id+')">'+
-      '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
-      // Top row: name + edit button
-      '<div class="inv-card-top">'+
-        '<div class="inv-card-name">'+item.name+'</div>'+
-        '<button class="inv-card-edit" onclick="event.stopPropagation();openQE('+item.id+')">✏️</button>'+
-      '</div>'+
-      // Price + tab small
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'+
-        '<span style="font-size:12px;color:var(--accent2);font-weight:600">'+priceStr+'</span>'+
-        '<span style="font-size:10px;color:var(--muted)">'+tabLabel+'</span>'+
-      '</div>'+
-      // Cases row with +/-
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:3px 6px">'+
-        '<span style="font-size:10px;color:var(--muted);width:40px">Cases</span>'+
-        '<button onclick="adjustCount('+item.id+',\"cases\",-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">−</button>'+
-        '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:24px;text-align:center">'+(item.cases||0)+'</span>'+
-        '<button onclick="adjustCount('+item.id+',\"cases\",1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">+</button>'+
-      '</div>'+
-      // Singles row with +/-
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:3px 6px">'+
-        '<span style="font-size:10px;color:var(--muted);width:40px">Singles</span>'+
-        '<button onclick="adjustCount('+item.id+',\"singles\",-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">−</button>'+
-        '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:24px;text-align:center">'+(item.singles||0)+'</span>'+
-        '<button onclick="adjustCount('+item.id+',\"singles\",1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">+</button>'+
-      '</div>'+
-      // Total
-      '<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-top:1px solid var(--border);margin-top:2px">'+
-        '<span style="font-size:10px;color:var(--muted)">Total</span>'+
-        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">'+(item.qty)+'</span>'+
-      '</div>'+
-      (deal?'<div class="inv-card-deal" style="margin-top:4px">🔥 '+deal.qty+' for $'+deal.price+'</div>':'')+
-      '<button onclick="event.stopPropagation();openSellModal('+item.id+')" '+
-        'style="width:100%;margin-top:8px;padding:7px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
-        '🛒 Sell'+
-      '</button>'+
-    '</div>';
-  }
-  grid.innerHTML = h;
-}
-
-// ── PRICING VIEW ─────────────────────────────────────────────
+// ── PRICING ───────────────────────────────────────────────────
 function buildPriceTabFilter(){
   var sel=document.getElementById('priceTabFilter');
   var h='<option value="-1">All Tabs</option>';
@@ -1519,7 +1419,6 @@ function renderPricingTable(){
   var search=(document.getElementById('priceSearch').value||'').toLowerCase();
   var tabF=parseInt(document.getElementById('priceTabFilter').value);
   var priceF=document.getElementById('priceFilter').value;
-
   var rows=[];
   for(var i=0;i<inventory.length;i++){
     var x=inventory[i];
@@ -1531,36 +1430,20 @@ function renderPricingTable(){
     rows.push(x);
   }
   rows.sort(function(a,b){return a.name.localeCompare(b.name);});
-
   var empty=document.getElementById('pricingEmpty');
-  if(!rows.length){
-    document.getElementById('pricingTbody').innerHTML='';
-    empty.style.display='block';return;
-  }
+  if(!rows.length){document.getElementById('pricingTbody').innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
     var missing=((!item.price)?'<span style="color:var(--red);font-size:10px">No price</span> ':'')+
                 ((!item.packed)?'<span style="color:var(--amber);font-size:10px">No packed</span>':'');
     h+='<tr>'+
-      '<td><div style="font-weight:500">'+item.name+'</div>'+
-         (missing?'<div style="margin-top:2px">'+missing+'</div>':'')+
-      '</td>'+
+      '<td><div style="font-weight:500">'+item.name+'</div>'+(missing?'<div style="margin-top:2px">'+missing+'</div>':'')+' </td>'+
       '<td style="font-size:11px;color:var(--muted)">'+tl(item)+'</td>'+
-      '<td><input type="number" min="0" placeholder="—" value="'+(item.price||'')+'" '+
-          'id="pp_'+item.id+'" '+
-          'style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" '+
-          'oninput="markPricingDirty('+item.id+')"></td>'+
-      '<td><input type="text" placeholder="e.g. 4/1" value="'+(item.packed||'')+'" '+
-          'id="ppk_'+item.id+'" '+
-          'style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" '+
-          'oninput="markPricingDirty('+item.id+')"></td>'+
-      '<td><input type="number" min="0" placeholder="—" value="'+(item.casePrice||'')+'" '+
-          'id="pcp_'+item.id+'" '+
-          'style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" '+
-          'oninput="markPricingDirty('+item.id+')"></td>'+
+      '<td><input type="number" min="0" placeholder="—" value="'+(item.price||'')+'" id="pp_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
+      '<td><input type="text" placeholder="e.g. 4/1" value="'+(item.packed||'')+'" id="ppk_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
+      '<td><input type="number" min="0" placeholder="—" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif" oninput="markPricingDirty('+item.id+')"></td>'+
       '<td><button class="btn" style="padding:4px 10px;font-size:12px" onclick="saveSinglePrice('+item.id+')">Save</button></td>'+
     '</tr>';
   }
@@ -1568,8 +1451,7 @@ function renderPricingTable(){
   document.getElementById('pricingSaveStatus').textContent='';
 }
 
-var pricingDirty={};
-function markPricingDirty(id){ pricingDirty[id]=true; }
+function markPricingDirty(id){pricingDirty[id]=true;}
 
 function saveSinglePrice(id){
   var item=fi(id);if(!item) return;
@@ -1577,71 +1459,28 @@ function saveSinglePrice(id){
   var packedEl=document.getElementById('ppk_'+id);
   var cpEl=document.getElementById('pcp_'+id);
   if(!priceEl) return;
-  var oldPrice=item.price;
   item.price=priceEl.value.trim();
   item.packed=packedEl?packedEl.value.trim():'';
   item.casePrice=cpEl?cpEl.value.trim():'';
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
-  logActivity('Updated pricing',item.name+' price:$'+(item.price||'—')+' packed:'+(item.packed||'—'));
+  logActivity('Updated pricing',item.name+' price:'+(item.price?'$'+item.price:'—')+' packed:'+(item.packed||'—'));
   delete pricingDirty[id];
-  // Flash the row green briefly
   var row=priceEl.closest('tr');
   if(row){row.style.background='rgba(34,197,94,0.1)';setTimeout(function(){row.style.background='';},1000);}
-  toast('Saved '+item.name+' ✓');
+  toast('Saved '+item.name+' \u2713');
 }
 
 function saveAllPricing(){
   var ids=Object.keys(pricingDirty);
   if(!ids.length){toast('No changes to save');return;}
   for(var i=0;i<ids.length;i++) saveSinglePrice(parseInt(ids[i]));
-  document.getElementById('pricingSaveStatus').textContent='Saved '+ids.length+' items ✓';
+  document.getElementById('pricingSaveStatus').textContent='Saved '+ids.length+' items \u2713';
   document.getElementById('pricingSaveStatus').style.color='var(--green)';
-  toast('Saved '+ids.length+' pricing updates ✓');
+  toast('Saved '+ids.length+' pricing updates \u2713');
   renderPricingTable();
 }
 
-// ── SELL MODAL ───────────────────────────────────────────────
-var sellItemId = null;
-var sellQty = 1;
-
-function openSellModal(id){
-  var item = fi(id); if(!item) return;
-  if(item.qty <= 0){ toast('⚠️ '+item.name+' is out of stock!'); return; }
-  sellItemId = id;
-  sellQty = 1;
-  document.getElementById('sellTitle').textContent = item.name;
-  document.getElementById('sellSub').textContent = (TABS[item.tab]?TABS[item.tab].short:'') + (item.price?' · $'+item.price:'');
-  document.getElementById('sellQtyDisplay').textContent = '1';
-  document.getElementById('sellStockInfo').textContent = item.qty+' in stock';
-  document.getElementById('sellOverlay').style.display = 'flex';
-}
-
-function changeSellQty(delta){
-  var item = fi(sellItemId); if(!item) return;
-  sellQty = Math.max(1, Math.min(item.qty, sellQty+delta));
-  document.getElementById('sellQtyDisplay').textContent = sellQty;
-  document.getElementById('sellStockInfo').textContent = item.qty+' in stock · '+( item.qty-sellQty)+' remaining';
-}
-
-function closeSell(){
-  document.getElementById('sellOverlay').style.display='none';
-  sellItemId=null; sellQty=1;
-}
-
-function confirmSell(){
-  var item = fi(sellItemId); if(!item) return;
-  if(sellQty > item.qty){ toast('Not enough stock!'); return; }
-  var deduct = sellQty;
-  if((item.singles||0) >= deduct){ item.singles -= deduct; }
-  else { deduct -= (item.singles||0); item.singles=0; item.cases=Math.max(0,(item.cases||0)-deduct); }
-  recalc(item);
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
-  logActivity('Sold',item.name+' x'+sellQty+' ('+( item.qty+sellQty)+' → '+item.qty+' left)');
-  toast('Sold '+sellQty+' x '+item.name+' ✓');
-  closeSell();
-  updateStats(); renderTable(); renderLowStock(); populateSaleDropdown(); renderRestockList();
-}
-
+// ── SWITCH VIEW ───────────────────────────────────────────────
 function switchView(view,btn){
   var vs=document.querySelectorAll('.view');for(var i=0;i<vs.length;i++) vs[i].classList.remove('active');
   var bs=document.querySelectorAll('.nav-btn');for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
