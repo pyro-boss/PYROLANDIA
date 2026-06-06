@@ -173,6 +173,23 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity 0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .toast.show{opacity:1}
 
+/* QUICK SCAN */
+.qs-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:flex;align-items:flex-start;justify-content:center;padding-top:80px;backdrop-filter:blur(4px)}
+.qs-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
+.qs-input{width:100%;padding:16px 20px;border:none;background:transparent;color:var(--text);font-size:18px;font-family:'DM Sans',sans-serif;outline:none}
+.qs-input::placeholder{color:var(--muted)}
+.qs-results{max-height:360px;overflow-y:auto}
+.qs-result{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);cursor:default;transition:background 0.1s}
+.qs-result:hover{background:var(--surface2)}
+.qs-result-name{flex:1;font-weight:500;font-size:14px}
+.qs-result-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.qs-result-qty{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);min-width:32px;text-align:center}
+.qs-btn{background:none;border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:8px;font-size:20px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;flex-shrink:0;line-height:1}
+.qs-btn:hover{border-color:var(--accent);color:var(--accent)}
+.qs-btn.minus:hover{border-color:var(--red);color:var(--red)}
+.qs-btn.sell{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:var(--green);font-size:12px;width:auto;padding:0 10px}
+.qs-empty{padding:2rem;text-align:center;color:var(--muted);font-size:13px}
+.qs-hint{padding:8px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);display:flex;justify-content:space-between}
 .ham-item{display:block;width:100%;padding:11px 16px;border:none;background:none;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;transition:background 0.15s;border-bottom:1px solid var(--border)}
 .ham-item:last-child{border-bottom:none}
 .ham-item:hover{background:var(--surface2);color:var(--accent)}
@@ -209,6 +226,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
 <!-- APP -->
 <div id="appShell">
+  <div id="offlineBanner" style="display:none;background:var(--red);color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600;letter-spacing:0.5px;position:sticky;top:0;z-index:200">
+    ⚠️ You are offline — changes may not be saving. Reconnect and reload.
+  </div>
   <div class="topbar">
     <div class="topbar-left">
       <div class="logo">🎆 PYROLANDIA STAFF</div>
@@ -216,6 +236,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="topbar-right">
       <span class="sync-status" id="syncStatus"></span>
+      <span id="lastSyncTime" style="font-size:11px;color:var(--muted)"></span>
+      <button class="topbar-btn" onclick="openQS()" style="border-color:rgba(255,77,0,0.4);color:var(--accent)">🔍 Quick Find</button>
       <button class="topbar-btn" onclick="loadAllTabs()">↻ Reload</button>
       <button class="topbar-btn" onclick="window.print()">🖨 Print</button>
       <button class="topbar-btn logout" onclick="doLogout()">Sign Out</button>
@@ -472,6 +494,20 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   </div>
 </div>
 
+<!-- QUICK SCAN -->
+<div id="qsOverlay" style="display:none" onclick="if(event.target===this)closeQS()">
+  <div class="qs-box" onclick="event.stopPropagation()">
+    <input class="qs-input" id="qsInput" placeholder="🔍 Search any product..." oninput="renderQS()" autocomplete="off">
+    <div class="qs-results" id="qsResults">
+      <div class="qs-empty">Start typing to find a product</div>
+    </div>
+    <div class="qs-hint">
+      <span>+ / − to adjust stock &nbsp;·&nbsp; 🛒 to sell</span>
+      <span>Esc to close</span>
+    </div>
+  </div>
+</div>
+
 <!-- SELL MODAL -->
 <div class="qe-overlay" id="sellOverlay" style="display:none" onclick="if(event.target===this)closeSell()">
   <div class="qe-modal">
@@ -595,6 +631,11 @@ function doLogin(){
     loadDealsFromDB();
     loadActivityLog();
     loadAllTabs();
+    // Auto-reload sheet every 5 minutes to stay in sync
+    if(window._autoReload) clearInterval(window._autoReload);
+    window._autoReload = setInterval(function(){
+      if(currentUser) loadAllTabs();
+    }, 5*60*1000);
     renderStaffList();
   } else {
     document.getElementById('loginErr').style.display='block';
@@ -744,7 +785,28 @@ function sendWrite(payload){fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:
 
 // ── UTILS ─────────────────────────────────────────────────────
 function toast(msg,dur){dur=dur||2600;var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},dur);}
-function setSyncStatus(type,msg){var el=document.getElementById('syncStatus');el.textContent=msg;el.className='sync-status'+(type==='ok'?' ok':type==='err'?' err':'');}
+function setSyncStatus(type,msg){
+  var el=document.getElementById('syncStatus');
+  el.textContent=msg;
+  el.className='sync-status'+(type==='ok'?' ok':type==='err'?' err':'');
+  if(type==='ok'){
+    window._lastSyncAt=Date.now();
+    updateLastSyncLabel();
+    if(window._syncTick) clearInterval(window._syncTick);
+    window._syncTick=setInterval(updateLastSyncLabel,30000);
+  }
+}
+
+function updateLastSyncLabel(){
+  var el=document.getElementById('lastSyncTime');
+  if(!el||!window._lastSyncAt) return;
+  var secs=Math.floor((Date.now()-window._lastSyncAt)/1000);
+  var label='';
+  if(secs<60) label='synced just now';
+  else if(secs<120) label='synced 1 min ago';
+  else label='synced '+Math.floor(secs/60)+' min ago';
+  el.textContent=label;
+}
 function recalc(item){item.qty=(item.cases||0)+(item.singles||0);item.status=item.qty===0?'OUT':item.qty<=2?'LOW':'IN';}
 function tl(item){return TABS[item.tab]?TABS[item.tab].short:'';}
 function fi(id){for(var i=0;i<inventory.length;i++){if(inventory[i].id===id)return inventory[i];}return null;}
@@ -963,6 +1025,10 @@ function renderCardGrid(rows){
         '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">'+item.qty+'</span>'+
       '</div>'+
       (deal?'<div class="inv-card-deal">🔥 '+deal.qty+' for $'+deal.price+'</div>':'')+
+      '<button onclick="openSellModal('+item.id+')" '+
+        'style="width:100%;margin-top:8px;padding:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        '🛒 Sell'+
+      '</button>'+
     '</div>';
   }
   grid.innerHTML=h;
@@ -1631,6 +1697,87 @@ function renderPricingTable(){ renderPricingCards(); }
 
 
 // ── SWITCH VIEW ───────────────────────────────────────────────
+// ── QUICK SCAN ───────────────────────────────────────────────
+function openQS(){
+  // Make overlay visible
+  var el=document.getElementById('qsOverlay');
+  el.style.display='flex';
+  el.className='qs-overlay';
+  document.getElementById('qsInput').value='';
+  document.getElementById('qsResults').innerHTML='<div class="qs-empty">Start typing to find a product</div>';
+  setTimeout(function(){document.getElementById('qsInput').focus();},50);
+}
+
+function closeQS(){
+  document.getElementById('qsOverlay').style.display='none';
+}
+
+function renderQS(){
+  var q=(document.getElementById('qsInput').value||'').toLowerCase().trim();
+  var el=document.getElementById('qsResults');
+  if(!q){el.innerHTML='<div class="qs-empty">Start typing to find a product</div>';return;}
+  var matches=[];
+  for(var i=0;i<inventory.length;i++){
+    if(inventory[i].name.toLowerCase().indexOf(q)>=0) matches.push(inventory[i]);
+  }
+  matches.sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(!matches.length){el.innerHTML='<div class="qs-empty">No products found</div>';return;}
+  var h='';
+  for(var r=0;r<Math.min(matches.length,8);r++){
+    var item=matches[r];
+    var statusColor=item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)';
+    h+='<div class="qs-result">'+
+      '<div style="flex:1">'+
+        '<div class="qs-result-name">'+item.name+'</div>'+
+        '<div class="qs-result-meta">'+tl(item)+(item.price?' &nbsp;·&nbsp; $'+item.price:'')+'&nbsp;·&nbsp;<span style="color:'+statusColor+'">'+item.status+'</span></div>'+
+      '</div>'+
+      '<div class="qs-result-qty" id="qsqty_'+item.id+'">'+item.qty+'</div>'+
+      '<button class="qs-btn minus" onclick="qsAdjust('+item.id+',-1)">&#8722;</button>'+
+      '<button class="qs-btn" onclick="qsAdjust('+item.id+',1)">&#43;</button>'+
+      '<button class="qs-btn sell" onclick="openSellModal('+item.id+');closeQS()">🛒 Sell</button>'+
+    '</div>';
+  }
+  if(matches.length>8) h+='<div class="qs-empty" style="padding:8px 16px;font-size:11px">...and '+(matches.length-8)+' more — keep typing to narrow down</div>';
+  el.innerHTML=h;
+}
+
+function qsAdjust(id,delta){
+  var item=fi(id);if(!item) return;
+  if(delta<0&&item.qty<=0){toast('No stock to remove!');return;}
+  if(delta>0) item.cases=(item.cases||0)+1;
+  else{
+    if((item.singles||0)>0) item.singles--;
+    else item.cases=Math.max(0,(item.cases||0)-1);
+  }
+  recalc(item);
+  var qel=document.getElementById('qsqty_'+id);
+  if(qel){
+    qel.textContent=item.qty;
+    qel.style.color=delta>0?'var(--green)':'var(--red)';
+    setTimeout(function(){if(qel)qel.style.color='var(--accent)';},600);
+  }
+  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  logActivity(delta>0?'Added stock':'Removed stock',item.name+(delta>0?' +1':' -1')+' (total: '+item.qty+')');
+  updateStats();
+  // Refresh main card if visible
+  var cEl=document.getElementById('cc_'+id);
+  var sEl=document.getElementById('cs_'+id);
+  var tEl=document.getElementById('ct_'+id);
+  var card=document.getElementById('card_'+id);
+  if(cEl) cEl.textContent=item.cases||0;
+  if(sEl) sEl.textContent=item.singles||0;
+  if(tEl) tEl.textContent=item.qty;
+  if(card) card.className='inv-card '+item.status;
+}
+
+// Keyboard shortcut — press / or Ctrl+K to open quick scan
+document.addEventListener('keydown',function(e){
+  if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key==='k'))&&currentUser){
+    e.preventDefault();openQS();
+  }
+  if(e.key==='Escape') closeQS();
+});
+
 // ── HAMBURGER MENU ───────────────────────────────────────────
 function toggleHamburger(e){
   e.stopPropagation();
@@ -1681,6 +1828,21 @@ function switchView(view,btn){
 }
 
 document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+
+// ── OFFLINE DETECTION ────────────────────────────────────────
+function updateOnlineStatus(){
+  var banner=document.getElementById('offlineBanner');
+  if(!banner) return;
+  if(!navigator.onLine){
+    banner.style.display='block';
+    setSyncStatus('err','Offline');
+  } else {
+    banner.style.display='none';
+  }
+}
+window.addEventListener('online',  function(){ updateOnlineStatus(); toast('Back online ✓ Reloading...'); if(currentUser) loadAllTabs(); });
+window.addEventListener('offline', function(){ updateOnlineStatus(); });
+updateOnlineStatus();
 </script>
 </body>
 </html>
