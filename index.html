@@ -510,7 +510,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <div class="toast" id="toast"></div>
 <script>
 var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
-var SCRIPT_URL='https://script.google.com/macros/s/AKfycbz20WfNlZMLAwdHF950TKr2FMQ8BocCaIP0Lz1HKiSxBm7Nj1iIxiEnCw-aRN2Xh28J/exec';
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
 var DEFAULT_USERS={
   'admin':{pass:'pyro2024!',role:'Admin'},
   'pyrohead':{pass:'staff1pass',role:'Staff'},
@@ -1020,19 +1020,21 @@ function renderCardGrid(rows){
         '</div>'+
       '</div>'+
 
-      // Total + Packed
+      // Total + Packed (PKD hidden for 1/1 and 2/1 tabs)
       '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 4px">'+
         '<span style="font-size:9px;color:var(--muted)">Total</span>'+
         '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent);margin-right:6px">'+item.qty+'</span>'+
-        '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
-        '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-          'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
-          buildPackedOptions(item.packed)+
-        '</select>'+
-        '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
-          'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
-          'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
-          'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'+
+        (item.tab>1?
+          '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
+          '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
+            'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
+            buildPackedOptions(item.packed)+
+          '</select>'+
+          '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
+            'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
+            'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
+            'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'
+        :'')+
       '</div>'+
 
       // Deal badge+delete OR deal picker
