@@ -772,7 +772,7 @@ function parseTab(csv,tabIndex){
     else if(rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT') status=rawStatus;
     else continue;
 
-    items.push({id:nextId++,tab:tabIndex,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty});
+    items.push({id:nextId++,tab:tabIndex,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty,lastUpdated:null});
   }
   return items;
 }
@@ -798,6 +798,7 @@ function loadAllTabs(){
         if(!seen[key]){seen[key]=true;inventory.push(itm);}
       }
     }
+    loadStamps();
     setSyncStatus('ok','Loaded '+inventory.length+' products \u2713');
     updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();populateDealDropdown();
     toast('Loaded '+inventory.length+' products \u2713');
@@ -995,6 +996,44 @@ function handleModalPackedSelect(sel){
   }
 }
 
+// ── LAST UPDATED TRACKING ────────────────────────────────────
+function stampLastUpdated(item){
+  var now = new Date();
+  item.lastUpdated = now.toISOString();
+  try{
+    var stamps = JSON.parse(localStorage.getItem('pyro_stamps')||'{}');
+    stamps[item.name.toUpperCase()] = now.toISOString();
+    localStorage.setItem('pyro_stamps', JSON.stringify(stamps));
+  }catch(e){}
+}
+
+function loadStamps(){
+  try{
+    var stamps = JSON.parse(localStorage.getItem('pyro_stamps')||'{}');
+    for(var i=0;i<inventory.length;i++){
+      var s = stamps[inventory[i].name.toUpperCase()];
+      if(s) inventory[i].lastUpdated = s;
+    }
+  }catch(e){}
+}
+
+function formatStamp(iso){
+  if(!iso) return '';
+  var d = new Date(iso);
+  var now = new Date();
+  var diff = Math.floor((now-d)/1000);
+  if(diff < 60)   return 'just now';
+  if(diff < 3600) return Math.floor(diff/60)+'m ago';
+  if(diff < 86400)return Math.floor(diff/3600)+'h ago';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function refreshCardTimestamp(id){
+  var item=fi(id);if(!item) return;
+  var el=document.getElementById('cts_'+id);
+  if(el) el.textContent=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
+}
+
 function saveCardPriceEl(el){
   var id=parseInt(el.getAttribute('data-id'));
   var field=el.getAttribute('data-field');
@@ -1004,10 +1043,13 @@ function saveCardPriceEl(el){
 function saveCardPrice(id,val,field){
   var item=fi(id);if(!item) return;
   if(field==='casePrice') item.casePrice=String(val).trim();
+  else if(field==='packed') item.packed=String(val).trim();
   else item.price=String(val).trim();
+  stampLastUpdated(item);
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
-  logActivity('Price updated',item.name+(field==='casePrice'?' case:$'+item.casePrice:' $'+item.price));
+  logActivity('Price updated',item.name+(field==='casePrice'?' case:$'+item.casePrice:field==='packed'?' packed:'+item.packed:' $'+item.price));
   toast(item.name+' saved ✓');
+  refreshCardTimestamp(id);
 }
 
 function adjustCount(id,field,delta,event){
@@ -1042,8 +1084,10 @@ function adjustCount(id,field,delta,event){
     strip.textContent=item.status==='LOW'?'\u26a0\ufe0f LOW STOCK':item.status==='OUT'?'\ud83d\udeab OUT OF STOCK':'';
     strip.style.display=(item.status==='LOW'||item.status==='OUT')?'block':'none';
   }
+  stampLastUpdated(item);
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
   logActivity(delta>0?'Added stock':'Removed stock',item.name+' '+field+(delta>0?' +':' ')+delta+' (total: '+item.qty+')');
+  refreshCardTimestamp(id);
   updateStats();
 }
 
@@ -1107,7 +1151,11 @@ function renderCardGrid(rows){
         '<span style="font-size:10px;color:var(--muted)">Total</span>'+
         '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent)">'+item.qty+'</span>'+
       '</div>'+
+      '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:4px;text-align:right">'+
+        (item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'')+
+      '</div>'+
       (deal?'<div class="inv-card-deal">🔥 '+deal.qty+' for $'+deal.price+'</div>':'')+
+
       '<button onclick="openSellModal('+item.id+')" '+
         'style="width:100%;margin-top:8px;padding:6px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
         '🛒 Sell'+
@@ -1173,6 +1221,7 @@ function saveQE(){
   item.cases=parseInt(document.getElementById('qeCases').value)||0;
   item.singles=parseInt(document.getElementById('qeSingles').value)||0;
   recalc(item);
+  stampLastUpdated(item);
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
   logActivity('Quick Edit',item.name+' qty:'+(oldQty!==item.qty?oldQty+' → '+item.qty:item.qty)+' price:'+(item.price?'$'+item.price:'—'));
   closeQE();
@@ -1759,6 +1808,9 @@ function renderPricingCards(){
           'oninput="markPricingDirty('+item.id+')" '+
           'style="flex:1;padding:4px 7px;border:1px solid '+(missingPacked?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:DM Sans,sans-serif">'+
       '</div>'+
+      '<div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:6px">'+
+        (item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'')+
+      '</div>'+
       '<button onclick="saveSinglePrice('+item.id+')" '+
         'style="width:100%;padding:5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
         'Save ✓'+
@@ -1773,6 +1825,7 @@ function markPricingDirty(id){pricingDirty[id]=true;}
 
 function saveSinglePrice(id){
   var item=fi(id);if(!item) return;
+  stampLastUpdated(item);
   var priceEl=document.getElementById('pp_'+id);
   var packedEl=document.getElementById('ppk_'+id);
   var cpEl=document.getElementById('pcp_'+id);
