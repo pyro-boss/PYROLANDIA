@@ -355,7 +355,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
           <button class="btn primary" onclick="addDeal()" style="width:100%">Add Deal</button>
         </div></div>
         <div><div class="panel">
-          <div class="panel-title">Active Deals</div>
+          <div class="panel-title">
+            <span>Active Deals</span>
+            <select id="dealsViewTab" onchange="renderDealsList()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:'DM Sans',sans-serif">
+              <option value="-1">All Types</option>
+            </select>
+          </div>
           <div id="dealsList"><div class="empty">No active deals yet.</div></div>
         </div></div>
       </div>
@@ -527,29 +532,52 @@ var pricingDirty={};
 function getUsers(){try{var s=localStorage.getItem('pyrolandia_users');return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_USERS));}catch(e){return JSON.parse(JSON.stringify(DEFAULT_USERS));}}
 function saveUsers(u){try{localStorage.setItem('pyrolandia_users',JSON.stringify(u));}catch(e){}}
 
+function startSession(u){
+  var users=getUsers();
+  currentUser=u;
+  document.getElementById('currentUserLabel').textContent=u+' ('+users[u].role+')';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='block';
+  document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  var today=new Date(),prior=new Date(today);prior.setDate(prior.getDate()-30);
+  document.getElementById('reportTo').value=today.toISOString().split('T')[0];
+  document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
+  loadDealsFromDB();loadActivityLog();
+  loadAllTabs();renderStaffList();
+  if(window._autoReload) clearInterval(window._autoReload);
+  window._autoReload=setInterval(function(){if(currentUser)loadAllTabs();},5*60*1000);
+}
+
 function doLogin(){
   var u=document.getElementById('loginUser').value.trim().toLowerCase();
   var p=document.getElementById('loginPass').value;
   var users=getUsers();
   if(users[u]&&users[u].pass===p){
-    currentUser=u;
-    document.getElementById('currentUserLabel').textContent=u+' ('+users[u].role+')';
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('appShell').style.display='block';
-    document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-    var today=new Date(),prior=new Date(today);prior.setDate(prior.getDate()-30);
-    document.getElementById('reportTo').value=today.toISOString().split('T')[0];
-    document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
-    loadDealsFromDB();loadActivityLog();
-    loadAllTabs();renderStaffList();
-    if(window._autoReload) clearInterval(window._autoReload);
-    window._autoReload=setInterval(function(){if(currentUser)loadAllTabs();},5*60*1000);
+    // Persist session to localStorage
+    try{localStorage.setItem('pyrolandia_session',JSON.stringify({user:u,ts:Date.now()}));}catch(e){}
+    startSession(u);
   } else {
     document.getElementById('loginErr').style.display='block';
   }
 }
+
+function restoreSession(){
+  try{
+    var s=localStorage.getItem('pyrolandia_session');
+    if(!s) return false;
+    var sess=JSON.parse(s);
+    // Session valid for 30 days
+    if(!sess||!sess.user||Date.now()-sess.ts>30*24*60*60*1000) return false;
+    var users=getUsers();
+    if(!users[sess.user]) return false;
+    startSession(sess.user);
+    return true;
+  }catch(e){return false;}
+}
 function doLogout(){
   currentUser=null;inventory=[];saleItems=[];salesLog=[];activityLog=[];restockLog=[];
+  // Clear persisted session
+  try{localStorage.removeItem('pyrolandia_session');}catch(e){}
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('appShell').style.display='none';
   document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';
@@ -877,7 +905,8 @@ function adjustCount(id,field,delta,event){
   if(flashEl){flashEl.style.color=delta>0?'var(--green)':'var(--red)';flashEl.style.transition='color 0.4s';setTimeout(function(){flashEl.style.color='';},600);}
   if(tEl){tEl.style.color='var(--green)';setTimeout(function(){tEl.style.color='var(--accent)';},600);}
   stampLastUpdated(item);
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  // DELTA WRITE: send delta instead of absolute so concurrent edits don't clobber each other
+  sendWrite({action:'adjustItem',item:{name:item.name,tab:item.tab},field:field,delta:delta});
   logActivity(delta>0?'Added stock':'Removed stock',item.name+' '+field+(delta>0?' +':' ')+delta+' (total: '+item.qty+')');
   refreshCardTimestamp(id);updateStats();
 }
@@ -892,18 +921,23 @@ function renderCardGrid(rows){
     var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
     var statusStrip=item.status==='LOW'?'LOW STOCK':item.status==='OUT'?'OUT OF STOCK':'';
     var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
+
     h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">'+
       '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
-      // Name + tab + edit button
+
+      // Name + tab label inline + edit button
       '<div class="inv-card-top">'+
-        '<div class="inv-card-name">'+item.name+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="inv-card-name">'+item.name+'</div>'+
+          '<div style="font-size:10px;color:var(--muted)">'+tabLabel+'</div>'+
+        '</div>'+
         '<button class="inv-card-edit" onclick="openQE('+item.id+')">Edit</button>'+
       '</div>'+
-      '<div style="font-size:10px;color:var(--muted);margin-bottom:5px">'+tabLabel+'</div>'+
+
       // Price + Case Price on same row
       '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:4px 6px">'+
         '<span style="font-size:10px;color:var(--muted)">$</span>'+
-        '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="Price" min="0" '+
+        '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" '+
           'data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" '+
           'style="width:46px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
         '<span style="font-size:9px;color:var(--border);margin:0 3px">|</span>'+
@@ -912,21 +946,10 @@ function renderCardGrid(rows){
           'data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" '+
           'style="width:46px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
       '</div>'+
-      // Packed dropdown
-      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">'+
-        '<span style="font-size:10px;color:var(--muted);width:24px">PKD</span>'+
-        '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-          'style="flex:1;padding:2px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif">'+
-          buildPackedOptions(item.packed)+
-        '</select>'+
-        '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
-          'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:50px;padding:2px 4px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif" '+
-          'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
-          'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'+
-      '</div>'+
-      // Cases / Singles / Total
-      '<div style="display:flex;gap:3px;margin-bottom:4px">'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
+
+      // Cases + Singles counts (no labels, just the numbers with +/-)
+      '<div style="display:flex;gap:3px;margin-bottom:3px">'+
+        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:2px 4px;text-align:center">'+
           '<div style="font-size:9px;color:var(--muted)">Cases</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:1px">'+
             '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">-</button>'+
@@ -934,7 +957,7 @@ function renderCardGrid(rows){
             '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">+</button>'+
           '</div>'+
         '</div>'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
+        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:2px 4px;text-align:center">'+
           '<div style="font-size:9px;color:var(--muted)">Singles</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:1px">'+
             '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">-</button>'+
@@ -942,17 +965,47 @@ function renderCardGrid(rows){
             '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">+</button>'+
           '</div>'+
         '</div>'+
-        '<div style="flex:1;background:rgba(255,77,0,0.08);border:1px solid rgba(255,77,0,0.2);border-radius:6px;padding:3px 4px;text-align:center">'+
-          '<div style="font-size:9px;color:var(--muted)">Total</div>'+
-          '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--accent)">'+item.qty+'</span>'+
-        '</div>'+
       '</div>'+
-      (deal?'<div class="inv-card-deal">DEAL: '+deal.qty+' for $'+deal.price+'</div>':'')+
+
+      // Total + Packed on same compact row
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 4px">'+
+        '<span style="font-size:9px;color:var(--muted)">Total</span>'+
+        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent);margin-right:6px">'+item.qty+'</span>'+
+        '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
+        '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
+          'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
+          buildPackedOptions(item.packed)+
+        '</select>'+
+        '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
+          'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
+          'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
+          'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'+
+      '</div>'+
+
+      // Deal badge OR deal picker
+      (deal?
+        '<div style="background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--accent);font-weight:700;margin-bottom:3px">'+
+          deal.qty+' for $'+deal.price+
+        '</div>'
+      :
+        '<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">'+
+          '<select id="dq_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+            buildQtyOptions()+
+          '</select>'+
+          '<span style="font-size:9px;color:var(--muted)">for $</span>'+
+          '<select id="dp_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+            buildPriceOptions()+
+          '</select>'+
+          '<button onclick="addDealFromCard('+item.id+')" style="padding:2px 5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap">+Deal</button>'+
+        '</div>'
+      )+
+
+      // Sell button (compact) + timestamp
       '<button onclick="openSellModal('+item.id+')" '+
-        'style="width:100%;margin-top:6px;padding:5px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        'style="width:100%;padding:3px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
         'Sell'+
       '</button>'+
-      '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:3px;text-align:right">'+stamp+'</div>'+
+      '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">'+stamp+'</div>'+
     '</div>';
   }
   grid.innerHTML=h;
@@ -1332,6 +1385,33 @@ function generateReport(){
   output.innerHTML=html;
 }
 
+// ── CARD DEAL HELPERS ────────────────────────────────────────
+function buildQtyOptions(){
+  var opts='<option value="">Qty</option>';
+  for(var i=2;i<=20;i++) opts+='<option value="'+i+'">'+i+'</option>';
+  return opts;
+}
+
+function buildPriceOptions(){
+  var prices=[20,25,50,75,100,150,200,300,400,500];
+  var opts='<option value="">Price</option>';
+  for(var i=0;i<prices.length;i++) opts+='<option value="'+prices[i]+'">$'+prices[i]+'</option>';
+  return opts;
+}
+
+function addDealFromCard(id){
+  var item=fi(id);if(!item) return;
+  var qty=parseInt(document.getElementById('dq_'+id).value);
+  var price=parseFloat(document.getElementById('dp_'+id).value);
+  if(!qty||!price){toast('Pick a qty and price first');return;}
+  deals.push({id:dealNextId++,productId:id,productName:item.name,tab:item.tab,qty:qty,price:price,note:''});
+  saveDealsToDB();
+  logActivity('Added deal',item.name+': '+qty+' for $'+price);
+  toast('Deal added: '+qty+' for $'+price);
+  renderTable(); // refresh cards to show deal badge
+  if(document.getElementById('view-deals').classList.contains('active')) renderDealsList();
+}
+
 function loadDealsFromDB(){try{var s=localStorage.getItem('pyrolandia_deals');if(s){deals=JSON.parse(s);dealNextId=deals.length?Math.max.apply(null,deals.map(function(d){return d.id;}))+1:0;}}catch(e){}}
 function saveDealsToDB(){try{localStorage.setItem('pyrolandia_deals',JSON.stringify(deals));}catch(e){}}
 function getBestDeal(productName){
@@ -1382,8 +1462,16 @@ function removeDeal(id){
   logActivity('Removed deal',deal.productName);toast('Deal removed');
 }
 function renderDealsList(){
-  var el=document.getElementById('dealsList');if(!deals.length){el.innerHTML='<div class="empty">No active deals yet.</div>';return;}
-  var grouped={};for(var i=0;i<deals.length;i++){var d=deals[i];if(!grouped[d.productName]) grouped[d.productName]={deals:[]};grouped[d.productName].deals.push(d);}
+  var el=document.getElementById('dealsList');
+  // Build tab filter options
+  var tabSel=document.getElementById('dealsViewTab');
+  if(tabSel&&tabSel.options.length<=1){
+    for(var t=0;t<TABS.length;t++) tabSel.innerHTML+='<option value="'+t+'">'+TABS[t].short+'</option>';
+  }
+  var tabF=tabSel?parseInt(tabSel.value):-1;
+  var filtered=deals.filter(function(d){return tabF<0||d.tab===tabF;});
+  if(!filtered.length){el.innerHTML='<div class="empty">No deals for this filter.</div>';return;}
+  var grouped={};for(var i=0;i<filtered.length;i++){var d=filtered[i];if(!grouped[d.productName]) grouped[d.productName]={deals:[]};grouped[d.productName].deals.push(d);}
   var h='',keys=Object.keys(grouped).sort();
   for(var k=0;k<keys.length;k++){
     var g=grouped[keys[k]];
@@ -1525,7 +1613,8 @@ function qsAdjust(id,delta){
   var qel=document.getElementById('qsqty_'+id);
   if(qel){qel.textContent=item.qty;qel.style.color=delta>0?'var(--green)':'var(--red)';setTimeout(function(){if(qel)qel.style.color='var(--accent)';},600);}
   stampLastUpdated(item);
-  sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+  // Delta write for concurrent safety
+  sendWrite({action:'adjustItem',item:{name:item.name,tab:item.tab},field:'singles',delta:delta});
   logActivity(delta>0?'Added stock':'Removed stock',item.name+(delta>0?' +1':' -1')+' (total: '+item.qty+')');
   updateStats();
   var cEl=document.getElementById('cc_'+id);var sEl=document.getElementById('cs_'+id);var tEl=document.getElementById('ct_'+id);var card=document.getElementById('card_'+id);
@@ -1570,6 +1659,9 @@ function updateOnlineStatus(){
 window.addEventListener('online',function(){updateOnlineStatus();toast('Back online - Reloading...');if(currentUser) loadAllTabs();});
 window.addEventListener('offline',function(){updateOnlineStatus();});
 updateOnlineStatus();
+
+// Restore session on page load if still valid
+restoreSession();
 
 document.addEventListener('keydown',function(e){
   if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key==='k'))&&currentUser){e.preventDefault();openQS();}
