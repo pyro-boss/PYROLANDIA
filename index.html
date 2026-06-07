@@ -442,7 +442,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="qe-grid">
       <div class="qe-field"><label>Price ($)</label><input type="number" id="qePrice" min="0" placeholder="--"></div>
       <div class="qe-field"><label>Case Price ($)</label><input type="number" id="qeCasePrice" min="0" placeholder="--"></div>
-      <div class="qe-field" style="grid-column:1/-1"><label>Packed</label>
+      <div class="qe-field" id="qePackedRow" style="grid-column:1/-1"><label>Packed</label>
         <select id="qePackedSel" onchange="handleQEPackedSelect(this)" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
           <option value="">-- Not set --</option>
           <option value="1/1">1/1</option><option value="2/1">2/1</option><option value="3/1">3/1</option>
@@ -505,7 +505,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 <div class="toast" id="toast"></div>
 <script>
 var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
-var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbz20WfNlZMLAwdHF950TKr2FMQ8BocCaIP0Lz1HKiSxBm7Nj1iIxiEnCw-aRN2Xh28J/exec';
 var DEFAULT_USERS={
   'admin':{pass:'pyro2024!',role:'Admin'},
   'pyrohead':{pass:'staff1pass',role:'Staff'},
@@ -967,25 +967,33 @@ function renderCardGrid(rows){
         '</div>'+
       '</div>'+
 
-      // Total + Packed on same compact row
+      // Total + Packed on same compact row (hide PKD for 1/1 and 2/1 tabs)
       '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 4px">'+
         '<span style="font-size:9px;color:var(--muted)">Total</span>'+
         '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent);margin-right:6px">'+item.qty+'</span>'+
-        '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
-        '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-          'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
-          buildPackedOptions(item.packed)+
-        '</select>'+
-        '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
-          'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
-          'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
-          'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'+
+        (item.tab!==0&&item.tab!==1?
+          '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
+          '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
+            'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
+            buildPackedOptions(item.packed)+
+          '</select>'+
+          '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
+            'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
+            'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
+            'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'
+        :'')+
       '</div>'+
 
       // Deal badge OR deal picker
       (deal?
-        '<div style="background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--accent);font-weight:700;margin-bottom:3px">'+
-          deal.qty+' for $'+deal.price+
+        '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'+
+          '<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--accent);font-weight:700">'+
+            deal.qty+' for $'+deal.price+
+          '</div>'+
+          '<button onclick="removeDeal('+deal.id+')" title="Remove deal" '+
+            'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:2px 6px;font-size:11px;cursor:pointer;flex-shrink:0">'+
+            'X'+
+          '</button>'+
         '</div>'
       :
         '<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">'+
@@ -1075,6 +1083,9 @@ function openQE(id){
   document.getElementById('qeCasePrice').value=item.casePrice||'';
   var packedSel=document.getElementById('qePackedSel');
   var packedInp=document.getElementById('qePacked');
+  var packedRow=document.getElementById('qePackedRow');
+  // Hide packed for 1/1 and 2/1 tabs
+  if(packedRow) packedRow.style.display=(item.tab===0||item.tab===1)?'none':'';
   if(item.packed&&PACKED_OPTIONS.indexOf(item.packed)===-1){packedSel.value='Custom';packedInp.style.display='block';packedInp.value=item.packed;}
   else{packedSel.value=item.packed||'';packedInp.style.display='none';packedInp.value=item.packed||'';}
   document.getElementById('qeCases').value=item.cases||0;
@@ -1507,7 +1518,9 @@ function renderPricingCards(){
     var x=inventory[i];
     if(tabF>=0&&x.tab!==tabF) continue;
     if(search&&x.name.toLowerCase().indexOf(search)===-1) continue;
-    var mp=!x.price,mpk=!x.packed,mcp=!x.casePrice;
+    var mp=!x.price,mcp=!x.casePrice;
+    // 1/1 and 2/1 don't need packed info
+    var mpk=!x.packed&&x.tab!==0&&x.tab!==1;
     if(filter==='incomplete'&&!mp&&!mpk&&!mcp) continue;
     if(filter==='noprice'&&!mp) continue;
     if(filter==='nopacked'&&!mpk) continue;
@@ -1539,12 +1552,14 @@ function renderPricingCards(){
         '<span style="font-size:10px;color:var(--muted)">C$</span>'+
         '<input type="number" min="0" placeholder="--" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="width:44px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
       '</div>'+
-      '<div style="display:flex;align-items:center;gap:3px;margin-bottom:8px">'+
-        '<span style="font-size:10px;color:var(--muted);width:24px">PKD</span>'+
-        '<select id="ppk_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="flex:1;padding:3px 4px;border:1px solid '+(mpk?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif">'+
-          buildPackedOptions(item.packed)+
-        '</select>'+
-      '</div>'+
+      (item.tab!==0&&item.tab!==1?
+        '<div style="display:flex;align-items:center;gap:3px;margin-bottom:8px">'+
+          '<span style="font-size:10px;color:var(--muted);width:24px">PKD</span>'+
+          '<select id="ppk_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="flex:1;padding:3px 4px;border:1px solid '+(mpk?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif">'+
+            buildPackedOptions(item.packed)+
+          '</select>'+
+        '</div>'
+      :'')+
       '<div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:5px">'+stamp+'</div>'+
       '<button onclick="saveSinglePrice('+item.id+')" style="width:100%;padding:5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Save</button>'+
     '</div>';
