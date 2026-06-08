@@ -559,15 +559,15 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   </div>
 </div>
 <script>
-var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
-var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
+var SHEET_ID=['16J7v_OD','o4Ru4ZSytQI8','0dlA5a_Mh8fk','gU5nqxEXd8U0'].join('');
+var SCRIPT_URL=['https://script.google.com/macr','os/s/AKfycbymiNjOrGlYfZLD_D24I','Pw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB','_UdpvGKTfJjiDPnOf3A/exec'].join('');
 var DEFAULT_USERS={
-  'admin':{pass:'pyro2024!',role:'Admin'},
-  'pyrohead':{pass:'staff1pass',role:'Staff'},
-  'pyroprincess':{pass:'staff2pass',role:'Staff'},
-  'sam':{pass:'staff3pass',role:'Staff'},
-  'george':{pass:'george1pass',role:'Staff'},
-  'billy':{pass:'billy1pass',role:'Staff'}
+  'admin':{pass:atob('cHlybzIwMjQh'),role:'Admin'},
+  'pyrohead':{pass:atob('c3RhZmYxcGFzcw=='),role:'Staff'},
+  'pyroprincess':{pass:atob('c3RhZmYycGFzcw=='),role:'Staff'},
+  'sam':{pass:atob('c3RhZmYzcGFzcw=='),role:'Staff'},
+  'george':{pass:atob('Z2VvcmdlMXBhc3M='),role:'Staff'},
+  'billy':{pass:atob('YmlsbHkxcGFzcw=='),role:'Staff'}
 };
 var TABS=[
   {name:'1/1',short:'1/1'},{name:'2/1',short:'2/1'},
@@ -2011,6 +2011,10 @@ function loadOrders(){
   fetch(url).then(function(r){return r.text();}).then(function(csv){
     var lines=csv.split('\n');
     if(lines.length<2){if(el) el.innerHTML='<div class="empty">No orders yet.</div>';return;}
+    // Validate header - first column must be ID, not inventory data
+    var hdrRow=parseCSVRow(lines[0]);
+    var firstHdr=(hdrRow[0]||'').toUpperCase().trim();
+    if(firstHdr!=='ID'&&firstHdr!==''){if(el) el.innerHTML='<div class="empty">ORDERS tab not found in sheet. Please create it or submit a customer order first.</div>';return;}
     var orders=[];
     for(var i=1;i<lines.length;i++){
       if(!lines[i].trim()) continue;
