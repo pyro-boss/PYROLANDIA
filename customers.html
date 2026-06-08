@@ -184,6 +184,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     </button>
   </div>
   <div class="tab-filters" id="tabFilters"></div>
+  <div class="tab-filters" id="priceFilters">
+    <button class="tab-f active" onclick="setPriceFilter('',this)">Any Price</button>
+    <button class="tab-f" onclick="setPriceFilter('u25',this)">Under $25</button>
+    <button class="tab-f" onclick="setPriceFilter('u50',this)">Under $50</button>
+    <button class="tab-f" onclick="setPriceFilter('u250',this)">Under $250</button>
+    <button class="tab-f" onclick="setPriceFilter('25to100',this)">$25-$100</button>
+    <button class="tab-f" onclick="setPriceFilter('100to250',this)">$100-$250</button>
+    <button class="tab-f" onclick="setPriceFilter('o250',this)">Over $250</button>
+  </div>
   <div class="last-updated" id="lastUpdated"></div>
 </div>
 
@@ -193,6 +202,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="loading-state">Loading inventory...</div>
   </div>
 </div>
+
+<!-- FLOATING CART BUTTON (mobile) -->
+<button id="floatCartBtn" onclick="toggleCart()" style="display:none;position:fixed;bottom:20px;right:20px;z-index:500;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(230,57,0,0.4);align-items:center;justify-content:center;flex-direction:column">
+  <span>&#128722;</span>
+  <span id="floatCartCount" style="font-size:10px;font-weight:700;line-height:1">0</span>
+</button>
 
 <!-- CART SIDEBAR -->
 <div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this)toggleCart()">
@@ -249,8 +264,25 @@ var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q
 var TAB_NAMES=['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
 var TAB_LABELS=['1/1 Cakes','2/1 Cakes','500G','200G','Shells','Candles','Rockets','Fountains','Misc'];
 var TAB_ICONS=['&#127874;','&#127874;','&#128165;','&#128165;','&#128012;','&#128369;','&#128640;','&#9971;','&#10024;'];
-var DATA=[],tabFilter=-1,statusFilter='',deals=[];
+var DATA=[],tabFilter=-1,statusFilter='',deals=[],priceFilter='';
 var cart=[],requests=[];
+
+// Restore cart from sessionStorage on page load
+(function(){
+  try{
+    var sc=sessionStorage.getItem('pyro_cart');
+    var sr=sessionStorage.getItem('pyro_requests');
+    if(sc) cart=JSON.parse(sc);
+    if(sr) requests=JSON.parse(sr);
+  }catch(e){}
+})();
+
+function saveCartToSession(){
+  try{
+    sessionStorage.setItem('pyro_cart',JSON.stringify(cart));
+    sessionStorage.setItem('pyro_requests',JSON.stringify(requests));
+  }catch(e){}
+}
 var showingDeals=false;
 
 // ── CSV ───────────────────────────────────────────────────────
@@ -327,7 +359,9 @@ function loadData(){
         if(!seen[k]){seen[k]=true;DATA.push(itm);}
       }
     }
-    document.getElementById('lastUpdated').textContent='Updated: '+new Date().toLocaleTimeString();
+    var inCount=DATA.filter(function(d){return d.s==='IN';}).length;
+  var lowCount=DATA.filter(function(d){return d.s==='LOW';}).length;
+  document.getElementById('lastUpdated').textContent='Showing '+DATA.length+' products ('+inCount+' in stock, '+lowCount+' low) | Updated: '+new Date().toLocaleTimeString();
     buildTabFilters();render();loadDeals();
   });
 }
@@ -401,6 +435,13 @@ function buildTabFilters(){
   document.getElementById('tabFilters').innerHTML=h;
 }
 
+function setPriceFilter(f,btn){
+  priceFilter=f;
+  var bs=document.querySelectorAll('#priceFilters .tab-f');
+  for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
+  btn.classList.add('active');render();
+}
+
 function setTab(t,btn){tabFilter=t;var bs=document.querySelectorAll('.tab-f');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');btn.classList.add('active');render();}
 function setStatus(s,btn){statusFilter=s;var bs=document.querySelectorAll('.filter-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');btn.classList.add('active');render();}
 
@@ -412,14 +453,32 @@ function render(){
     var d=DATA[i];
     if(tabFilter>=0&&d.t!==tabFilter) continue;
     if(statusFilter&&d.s!==statusFilter) continue;
-    if(search&&d.n.toLowerCase().indexOf(search)===-1) continue;
+    // Price filter
+    if(priceFilter){
+      var p=parseFloat(d.p)||0;
+      if(priceFilter==='u25'&&p>=25) continue;
+      else if(priceFilter==='u50'&&p>=50) continue;
+      else if(priceFilter==='u250'&&p>=250) continue;
+      else if(priceFilter==='25to100'&&(p<25||p>100)) continue;
+      else if(priceFilter==='100to250'&&(p<100||p>250)) continue;
+      else if(priceFilter==='o250'&&p<=250) continue;
+    }
+    if(search&&d.n.toLowerCase().replace(/[^a-z0-9 ]/g,'').indexOf(search.toLowerCase().replace(/[^a-z0-9 ]/g,''))===-1) continue;
     rows.push(d);
   }
-  if(sort==='az') rows.sort(function(a,b){return a.n.localeCompare(b.n);});
-  else if(sort==='za') rows.sort(function(a,b){return b.n.localeCompare(a.n);});
-  else if(sort==='status'){var ord={OUT:0,LOW:1,IN:2};rows.sort(function(a,b){return ord[a.s]-ord[b.s]||a.n.localeCompare(b.n);});}
-  else if(sort==='priceasc') rows.sort(function(a,b){return (parseFloat(a.p)||0)-(parseFloat(b.p)||0);});
-  else if(sort==='pricedesc') rows.sort(function(a,b){return (parseFloat(b.p)||0)-(parseFloat(a.p)||0);});
+  // Always push OUT items to bottom regardless of sort
+  function outLast(a,b){return (a.s==='OUT'?1:0)-(b.s==='OUT'?1:0);}
+  if(sort==='az') rows.sort(function(a,b){return outLast(a,b)||a.n.localeCompare(b.n);});
+  else if(sort==='za') rows.sort(function(a,b){return outLast(a,b)||b.n.localeCompare(a.n);});
+  else if(sort==='status'){var ord={OUT:2,LOW:0,IN:1};rows.sort(function(a,b){return ord[a.s]-ord[b.s]||a.n.localeCompare(b.n);});}
+  else if(sort==='priceasc') rows.sort(function(a,b){return outLast(a,b)||(parseFloat(a.p)||0)-(parseFloat(b.p)||0);});
+  else if(sort==='pricedesc') rows.sort(function(a,b){return outLast(a,b)||(parseFloat(b.p)||0)-(parseFloat(a.p)||0);});
+  // Update count display
+  var visIn=rows.filter(function(d){return d.s==='IN';}).length;
+  var visLow=rows.filter(function(d){return d.s==='LOW';}).length;
+  var visOut=rows.filter(function(d){return d.s==='OUT';}).length;
+  var lu=document.getElementById('lastUpdated');
+  if(lu) lu.textContent='Showing '+rows.length+' products ('+visIn+' in, '+visLow+' low, '+visOut+' out) | Updated: '+new Date().toLocaleTimeString();
   var grid=document.getElementById('grid');
   if(!rows.length){grid.innerHTML='<div class="loading-state">No products found.</div>';return;}
   var h='';
@@ -482,6 +541,9 @@ function requestItem(btn){
 function updateCartCount(){
   var total=cart.reduce(function(s,c){return s+c.qty;},0)+requests.length;
   document.getElementById('cartCount').textContent=total;
+  var fc=document.getElementById('floatCartCount');
+  if(fc) fc.textContent=total;
+  saveCartToSession();
 }
 
 function renderCartItems(){
@@ -612,6 +674,16 @@ function shareStore(){
   if(navigator.share){navigator.share({title:'Pyrolandia Fireworks 2026',text:'Check out Pyrolandia fireworks!',url:url}).catch(function(){});}
   else{navigator.clipboard.writeText(url).then(function(){alert('Link copied!');}).catch(function(){prompt('Copy this link:',url);});}
 }
+
+// Show floating cart button on mobile
+function updateFloatBtn(){
+  var btn=document.getElementById('floatCartBtn');
+  if(!btn) return;
+  if(window.innerWidth<=640){btn.style.display='flex';}
+  else{btn.style.display='none';}
+}
+updateFloatBtn();
+window.addEventListener('resize',updateFloatBtn);
 
 loadData();
 setInterval(loadData,3*60*1000);
