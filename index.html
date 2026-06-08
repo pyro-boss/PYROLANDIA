@@ -226,7 +226,6 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <span id="lastSyncTime" style="font-size:10px;color:var(--muted)"></span>
       <button class="topbar-btn" onclick="openQS()" style="border-color:rgba(255,77,0,0.4);color:var(--accent)">Search</button>
       <button class="topbar-btn" onclick="loadAllTabs()">Reload</button>
-      <button class="topbar-btn" onclick="window.print()">Print</button>
       <button class="topbar-btn logout" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
@@ -236,8 +235,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <button class="nav-btn active" onclick="switchView('inventory',this)">Inventory</button>
       <button class="nav-btn" onclick="switchView('restock',this)">Bulk Restock</button>
       <button class="nav-btn" onclick="switchView('deals',this)">Deals</button>
+      <button class="nav-btn" onclick="switchView('orders',this)" id="ordersNavBtn">Orders <span id="ordersBadge" style="display:none;background:var(--red);color:#fff;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:3px">0</span></button>
       <button class="nav-btn" onclick="switchView('pricing',this)">Pricing</button>
-      <button class="nav-btn" onclick="switchView('lowstock',this)">Low / Out</button>
+
       <div style="margin-left:auto;position:relative">
         <button class="nav-btn" onclick="toggleHamburger(event)" id="hamburgerBtn" style="border:1px solid var(--border);border-radius:8px;padding:5px 12px">More</button>
         <div id="hamburgerMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:200;overflow:hidden">
@@ -249,24 +249,18 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       </div>
     </div>
     <div class="view active" id="view-inventory">
+      <button onclick="openAddModal()" id="addProductBtn"
+        style="position:fixed;bottom:24px;right:24px;z-index:500;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(255,77,0,0.5);display:flex;align-items:center;justify-content:center;line-height:1">+</button>
       <div class="toolbar">
-        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()">
-        <select id="statusFilter" onchange="renderTable()">
-          <option value="">All statuses</option>
+        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()" style="flex:1">
+        <select id="statusFilter" onchange="renderTable()" style="width:110px">
+          <option value="">All Status</option>
           <option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option>
         </select>
-        <select id="sortOrder" onchange="renderTable()">
-          <option value="az">A to Z</option><option value="za">Z to A</option>
-          <option value="status">By Status</option><option value="qty">By Qty</option>
-        </select>
-        <button class="btn primary" onclick="openAddModal()">+ Add Product</button>
-        <div class="view-toggle">
-          <button class="view-toggle-btn" id="toggleTable" onclick="setViewMode('table')">Table</button>
-          <button class="view-toggle-btn active" id="toggleCard" onclick="setViewMode('card')">Cards</button>
-        </div>
+
       </div>
       <div class="tab-bar" id="tabBar"></div>
-      <div class="tbl-wrap" id="tblWrap" style="display:none">
+      <div class="tbl-wrap" id="tblWrap" style="display:none!important">
         <table>
           <thead><tr>
             <th style="width:60px">Status</th><th>Product</th>
@@ -410,6 +404,22 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div id="pricingCards" class="card-grid"></div>
       <div class="empty" id="pricingEmpty" style="display:none">All items are fully priced!</div>
     </div>
+    <div class="view" id="view-orders">
+      <div class="panel">
+        <div class="panel-title">
+          <span>Customer Orders / Wishlists</span>
+          <div style="display:flex;gap:6px">
+            <select id="orderStatusFilter" onchange="renderOrders()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif">
+              <option value="">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="COMPLETE">Complete</option>
+            </select>
+          </div>
+        </div>
+        <div id="ordersList"><div class="loading-msg"><span class="spinner"></span>Loading orders...</div></div>
+      </div>
+    </div>
+
     <div class="view" id="view-actlog">
       <div class="panel" style="max-height:600px;overflow-y:auto">
         <div class="panel-title">
@@ -832,9 +842,7 @@ function updateStats(){
 }
 
 function setViewMode(mode){
-  viewMode=mode;
-  document.getElementById('toggleTable').className='view-toggle-btn'+(mode==='table'?' active':'');
-  document.getElementById('toggleCard').className='view-toggle-btn'+(mode==='card'?' active':'');
+  viewMode='card';
   renderTable();
 }
 function buildTabBar(){
@@ -846,7 +854,6 @@ function renderTable(){
   buildTabBar();
   var search=(document.getElementById('search').value||'').toLowerCase();
   var sf=document.getElementById('statusFilter').value;
-  var sort=document.getElementById('sortOrder').value;
   var showCat=activeTab===-1;
   document.getElementById('catHeader').style.display=showCat?'':'none';
   var rows=[];
@@ -857,14 +864,10 @@ function renderTable(){
     if(search&&x.name.toLowerCase().indexOf(search)===-1) continue;
     rows.push(x);
   }
-  if(sort==='az') rows.sort(function(a,b){return a.name.localeCompare(b.name);});
-  else if(sort==='za') rows.sort(function(a,b){return b.name.localeCompare(a.name);});
-  else if(sort==='status'){var ord={OUT:0,LOW:1,IN:2};rows.sort(function(a,b){return ord[a.status]-ord[b.status];});}
-  else if(sort==='qty') rows.sort(function(a,b){return a.qty-b.qty;});
-  var tblWrap=document.getElementById('tblWrap');
+  // Default sort: A-Z
+  rows.sort(function(a,b){return a.name.localeCompare(b.name);});
   var cardGrid=document.getElementById('cardGrid');
-  tblWrap.style.display=viewMode==='table'?'':'none';
-  cardGrid.style.display=viewMode==='card'?'':'none';
+  cardGrid.style.display='';
   var empty=document.getElementById('emptyMsg');
   if(!rows.length){document.getElementById('tbody').innerHTML='';cardGrid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
@@ -1897,12 +1900,113 @@ function qsAdjust(id,delta){
   if(cEl) cEl.textContent=item.cases||0;if(sEl) sEl.textContent=item.singles||0;if(tEl) tEl.textContent=item.qty;if(card) card.className='inv-card '+item.status;
 }
 
+// ── ORDERS ───────────────────────────────────────────────────
+function loadOrders(){
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=ORDERS&t='+Date.now();
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    var lines=csv.split('\n');
+    if(lines.length<2){document.getElementById('ordersList').innerHTML='<div class="empty">No orders yet.</div>';return;}
+    var orders=[];
+    for(var i=1;i<lines.length;i++){
+      if(!lines[i].trim()) continue;
+      var row=parseCSVRow(lines[i]);
+      if(!row[0]) continue;
+      orders.push({
+        id:row[0]||'',date:row[1]||'',name:row[2]||'',
+        email:row[3]||'',phone:row[4]||'',
+        items:(row[5]||'').split('|').filter(Boolean),
+        status:row[6]||'PENDING',notes:row[7]||''
+      });
+    }
+    // Newest first, pending first
+    orders.sort(function(a,b){
+      if(a.status==='PENDING'&&b.status!=='PENDING') return -1;
+      if(b.status==='PENDING'&&a.status!=='PENDING') return 1;
+      return b.id-a.id;
+    });
+    // Update badge
+    var pending=orders.filter(function(o){return o.status==='PENDING';}).length;
+    var badge=document.getElementById('ordersBadge');
+    if(badge){badge.textContent=pending;badge.style.display=pending>0?'inline':'none';}
+    renderOrdersList(orders);
+  }).catch(function(){
+    document.getElementById('ordersList').innerHTML='<div class="empty">Could not load orders. Make sure ORDERS tab exists in sheet.</div>';
+  });
+}
+
+function renderOrdersList(orders){
+  var filter=document.getElementById('orderStatusFilter')?document.getElementById('orderStatusFilter').value:'';
+  var filtered=filter?orders.filter(function(o){return o.status===filter;}):orders;
+  var el=document.getElementById('ordersList');
+  if(!filtered.length){el.innerHTML='<div class="empty">No orders found.</div>';return;}
+  var h='';
+  for(var i=0;i<filtered.length;i++){
+    var o=filtered[i];
+    var statusColor=o.status==='COMPLETE'?'var(--green)':o.status==='PENDING'?'var(--amber)':'var(--muted)';
+    h+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">'+
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px">'+
+        '<div>'+
+          '<div style="font-weight:600;font-size:14px;color:var(--text)">'+o.name+'</div>'+
+          '<div style="font-size:12px;color:var(--muted)">'+o.email+(o.phone?' &nbsp;·&nbsp; '+o.phone:'')+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+o.date+'</div>'+
+        '</div>'+
+        '<span style="color:'+statusColor+';font-size:11px;font-weight:700;border:1px solid '+statusColor+';border-radius:20px;padding:2px 8px;white-space:nowrap">'+o.status+'</span>'+
+      '</div>'+
+      '<div style="margin-bottom:10px">'+
+        o.items.map(function(itm){return '<div style="padding:4px 8px;background:var(--surface);border-radius:6px;font-size:12px;margin-bottom:3px;color:var(--text)">'+itm+'</div>';}).join('')+
+      '</div>'+
+      '<div style="display:flex;gap:6px">'+
+        (o.status!=='COMPLETE'?
+          '<button class="ord-complete-btn" data-oid="'+o.id+'" '+
+            'style="flex:1;padding:6px;background:var(--green-bg);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+            'Mark Complete</button>':'<div style="flex:1"></div>')+
+        '<button class="ord-delete-btn" data-oid="'+o.id+'" '+
+          'style="padding:6px 12px;background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:7px;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif">'+
+          'Delete</button>'+
+      '</div>'+
+    '</div>';
+  }
+  el.innerHTML=h;
+}
+
+function renderOrders(){loadOrders();}
+
+// Use event delegation to avoid quote conflicts
+document.addEventListener('click',function(e){
+  var completeBtn=e.target.closest('.ord-complete-btn');
+  var deleteBtn=e.target.closest('.ord-delete-btn');
+  if(completeBtn){updateOrderStatus(completeBtn.getAttribute('data-oid'),'COMPLETE');}
+  if(deleteBtn){deleteOrder(deleteBtn.getAttribute('data-oid'));}
+});
+
+function updateOrderStatus(orderId,status){
+  sendWrite({action:'updateOrder',orderId:orderId,status:status});
+  toast('Order marked '+status);
+  setTimeout(loadOrders,800);
+  logActivity('Order '+status,'Order #'+orderId);
+}
+
+function deleteOrder(orderId){
+  if(!confirm('Delete this order?')) return;
+  sendWrite({action:'deleteOrder',orderId:orderId});
+  toast('Order deleted');
+  setTimeout(loadOrders,800);
+  logActivity('Deleted order','Order #'+orderId);
+}
+
 function toggleHamburger(e){
   e.stopPropagation();var menu=document.getElementById('hamburgerMenu');
   menu.style.display=menu.style.display==='none'?'block':'none';
 }
 document.addEventListener('click',function(){var menu=document.getElementById('hamburgerMenu');if(menu) menu.style.display='none';});
 function switchViewHam(view,btn){
+  // Admin-only views
+  if((view==='settings'||view==='actlog')&&currentUser){
+    var users=getUsers();
+    if(users[currentUser]&&users[currentUser].role!=='Admin'){
+      toast('Admin access only');return;
+    }
+  }
   document.getElementById('hamburgerMenu').style.display='none';
   var bs=document.querySelectorAll('.nav-btn');for(var i=0;i<bs.length;i++) bs[i].classList.remove('active');
   document.getElementById('hamburgerBtn').classList.add('active');
@@ -1925,6 +2029,7 @@ function switchView(view,btn){
   if(view==='settings') renderStaffList();
   if(view==='pricing'){buildPriceTabFilter();renderPricingCards();}
   if(view==='deals'){populateDealDropdown();renderDealsList();}
+  if(view==='orders') loadOrders();
 }
 
 function updateOnlineStatus(){
