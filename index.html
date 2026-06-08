@@ -427,7 +427,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
           </select>
           <button onclick="loadOrders()" class="btn" style="padding:7px 12px;font-size:12px">Refresh</button>
         </div>
-        <div id="ordersList"><div class="loading-msg"><span class="spinner"></span>Loading orders...</div></div>
+        <div id="ordersList"><div class="empty">Select this tab to load orders.</div></div>
       </div>
     </div>
 
@@ -1715,21 +1715,26 @@ function loadDealsFromDB(){
     deals=[];dealNextId=0;
     var lines=csv.split('\n');
     if(lines.length<2) return;
-    // Skip header row
+    // Validate header - must start with ID column, not inventory data
+    var hdr=parseCSVRow(lines[0]);
+    var firstHdr=(hdr[0]||'').toUpperCase().trim();
+    if(firstHdr!=='ID'&&firstHdr!=='') return; // wrong sheet
     for(var i=1;i<lines.length;i++){
       if(!lines[i].trim()) continue;
       var row=parseCSVRow(lines[i]);
       if(!row[0]) continue;
       try{
+        var qty=parseInt(row[3])||0;
+        var price=parseFloat(row[4])||0;
+        if(!qty||!price) continue; // skip empty/invalid deals
         var d={
           id:parseInt(row[0])||dealNextId,
           productName:(row[1]||'').trim(),
           tab:parseInt(row[2])||0,
-          qty:parseInt(row[3])||0,
-          price:parseFloat(row[4])||0,
+          qty:qty,price:price,
           note:(row[5]||'').trim()
         };
-        if(d.productName&&d.qty&&d.price){
+        if(d.productName){
           deals.push(d);
           if(d.id>=dealNextId) dealNextId=d.id+1;
         }
@@ -2280,7 +2285,7 @@ function switchView(view,btn){
   if(view==='settings') renderStaffList();
   if(view==='pricing'){buildPriceTabFilter();renderPricingCards();}
   if(view==='deals'){populateDealDropdown();renderDealsList();}
-  if(view==='orders') loadOrders();
+  if(view==='orders'){document.getElementById('ordersList').innerHTML='<div class="empty">Loading orders...</div>';loadOrders();}
 }
 
 function updateOnlineStatus(){
