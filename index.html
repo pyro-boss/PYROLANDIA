@@ -172,7 +172,33 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   th{background:#f0f0f0;color:#333}
   td{border-bottom:1px solid #eee}
 }
-@media(max-width:640px){.stats{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}.report-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+  .report-grid{grid-template-columns:1fr 1fr}
+  .card-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .topbar{padding:0 .75rem;height:50px}
+  .logo{font-size:20px}
+  .user-badge{display:none}
+  .topbar-btn{padding:4px 7px;font-size:10px}
+  .nav-btn{padding:6px 9px;font-size:11px}
+  .main{padding:.75rem}
+  .stats{gap:6px}
+  .stat{padding:.65rem .75rem}
+  .stat-val{font-size:26px}
+}
+@media(min-width:481px)and(max-width:768px){
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .two-col{grid-template-columns:1fr}
+}
+@media(min-width:769px)and(max-width:1024px){
+  .card-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:1025px){
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+}
+@media(max-width:640px){.report-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -301,7 +327,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             <label style="font-size:13px;color:var(--muted)">Add qty to selected:</label>
             <input class="inline-num" type="number" id="bulkQty" min="1" value="1" style="width:70px">
           </div>
-          <div id="restockList" style="max-height:360px;overflow-y:auto"></div>
+          <input type="text" id="restockSearch" placeholder="Search products..." oninput="renderRestockList()"
+            style="width:100%;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:8px">
+          <div id="restockList" style="max-height:320px;overflow-y:auto"></div>
           <button class="btn primary" id="bulkRestockBtn" onclick="commitBulkRestock()" style="width:100%;margin-top:1rem" disabled>Apply Restock and Sync</button>
         </div></div>
         <div><div class="panel">
@@ -392,19 +420,9 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       </div>
     </div>
     <div class="view" id="view-settings">
-      <div class="two-col">
-        <div><div class="panel">
-          <div class="panel-title">Change Password</div>
-          <div class="field"><label>Current Password</label><input type="password" id="pwCurrent" placeholder="Enter current password"></div>
-          <div class="field"><label>New Password</label><input type="password" id="pwNew" placeholder="Enter new password"></div>
-          <div class="field"><label>Confirm New Password</label><input type="password" id="pwConfirm" placeholder="Confirm new password"></div>
-          <div id="pwMsg" style="font-size:13px;margin-bottom:10px;display:none"></div>
-          <button class="btn primary" onclick="changePassword()" style="width:100%">Update Password</button>
-        </div></div>
-        <div><div class="panel">
-          <div class="panel-title">Staff Accounts</div>
-          <div id="staffList" style="font-size:13px"></div>
-        </div></div>
+      <div class="panel" style="max-width:480px">
+        <div class="panel-title">Staff Accounts</div>
+        <div id="staffList" style="font-size:13px"></div>
       </div>
     </div>
   </div>
@@ -526,7 +544,7 @@ var TABS=[
   {name:'ROCKETS',short:'Rockets'},{name:'FOUNTAINS',short:'Fountains'},
   {name:'MISC',short:'Misc'}
 ];
-var PACKED_OPTIONS=['1/1','2/1','3/1','4/1','6/1','8/1','12/1','3/4','12/6','24/1','18/1','5/2000','100/100','3/24'];
+var PACKED_OPTIONS=['1/1','2/1','3/1','4/1','6/1','8/1','12/1','3/4','12/6','24/1','18/1','4/6','4/18','4/24','10/6','10/2','5/2000','4/2000','4/4000','6/4','100/100','3/24','2/20/20','20/12/6'];
 var inventory=[],nextId=0,activeTab=-1,editingId=null,isAdding=false;
 var saleItems=[],salesLog=[],activityLog=[],restockLog=[];
 var deals=[],dealNextId=0;
@@ -964,79 +982,79 @@ function renderCardGrid(rows){
     var deal=getBestDeal(item.name);
     var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
     var statusStrip=item.status==='LOW'?'LOW STOCK':item.status==='OUT'?'OUT OF STOCK':'';
-    var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
-    var showPKD=item.tab>1; // hide PKD for 1/1 (0) and 2/1 (1)
-
-    // Build tab select options
+    var showPKD=item.tab>1;
+    // Force-match packed to known option if possible
+    var packedVal=item.packed||'';
     var tabOpts='';
     for(var t=0;t<TABS.length;t++) tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
 
     h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">'+
       '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
 
-      // Editable name + delete on same row
-      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+
+      // Total + Name + Delete on top row
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">'+
+        '<div style="text-align:center;flex-shrink:0;min-width:36px">'+
+          '<div style="font-size:8px;color:var(--muted);line-height:1">Total</div>'+
+          '<div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent);line-height:1">'+item.qty+'</div>'+
+        '</div>'+
         '<input type="text" id="cname_'+item.id+'" value="'+item.name+'" '+
           'data-id="'+item.id+'" data-field="name" autocapitalize="characters" '+
           'onchange="saveCardField('+item.id+',\'name\',this.value)" '+
           'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
         '<button onclick="deleteCardItem('+item.id+')" title="Delete" '+
-          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 6px;font-size:11px;cursor:pointer;flex-shrink:0">X</button>'+
+          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 5px;font-size:10px;cursor:pointer;flex-shrink:0">X</button>'+
       '</div>'+
 
-      // Price + Case Price — equal width both inputs
+      // Price + Case Price equal width
       '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:4px 6px">'+
         '<span style="font-size:10px;color:var(--muted);flex-shrink:0">$</span>'+
         '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" '+
           'data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" '+
-          'style="flex:1;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif;min-width:0">'+
+          'style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
         '<span style="font-size:9px;color:var(--border);margin:0 3px;flex-shrink:0">|</span>'+
         '<span style="font-size:10px;color:var(--muted);flex-shrink:0">C$</span>'+
         '<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" '+
           'data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" '+
-          'style="flex:1;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-width:0">'+
+          'style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
       '</div>'+
 
-      // Cases + Singles — bigger +/- buttons
+      // Cases + Singles with bigger tap targets
       '<div style="display:flex;gap:3px;margin-bottom:3px">'+
         '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
           '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">-</button>'+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
             '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.cases||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" '+
-              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>'+
+              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
           '</div>'+
         '</div>'+
         '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
           '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">-</button>'+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
             '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.singles||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" '+
-              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>'+
+              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
           '</div>'+
         '</div>'+
       '</div>'+
 
-      // Total + Tab + PKD all on one row
-      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 2px">'+
-        '<span style="font-size:9px;color:var(--muted)">Total</span>'+
-        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent)">'+item.qty+'</span>'+
+      // Tab + PKD on one row (PKD hidden for 1/1 and 2/1)
+      '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px">'+
         '<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" '+
-          'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
           tabOpts+
         '</select>'+
         (showPKD?
           '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-            'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
-            buildPackedOptions(item.packed)+
+            'style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
+            buildPackedOptions(packedVal)+
           '</select>'+
-          '<input type="text" id="pkd_custom_'+item.id+'" placeholder="custom" '+
-            'style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:45px;padding:1px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
-            'value="'+(isCustomPacked(item.packed)?item.packed:'')+'" '+
+          '<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" '+
+            'style="display:none;width:50px;padding:2px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
             'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'
         :'')+
       '</div>'+
@@ -1332,7 +1350,7 @@ function commitSales(){
     if((item.singles||0)>=d){item.singles-=d;}else{d-=(item.singles||0);item.singles=0;item.cases=Math.max(0,(item.cases||0)-d);}
     recalc(item);names.push(sale.name+' x'+sale.qty);
   }
-  sendWrite({action:'applySales',sales:saleItems});
+  sendWrite({action:'applySales',sales:saleItems,staff:currentUser});
   logActivity('End of Day Sales',names.join(', '));
   salesLog.unshift({date:date,user:currentUser,items:saleItems.map(function(s){return {name:s.name,qty:s.qty,tab:s.tab,price:s.price||'0'};})});
   clearSales();renderSalesLog();
@@ -1361,16 +1379,27 @@ function renderRestockList(){
   buildRestockFilters();
   var tabF=parseInt((document.getElementById('restockTabFilter')||{value:'-1'}).value);
   var statusF=(document.getElementById('restockStatusFilter')||{value:''}).value;
+  var search=((document.getElementById('restockSearch')||{value:''}).value||'').toLowerCase();
   var sorted=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var h='';
   for(var i=0;i<sorted.length;i++){
     var item=sorted[i];
     if(tabF>=0&&item.tab!==tabF) continue;
     if(statusF&&item.status!==statusF) continue;
-    h+='<div class="checkbox-item" onclick="toggleRestock('+item.id+')">'+
-      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()">'+
-      '<label for="rc_'+item.id+'">'+item.name+' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span></label>'+
-      '<span class="item-qty"><span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span> '+item.qty+'</span>'+
+    if(search&&item.name.toLowerCase().indexOf(search)===-1) continue;
+    h+='<div class="checkbox-item" style="flex-wrap:wrap;gap:6px" onclick="toggleRestock('+item.id+')">'+
+      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()" style="flex-shrink:0">'+
+      '<label for="rc_'+item.id+'" style="flex:1;min-width:100px">'+item.name+
+        ' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span>'+
+      '</label>'+
+      '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0" onclick="event.stopPropagation()">'+
+        '<span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span>'+
+        '<span style="color:var(--muted);font-size:11px">'+item.qty+'</span>'+
+        '<span style="font-size:11px;color:var(--muted)">+</span>'+
+        '<input type="number" id="rq_'+item.id+'" min="1" value="1" placeholder="qty" '+
+          'style="width:44px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;text-align:center;font-family:DM Sans,sans-serif" '+
+          'onclick="event.stopPropagation()">'+
+      '</div>'+
     '</div>';
   }
   document.getElementById('restockList').innerHTML=h||'<div class="empty">No products match.</div>';
@@ -1390,20 +1419,28 @@ function selectLowRestock(){
 }
 function clearRestockSelection(){var cbs=document.querySelectorAll('#restockList input[type=checkbox]');for(var i=0;i<cbs.length;i++)cbs[i].checked=false;updateBulkBtn();}
 function commitBulkRestock(){
-  var qty=parseInt(document.getElementById('bulkQty').value)||1;
+  var defaultQty=parseInt(document.getElementById('bulkQty').value)||1;
   var cbs=document.querySelectorAll('#restockList input[type=checkbox]:checked');
   if(!cbs.length) return;
   var btn=document.getElementById('bulkRestockBtn');btn.disabled=true;btn.textContent='Applying...';
-  var names=[];
+  var logItems=[];
   for(var i=0;i<cbs.length;i++){
     var id=parseInt(cbs[i].id.replace('rc_',''));var item=fi(id);if(!item) continue;
-    item.cases=(item.cases||0)+qty;recalc(item);names.push(item.name);stampLastUpdated(item);
-    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+    // Use individual qty if set, else fall back to bulk qty
+    var qtyEl=document.getElementById('rq_'+id);
+    var qty=qtyEl?parseInt(qtyEl.value)||defaultQty:defaultQty;
+    item.cases=(item.cases||0)+qty;recalc(item);
+    logItems.push({name:item.name,qty:qty});
+    stampLastUpdated(item);
+    sendWrite({action:'adjustItem',item:{name:item.name,tab:item.tab},field:'cases',delta:qty});
   }
-  restockLog.unshift({date:todayDate(),user:currentUser,items:names.slice(),qty:qty});renderRestockLog();
+  var logDesc=logItems.map(function(x){return x.name+' +'+x.qty;}).join(', ');
+  restockLog.unshift({date:todayDate(),user:currentUser,items:logItems});
+  renderRestockLog();
   updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
-  logActivity('Bulk Restock',names.length+' items +'+qty+' each');
-  btn.textContent='Apply Restock and Sync';btn.disabled=false;toast('Restocked '+names.length+' products');
+  logActivity('Bulk Restock',logDesc);
+  btn.textContent='Apply Restock and Sync';btn.disabled=false;
+  toast('Restocked '+logItems.length+' products');
 }
 function renderRestockLog(){
   var log=document.getElementById('restockLog');
@@ -1411,7 +1448,8 @@ function renderRestockLog(){
   var h='';
   for(var i=0;i<restockLog.length;i++){
     var e=restockLog[i];
-    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+'</span></div><div class="log-detail">+'+e.qty+' to '+e.items.length+' items: <b>'+e.items.join(', ')+'</b></div></div>';
+    var itemDesc=e.items.map?e.items.map(function(x){return (typeof x==='object'?x.name+' +'+x.qty:x);}).join(', '):(e.items||[]).join(', ');
+    h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-time">'+e.date+'</span></div><div class="log-detail"><b>'+itemDesc+'</b></div></div>';
   }
   log.innerHTML=h;
 }
@@ -1437,39 +1475,124 @@ function renderActLog(){
 }
 
 function generateReport(){
-  var from=document.getElementById('reportFrom').value;var to=document.getElementById('reportTo').value;
+  var from=document.getElementById('reportFrom').value;
+  var to=document.getElementById('reportTo').value;
   if(!from||!to){alert('Please select a date range.');return;}
-  var fromDate=new Date(from),toDate=new Date(to);toDate.setHours(23,59,59);
-  var filtered=salesLog.filter(function(e){var d=new Date(e.date);return d>=fromDate&&d<=toDate;});
   var output=document.getElementById('reportOutput');
-  if(!filtered.length){output.innerHTML='<div class="panel"><div class="empty">No sales in this date range.</div></div>';return;}
-  var totals={},totalUnits=0,byUser={};
-  for(var i=0;i<filtered.length;i++){
-    var e=filtered[i];byUser[e.user]=(byUser[e.user]||0);
-    for(var j=0;j<e.items.length;j++){
-      var itm=e.items[j];
-      if(!totals[itm.name]) totals[itm.name]={qty:0,tab:itm.tab};
-      totals[itm.name].qty+=itm.qty;totalUnits+=itm.qty;byUser[e.user]+=itm.qty;
+  output.innerHTML='<div class="panel"><div class="loading-msg"><span class="spinner"></span>Loading sales from sheet...</div></div>';
+
+  // Fetch Sales Log tab directly from the sheet
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=Sales%20Log&t='+Date.now();
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    var lines=csv.split('\n');
+    if(lines.length<2){
+      output.innerHTML='<div class="panel"><div class="empty">No sales data found in sheet.</div></div>';
+      return;
     }
-  }
-  var sorted=[];var keys=Object.keys(totals);
-  for(var k=0;k<keys.length;k++) sorted.push({name:keys[k],qty:totals[keys[k]].qty,tab:totals[keys[k]].tab});
-  sorted.sort(function(a,b){return b.qty-a.qty;});
-  var html='<div class="report-grid">'+
-    '<div class="report-stat"><div class="report-stat-label">Total Units Sold</div><div class="report-stat-val">'+totalUnits+'</div></div>'+
-    '<div class="report-stat"><div class="report-stat-label">Unique Products</div><div class="report-stat-val">'+sorted.length+'</div></div>'+
-    '<div class="report-stat"><div class="report-stat-label">Sessions</div><div class="report-stat-val">'+filtered.length+'</div></div>'+
-  '</div>';
-  html+='<div class="panel" style="margin-bottom:1rem"><div class="panel-title">Sales by Staff</div>';
-  var ukeys=Object.keys(byUser);
-  for(var u=0;u<ukeys.length;u++) html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--accent2);font-weight:600">'+ukeys[u]+'</span><span class="qty-pill">'+byUser[ukeys[u]]+' units</span></div>';
-  html+='</div><div class="panel"><div class="panel-title">Top Products</div><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border)">Product</th><th style="text-align:left;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);width:65px">Tab</th><th style="text-align:right;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);width:70px">Sold</th></tr></thead><tbody>';
-  for(var p=0;p<sorted.length;p++){
-    var row=sorted[p];var tabName=TABS[row.tab]?TABS[row.tab].short:'';
-    html+='<tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 10px;font-weight:500">'+row.name+'</td><td style="padding:7px 10px;font-size:11px;color:var(--muted)">'+tabName+'</td><td style="padding:7px 10px;text-align:right"><span class="qty-pill">'+row.qty+'</span></td></tr>';
-  }
-  html+='</tbody></table></div>';
-  output.innerHTML=html;
+
+    var fromDate=new Date(from);
+    var toDate=new Date(to);toDate.setHours(23,59,59);
+
+    // Parse header row to find column positions
+    var headers=parseCSVRow(lines[0]);
+    var dateCol=-1,timeCol=-1,productCol=-1,tabCol=-1,qtyCol=-1,priceCol=-1,staffCol=-1;
+    for(var h=0;h<headers.length;h++){
+      var hdr=headers[h].toUpperCase().trim();
+      if(hdr==='DATE') dateCol=h;
+      else if(hdr==='TIME') timeCol=h;
+      else if(hdr==='PRODUCT') productCol=h;
+      else if(hdr==='TAB') tabCol=h;
+      else if(hdr==='QTY'||hdr==='QTY SOLD') qtyCol=h;
+      else if(hdr==='PRICE') priceCol=h;
+      else if(hdr==='STAFF') staffCol=h;
+    }
+    if(productCol<0||qtyCol<0){
+      output.innerHTML='<div class="panel"><div class="empty">Could not read Sales Log columns. Check sheet headers.</div></div>';
+      return;
+    }
+
+    var totals={},totalUnits=0,totalRevenue=0,byDate={};
+    for(var i=1;i<lines.length;i++){
+      if(!lines[i].trim()) continue;
+      var row=parseCSVRow(lines[i]);
+      var dateStr=dateCol>=0?row[dateCol].trim():'';
+      if(!dateStr) continue;
+      var rowDate=new Date(dateStr);
+      if(isNaN(rowDate.getTime())) continue;
+      if(rowDate<fromDate||rowDate>toDate) continue;
+      var product=productCol>=0?row[productCol].trim():'';
+      var qty=qtyCol>=0?parseInt(row[qtyCol])||0:0;
+      var price=priceCol>=0?parseFloat(row[priceCol])||0:0;
+      var tab=tabCol>=0?row[tabCol].trim():'';
+      if(!product||!qty) continue;
+      if(!totals[product]) totals[product]={qty:0,revenue:0,tab:tab};
+      totals[product].qty+=qty;
+      totals[product].revenue+=price*qty;
+      totalUnits+=qty;
+      totalRevenue+=price*qty;
+      // Group by date
+      var dk=dateStr;
+      if(!byDate[dk]) byDate[dk]={units:0};
+      byDate[dk].units+=qty;
+    }
+
+    var sorted=[];
+    var keys=Object.keys(totals);
+    for(var k=0;k<keys.length;k++) sorted.push({name:keys[k],qty:totals[keys[k]].qty,revenue:totals[keys[k]].revenue,tab:totals[keys[k]].tab});
+    sorted.sort(function(a,b){return b.qty-a.qty;});
+
+    if(!sorted.length){
+      output.innerHTML='<div class="panel"><div class="empty">No sales found in this date range.</div></div>';
+      return;
+    }
+
+    // Build report HTML
+    var html='<div class="report-grid" style="margin-bottom:1rem">'+
+      '<div class="report-stat"><div class="report-stat-label">Units Sold</div><div class="report-stat-val">'+totalUnits+'</div></div>'+
+      '<div class="report-stat"><div class="report-stat-label">Products</div><div class="report-stat-val">'+sorted.length+'</div></div>'+
+      (totalRevenue>0?'<div class="report-stat"><div class="report-stat-label">Est. Revenue</div><div class="report-stat-val" style="font-size:22px">$'+totalRevenue.toLocaleString()+'</div></div>':'<div class="report-stat"><div class="report-stat-label">Days Active</div><div class="report-stat-val">'+Object.keys(byDate).length+'</div></div>')+
+    '</div>';
+
+    // Daily breakdown
+    var dateKeys=Object.keys(byDate).sort();
+    if(dateKeys.length>1){
+      html+='<div class="panel" style="margin-bottom:1rem"><div class="panel-title">Sales by Day</div>';
+      for(var d=0;d<dateKeys.length;d++){
+        var dk2=dateKeys[d];
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">'+
+          '<span style="color:var(--text)">'+dk2+'</span>'+
+          '<span class="qty-pill">'+byDate[dk2].units+' units</span>'+
+        '</div>';
+      }
+      html+='</div>';
+    }
+
+    // Top products table
+    html+='<div class="panel"><div class="panel-title">Top Products</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+      '<thead><tr>'+
+        '<th style="text-align:left;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border)">Product</th>'+
+        '<th style="text-align:left;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);width:65px">Tab</th>'+
+        '<th style="text-align:right;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);width:70px">Sold</th>'+
+        (totalRevenue>0?'<th style="text-align:right;padding:6px 10px;background:var(--surface2);border-bottom:1px solid var(--border);width:90px">Revenue</th>':'')+
+      '</tr></thead><tbody>';
+    for(var p=0;p<sorted.length;p++){
+      var row2=sorted[p];
+      html+='<tr style="border-bottom:1px solid var(--border)">'+
+        '<td style="padding:7px 10px;font-weight:500">'+row2.name+'</td>'+
+        '<td style="padding:7px 10px;font-size:11px;color:var(--muted)">'+row2.tab+'</td>'+
+        '<td style="padding:7px 10px;text-align:right"><span class="qty-pill">'+row2.qty+'</span></td>'+
+        (totalRevenue>0&&row2.revenue>0?'<td style="padding:7px 10px;text-align:right;color:var(--accent2);font-size:12px">$'+row2.revenue.toLocaleString()+'</td>':
+         totalRevenue>0?'<td style="padding:7px 10px;text-align:right;color:var(--muted);font-size:11px">--</td>':'')+
+      '</tr>';
+    }
+    html+='</tbody></table></div>';
+    output.innerHTML=html;
+
+  }).catch(function(err){
+    // Fallback to in-memory session data
+    output.innerHTML='<div class="panel"><div class="empty">Could not load from sheet. Showing session data only.</div></div>';
+  });
 }
 
 // ── CARD DEAL HELPERS ────────────────────────────────────────
@@ -1712,6 +1835,14 @@ function openQS(){
   document.getElementById('qsResults').innerHTML='<div class="qs-empty">Start typing to find a product</div>';
   setTimeout(function(){document.getElementById('qsInput').focus();},50);
 }
+function qsQuickAdd(name){
+  closeQS();
+  // Pre-fill the add modal and open it
+  openAddModal();
+  document.getElementById('mName').value=name.toUpperCase();
+  toast('Fill in details and save to add '+name);
+}
+
 function closeQS(){document.getElementById('qsOverlay').style.display='none';}
 function renderQS(){
   var q=(document.getElementById('qsInput').value||'').toLowerCase().trim();
@@ -1719,7 +1850,22 @@ function renderQS(){
   if(!q){el.innerHTML='<div class="qs-empty">Start typing to find a product</div>';return;}
   var matches=[];for(var i=0;i<inventory.length;i++){if(inventory[i].name.toLowerCase().indexOf(q)>=0)matches.push(inventory[i]);}
   matches.sort(function(a,b){return a.name.localeCompare(b.name);});
-  if(!matches.length){el.innerHTML='<div class="qs-empty">No products found</div>';return;}
+  if(!matches.length){
+    var qUp=q.toUpperCase();
+    el.innerHTML='<div class="qs-empty" style="padding:1rem">'+
+      '<div style="margin-bottom:8px">No products found for '+qUp+'</div>'+
+      '<button id="qsAddBtn" '+
+        'style="padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        '+ Add '+qUp+' as new product'+
+      '</button>'+
+    '</div>';
+    // Attach click after render to avoid quote conflict
+    setTimeout(function(){
+      var btn=document.getElementById('qsAddBtn');
+      if(btn) btn.onclick=function(){qsQuickAdd(qUp);};
+    },0);
+    return;
+  }
   var h='';
   for(var r=0;r<Math.min(matches.length,8);r++){
     var item=matches[r];var sc=item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)';
