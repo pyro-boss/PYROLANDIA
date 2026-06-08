@@ -964,6 +964,8 @@ function renderCardGrid(rows){
     var deal=getBestDeal(item.name);
     var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
     var statusStrip=item.status==='LOW'?'LOW STOCK':item.status==='OUT'?'OUT OF STOCK':'';
+    var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
+    var showPKD=item.tab>1; // hide PKD for 1/1 (0) and 2/1 (1)
 
     // Build tab select options
     var tabOpts='';
@@ -972,60 +974,62 @@ function renderCardGrid(rows){
     h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">'+
       '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
 
-      // Editable name + tab select + delete on same row
+      // Editable name + delete on same row
       '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">'+
         '<input type="text" id="cname_'+item.id+'" value="'+item.name+'" '+
-          'data-id="'+item.id+'" data-field="name" '+
-          'autocapitalize="characters" '+
+          'data-id="'+item.id+'" data-field="name" autocapitalize="characters" '+
           'onchange="saveCardField('+item.id+',\'name\',this.value)" '+
-          'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
-        '<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" '+
-          'style="width:42px;padding:2px 2px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif;flex-shrink:0">'+
-          tabOpts+
-        '</select>'+
+          'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
         '<button onclick="deleteCardItem('+item.id+')" title="Delete" '+
-          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 5px;font-size:11px;cursor:pointer;flex-shrink:0">X</button>'+
+          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 6px;font-size:11px;cursor:pointer;flex-shrink:0">X</button>'+
       '</div>'+
 
-      // Price + Case Price
+      // Price + Case Price — equal width both inputs
       '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:4px 6px">'+
-        '<span style="font-size:10px;color:var(--muted)">$</span>'+
+        '<span style="font-size:10px;color:var(--muted);flex-shrink:0">$</span>'+
         '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" '+
           'data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" '+
-          'style="width:46px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
-        '<span style="font-size:9px;color:var(--border);margin:0 3px">|</span>'+
-        '<span style="font-size:10px;color:var(--muted)">C$</span>'+
+          'style="flex:1;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif;min-width:0">'+
+        '<span style="font-size:9px;color:var(--border);margin:0 3px;flex-shrink:0">|</span>'+
+        '<span style="font-size:10px;color:var(--muted);flex-shrink:0">C$</span>'+
         '<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" '+
           'data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" '+
-          'style="width:46px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-width:0">'+
       '</div>'+
 
-      // Cases + Singles
+      // Cases + Singles — bigger +/- buttons
       '<div style="display:flex;gap:3px;margin-bottom:3px">'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:2px 4px;text-align:center">'+
-          '<div style="font-size:9px;color:var(--muted)">Cases</div>'+
-          '<div style="display:flex;align-items:center;justify-content:center;gap:1px">'+
-            '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">-</button>'+
-            '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:20px;text-align:center">'+(item.cases||0)+'</span>'+
-            '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">+</button>'+
+        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
+          '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>'+
+          '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
+            '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" '+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">-</button>'+
+            '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.cases||0)+'</span>'+
+            '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" '+
+              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>'+
           '</div>'+
         '</div>'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:2px 4px;text-align:center">'+
-          '<div style="font-size:9px;color:var(--muted)">Singles</div>'+
-          '<div style="display:flex;align-items:center;justify-content:center;gap:1px">'+
-            '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">-</button>'+
-            '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:20px;text-align:center">'+(item.singles||0)+'</span>'+
-            '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 2px;line-height:1">+</button>'+
+        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
+          '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>'+
+          '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
+            '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" '+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">-</button>'+
+            '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.singles||0)+'</span>'+
+            '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" '+
+              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:28px;height:28px;border-radius:6px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>'+
           '</div>'+
         '</div>'+
       '</div>'+
 
-      // Total + Packed (PKD hidden for 1/1 and 2/1 tabs)
-      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 4px">'+
+      // Total + Tab + PKD all on one row
+      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;padding:2px 2px">'+
         '<span style="font-size:9px;color:var(--muted)">Total</span>'+
-        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent);margin-right:6px">'+item.qty+'</span>'+
-        (item.tab>1?
-          '<span style="font-size:9px;color:var(--muted)">PKD</span>'+
+        '<span id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent)">'+item.qty+'</span>'+
+        '<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" '+
+          'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+          tabOpts+
+        '</select>'+
+        (showPKD?
           '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
             'style="flex:1;padding:1px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
             buildPackedOptions(item.packed)+
@@ -1051,17 +1055,17 @@ function renderCardGrid(rows){
           '<select id="dq_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
             buildQtyOptions()+
           '</select>'+
-          '<span style="font-size:9px;color:var(--muted)">for $</span>'+
+          '<span style="font-size:9px;color:var(--muted);flex-shrink:0">for $</span>'+
           '<select id="dp_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
             buildPriceOptions()+
           '</select>'+
-          '<button onclick="addDealFromCard('+item.id+')" style="padding:2px 5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap">+Deal</button>'+
+          '<button onclick="addDealFromCard('+item.id+')" style="padding:2px 5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">+Deal</button>'+
         '</div>'
       )+
 
       // Sell + timestamp
       '<button onclick="openSellModal('+item.id+')" '+
-        'style="width:100%;padding:3px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        'style="width:100%;padding:4px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
         'Sell'+
       '</button>'+
       '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">'+stamp+'</div>'+
@@ -1476,7 +1480,7 @@ function buildQtyOptions(){
 }
 
 function buildPriceOptions(){
-  var prices=[20,25,50,75,100,150,200,300,400,500];
+  var prices=[10,20,25,50,75,100,150,200,250,300,400,500,750,1000];
   var opts='<option value="">Price</option>';
   for(var i=0;i<prices.length;i++) opts+='<option value="'+prices[i]+'">$'+prices[i]+'</option>';
   return opts;
@@ -1495,8 +1499,47 @@ function addDealFromCard(id){
   if(document.getElementById('view-deals').classList.contains('active')) renderDealsList();
 }
 
-function loadDealsFromDB(){try{var s=localStorage.getItem('pyrolandia_deals');if(s){deals=JSON.parse(s);dealNextId=deals.length?Math.max.apply(null,deals.map(function(d){return d.id;}))+1:0;}}catch(e){}}
-function saveDealsToDB(){try{localStorage.setItem('pyrolandia_deals',JSON.stringify(deals));}catch(e){}}
+function loadDealsFromDB(){
+  // Load deals from Google Sheet DEALS tab via CSV
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=DEALS&t='+Date.now();
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    deals=[];dealNextId=0;
+    var lines=csv.split('\n');
+    if(lines.length<2) return;
+    // Skip header row
+    for(var i=1;i<lines.length;i++){
+      if(!lines[i].trim()) continue;
+      var row=parseCSVRow(lines[i]);
+      if(!row[0]) continue;
+      try{
+        var d={
+          id:parseInt(row[0])||dealNextId,
+          productName:(row[1]||'').trim(),
+          tab:parseInt(row[2])||0,
+          qty:parseInt(row[3])||0,
+          price:parseFloat(row[4])||0,
+          note:(row[5]||'').trim()
+        };
+        if(d.productName&&d.qty&&d.price){
+          deals.push(d);
+          if(d.id>=dealNextId) dealNextId=d.id+1;
+        }
+      }catch(e){}
+    }
+    renderDealsList();
+    renderTable(); // refresh cards to show deal badges
+  }).catch(function(){
+    // Fallback to localStorage if sheet not accessible
+    try{var s=localStorage.getItem('pyrolandia_deals');if(s){deals=JSON.parse(s);dealNextId=deals.length?Math.max.apply(null,deals.map(function(d){return d.id;}))+1:0;}}catch(e){}
+  });
+}
+
+function saveDealsToDB(){
+  // Save to sheet via Apps Script
+  sendWrite({action:'saveDeals',deals:deals});
+  // Also keep localStorage as backup
+  try{localStorage.setItem('pyrolandia_deals',JSON.stringify(deals));}catch(e){}
+}
 function getBestDeal(productName){
   var pd=deals.filter(function(d){return d.productName.toUpperCase()===productName.toUpperCase();});
   if(!pd.length) return null;var best=pd[0];
