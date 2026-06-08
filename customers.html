@@ -27,7 +27,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .dot.g{background:var(--green)}.dot.a{background:var(--amber)}.dot.r{background:var(--red)}
 .controls{max-width:960px;margin:1.5rem auto 0;padding:0 1.25rem}
-.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:.75rem}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;position:sticky;top:0;z-index:100;background:var(--bg);padding:.75rem 0 .5rem}
 .filters input{flex:1;min-width:180px;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
 .filters input:focus{outline:none;border-color:var(--accent)}
 .filter-btn{height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap}
@@ -67,6 +67,23 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .deal-card-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;position:relative}
 .deal-badge{display:inline-block;background:linear-gradient(135deg,#ff4d00,#ff8c00);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:0.5px}
 @media(max-width:500px){.hero-logo{font-size:38px}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){
+  .card-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .filters{gap:5px}
+  .filters input{min-width:120px;height:36px;font-size:13px}
+  .filter-btn{padding:5px 10px;font-size:12px}
+  .tab-f{padding:4px 8px;font-size:11px}
+  header h1{font-size:28px}
+  .card-name{font-size:13px}
+  .card-price{font-size:20px}
+  .main{padding:.75rem}
+}
+@media(min-width:769px)and(max-width:1024px){
+  .card-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:1025px){
+  .card-grid{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
