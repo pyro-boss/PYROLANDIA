@@ -225,6 +225,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <span class="sync-status" id="syncStatus"></span>
       <span id="lastSyncTime" style="font-size:10px;color:var(--muted)"></span>
       <button class="topbar-btn" onclick="openQS()" style="border-color:rgba(255,77,0,0.4);color:var(--accent)">Search</button>
+      <button class="topbar-btn" onclick="showDaySummary()">Summary</button>
       <button class="topbar-btn" onclick="loadAllTabs()">Reload</button>
       <button class="topbar-btn logout" onclick="doLogout()">Sign Out</button>
     </div>
@@ -310,16 +311,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
               <button class="btn" style="padding:3px 8px;font-size:11px" onclick="clearRestockSelection()">Clear</button>
             </div>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
             <select id="restockTabFilter" onchange="renderRestockList()" style="flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif"><option value="-1">All Types</option></select>
-            <select id="restockStatusFilter" onchange="renderRestockList()" style="flex:1;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
-              <option value="">All Statuses</option><option value="OUT">Out of Stock</option>
-              <option value="LOW">Low Stock</option><option value="IN">In Stock</option>
-            </select>
           </div>
           <div style="margin-bottom:10px;display:flex;gap:8px;align-items:center">
-            <label style="font-size:13px;color:var(--muted)">Add qty to selected:</label>
-            <input class="inline-num" type="number" id="bulkQty" min="1" value="1" style="width:70px">
+            <label style="font-size:13px;color:var(--muted)">Default add qty:</label>
+            <select id="bulkQty" style="width:80px;height:34px;padding:0 8px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif"><option value="1"selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option></select>
           </div>
           <input type="text" id="restockSearch" placeholder="Search products..." oninput="renderRestockList()"
             style="width:100%;height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;margin-bottom:8px">
@@ -405,16 +402,30 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div class="empty" id="pricingEmpty" style="display:none">All items are fully priced!</div>
     </div>
     <div class="view" id="view-orders">
-      <div class="panel">
-        <div class="panel-title">
-          <span>Customer Orders / Wishlists</span>
-          <div style="display:flex;gap:6px">
-            <select id="orderStatusFilter" onchange="renderOrders()" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif">
-              <option value="">All</option>
-              <option value="PENDING">Pending</option>
-              <option value="COMPLETE">Complete</option>
-            </select>
-          </div>
+      <!-- ORDER DETAIL (hidden by default, shown when order tapped) -->
+      <div id="orderDetail" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+          <button onclick="closeOrderDetail()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Back</button>
+          <div id="orderDetailTitle" style="font-weight:600;font-size:15px;color:var(--text)"></div>
+        </div>
+        <div id="orderDetailContent"></div>
+      </div>
+      <!-- ORDER LIST -->
+      <div id="orderListView">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+          <select id="orderSortFilter" onchange="loadOrders()" style="height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
+            <option value="valuedesc">Highest Value First</option>
+            <option value="valueasc">Lowest Value First</option>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+          <select id="orderStatusFilter" onchange="loadOrders()" style="height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif">
+            <option value="">All Orders</option>
+            <option value="PENDING">Pending</option>
+            <option value="COMPLETE">Complete</option>
+            <option value="PARTIAL">Partial</option>
+          </select>
+          <button onclick="loadOrders()" class="btn" style="padding:7px 12px;font-size:12px">Refresh</button>
         </div>
         <div id="ordersList"><div class="loading-msg"><span class="spinner"></span>Loading orders...</div></div>
       </div>
@@ -536,6 +547,17 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<!-- DAY SUMMARY MODAL -->
+<div class="overlay" id="summaryOverlay" style="display:none" onclick="if(event.target===this)document.getElementById('summaryOverlay').style.display='none'">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">Session Summary</div>
+    <div id="summaryContent"></div>
+    <div style="display:flex;gap:8px;margin-top:1rem">
+      <button class="btn" onclick="document.getElementById('summaryOverlay').style.display='none'" style="flex:1">Close</button>
+      <button class="btn primary" onclick="copySummary()" style="flex:1">Copy Summary</button>
+    </div>
+  </div>
+</div>
 <script>
 var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
@@ -578,7 +600,8 @@ function startSession(u){
   loadDealsFromDB();loadActivityLog();
   loadAllTabs();renderStaffList();
   if(window._autoReload) clearInterval(window._autoReload);
-  window._autoReload=setInterval(function(){if(currentUser)loadAllTabs();},5*60*1000);
+  var jitter=Math.floor(Math.random()*60000);
+  window._autoReload=setInterval(function(){if(currentUser)loadAllTabs();},(5*60*1000)+jitter);
 }
 
 function doLogin(){
@@ -711,6 +734,18 @@ function fetchTab(tabIndex){
   return fetch(url).then(function(r){return r.text();}).then(function(csv){return parseTab(csv,tabIndex);}).catch(function(){return [];});
 }
 function loadAllTabs(){
+  // Show cached data instantly while fresh data loads
+  try{
+    var cached=sessionStorage.getItem('pyro_inventory_cache');
+    if(cached){
+      var parsed=JSON.parse(cached);
+      if(parsed&&parsed.length){
+        inventory=parsed;nextId=parsed.reduce(function(m,x){return Math.max(m,x.id+1);},0);
+        loadStamps();updateStats();renderTable();renderLowStock();
+        populateSaleDropdown();renderRestockList();populateDealDropdown();
+      }
+    }
+  }catch(e){}
   setSyncStatus('','Loading...');
   document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading-msg"><span class="spinner"></span>Loading...</td></tr>';
   nextId=0;
@@ -724,6 +759,8 @@ function loadAllTabs(){
       }
     }
     loadStamps();
+    // Cache for instant load next time
+    try{sessionStorage.setItem('pyro_inventory_cache',JSON.stringify(inventory));}catch(e){}
     setSyncStatus('ok','Loaded '+inventory.length+' products');
     updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();populateDealDropdown();
     toast('Loaded '+inventory.length+' products');
@@ -783,6 +820,8 @@ function logActivity(action,detail){
   activityLog.unshift(entry);
   if(activityLog.length>200) activityLog=activityLog.slice(0,200);
   try{localStorage.setItem('pyrolandia_actlog',JSON.stringify(activityLog));}catch(e){}
+  // Write to LOG sheet tab for persistence across devices
+  sendWrite({action:'logActivity',user:currentUser,date:todayDate(),time:nowTime(),actAction:action,detail:detail});
   if(document.getElementById('view-actlog').classList.contains('active')) renderActLog();
 }
 function loadActivityLog(){try{var s=localStorage.getItem('pyrolandia_actlog');if(s) activityLog=JSON.parse(s);}catch(e){}}
@@ -894,6 +933,16 @@ function renderTable(){
   if(viewMode==='card') renderCardGrid(rows);
 }
 
+function saveCardNameBtn(id){
+  var inp=document.getElementById('cname_'+id);
+  if(!inp) return;
+  var newName=inp.value.trim().toUpperCase();
+  if(!newName){toast('Name cannot be empty');return;}
+  var item=fi(id);
+  if(!item||newName===item.name){toast('No change');return;}
+  saveCardField(id,'name',newName);
+}
+
 function saveCardField(id, field, val){
   var item=fi(id); if(!item) return;
   val = String(val).trim();
@@ -1002,8 +1051,11 @@ function renderCardGrid(rows){
         '</div>'+
         '<input type="text" id="cname_'+item.id+'" value="'+item.name+'" '+
           'data-id="'+item.id+'" data-field="name" autocapitalize="characters" '+
-          'onchange="saveCardField('+item.id+',\'name\',this.value)" '+
+          'onkeydown="if(event.key===\'Enter\')saveCardNameBtn('+item.id+')" '+
+          'x-was-onchange="saveCardField('+item.id+',\'name\',this.value)" '+
           'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
+        '<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" title="Save name" '+
+          'style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:5px;padding:2px 5px;font-size:10px;cursor:pointer;flex-shrink:0">OK</button>'+
         '<button onclick="deleteCardItem('+item.id+')" title="Delete" '+
           'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 5px;font-size:10px;cursor:pointer;flex-shrink:0">X</button>'+
       '</div>'+
@@ -1399,9 +1451,7 @@ function renderRestockList(){
         '<span class="badge '+item.status+'" style="font-size:10px">'+item.status+'</span>'+
         '<span style="color:var(--muted);font-size:11px">'+item.qty+'</span>'+
         '<span style="font-size:11px;color:var(--muted)">+</span>'+
-        '<input type="number" id="rq_'+item.id+'" min="1" value="1" placeholder="qty" '+
-          'style="width:44px;height:28px;padding:0 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;text-align:center;font-family:DM Sans,sans-serif" '+
-          'onclick="event.stopPropagation()">'+
+        '<select id="rq_'+item.id+'" onclick="event.stopPropagation()" style="width:52px;height:28px;padding:0 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:DM Sans,sans-serif"><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option><option value=\"7\">7</option><option value=\"8\">8</option><option value=\"9\">9</option><option value=\"10\">10</option><option value=\"11\">11</option><option value=\"12\">12</option><option value=\"13\">13</option><option value=\"14\">14</option><option value=\"15\">15</option><option value=\"16\">16</option><option value=\"17\">17</option><option value=\"18\">18</option><option value=\"19\">19</option><option value=\"20\">20</option><option value=\"21\">21</option><option value=\"22\">22</option><option value=\"23\">23</option><option value=\"24\">24</option><option value=\"25\">25</option></select>'+
       '</div>'+
     '</div>';
   }
@@ -1468,6 +1518,34 @@ function renderActLog(){
   var filter=document.getElementById('actLogFilter')?document.getElementById('actLogFilter').value:'';
   var logs=filter?activityLog.filter(function(e){return e.user===filter;}):activityLog;
   var el=document.getElementById('actLog');
+  if(!logs.length){
+    // Try loading from sheet if local is empty
+    loadActLogFromSheet();
+    return;
+  }
+  buildActLogHtml(logs,el);
+}
+
+function loadActLogFromSheet(){
+  var el=document.getElementById('actLog');
+  el.innerHTML='<div class="loading-msg"><span class="spinner"></span>Loading activity log...</div>';
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=LOG&t='+Date.now();
+  fetch(url).then(function(r){return r.text();}).then(function(csv){
+    var lines=csv.split('\n');
+    if(lines.length<2){el.innerHTML='<div class="empty">No activity yet.</div>';return;}
+    var logs=[];
+    for(var i=lines.length-1;i>=1;i--){
+      if(!lines[i].trim()) continue;
+      var row=parseCSVRow(lines[i]);
+      if(!row[0]) continue;
+      logs.push({user:row[0]||'',date:row[1]||'',time:row[2]||'',action:row[3]||'',detail:row[4]||''});
+      if(logs.length>=200) break;
+    }
+    buildActLogHtml(logs,el);
+  }).catch(function(){el.innerHTML='<div class="empty">Could not load activity log.</div>';});
+}
+
+function buildActLogHtml(logs,el){
   if(!logs.length){el.innerHTML='<div class="empty">No activity yet.</div>';return;}
   var h='';
   for(var i=0;i<logs.length;i++){
@@ -1475,6 +1553,7 @@ function renderActLog(){
     h+='<div class="log-item"><div class="log-meta"><span class="log-user">'+e.user+'</span><span class="log-action"> '+e.action+'</span><span class="log-time"> '+e.date+' '+e.time+'</span></div><div class="log-detail"><b>'+e.detail+'</b></div></div>';
   }
   el.innerHTML=h;
+  updateActLogFilter();
 }
 
 function generateReport(){
@@ -1621,8 +1700,12 @@ function addDealFromCard(id){
   saveDealsToDB();
   logActivity('Added deal',item.name+': '+qty+' for $'+price);
   toast('Deal added: '+qty+' for $'+price);
-  renderTable(); // refresh cards to show deal badge
-  if(document.getElementById('view-deals').classList.contains('active')) renderDealsList();
+  // Refresh cards AND deals tab
+  renderTable();
+  if(document.getElementById('view-deals').classList.contains('active')){
+    populateDealDropdown();renderDealsList();
+  }
+  // Also refresh the customer page deals if loaded
 }
 
 function loadDealsFromDB(){
@@ -1710,7 +1793,9 @@ function removeDeal(id){
   var deal=null;for(var i=0;i<deals.length;i++){if(deals[i].id===id){deal=deals[i];break;}}
   if(!deal||!confirm('Remove this deal?')) return;
   deals=deals.filter(function(d){return d.id!==id;});
-  saveDealsToDB();renderDealsList();renderTable();
+  saveDealsToDB();
+  renderTable();
+  if(document.getElementById('view-deals').classList.contains('active')){populateDealDropdown();renderDealsList();}
   logActivity('Removed deal',deal.productName);toast('Deal removed');
 }
 function renderDealsList(){
@@ -1901,97 +1986,263 @@ function qsAdjust(id,delta){
 }
 
 // ── ORDERS ───────────────────────────────────────────────────
+// ── ORDERS ────────────────────────────────────────────────────
+var _allOrders=[];
+
+function estimateOrderValue(items){
+  var total=0;
+  for(var i=0;i<items.length;i++){
+    if(items[i].indexOf('[REQUEST]')>=0) continue;
+    var m=items[i].match(/\$([0-9.]+)/);
+    if(m) total+=parseFloat(m[1]);
+  }
+  return total;
+}
+
 function loadOrders(){
   var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=ORDERS&t='+Date.now();
+  var el=document.getElementById('ordersList');
+  if(el) el.innerHTML='<div class="loading-msg"><span class="spinner"></span>Loading orders...</div>';
   fetch(url).then(function(r){return r.text();}).then(function(csv){
     var lines=csv.split('\n');
-    if(lines.length<2){document.getElementById('ordersList').innerHTML='<div class="empty">No orders yet.</div>';return;}
+    if(lines.length<2){if(el) el.innerHTML='<div class="empty">No orders yet.</div>';return;}
     var orders=[];
     for(var i=1;i<lines.length;i++){
       if(!lines[i].trim()) continue;
       var row=parseCSVRow(lines[i]);
       if(!row[0]) continue;
+      var items=(row[5]||'').split('|').filter(Boolean);
       orders.push({
         id:row[0]||'',date:row[1]||'',name:row[2]||'',
-        email:row[3]||'',phone:row[4]||'',
-        items:(row[5]||'').split('|').filter(Boolean),
-        status:row[6]||'PENDING',notes:row[7]||''
+        email:row[3]||'',phone:row[4]||'',items:items,
+        status:(row[6]||'PENDING').toUpperCase(),
+        notes:row[7]||'',
+        paid:(row[8]||'UNPAID').toUpperCase(),
+        value:estimateOrderValue(items)
       });
     }
-    // Newest first, pending first
-    orders.sort(function(a,b){
-      if(a.status==='PENDING'&&b.status!=='PENDING') return -1;
-      if(b.status==='PENDING'&&a.status!=='PENDING') return 1;
-      return b.id-a.id;
-    });
-    // Update badge
+    _allOrders=orders;
     var pending=orders.filter(function(o){return o.status==='PENDING';}).length;
     var badge=document.getElementById('ordersBadge');
     if(badge){badge.textContent=pending;badge.style.display=pending>0?'inline':'none';}
     renderOrdersList(orders);
   }).catch(function(){
-    document.getElementById('ordersList').innerHTML='<div class="empty">Could not load orders. Make sure ORDERS tab exists in sheet.</div>';
+    if(el) el.innerHTML='<div class="empty">Could not load. Make sure ORDERS tab exists in sheet.</div>';
   });
 }
 
 function renderOrdersList(orders){
-  var filter=document.getElementById('orderStatusFilter')?document.getElementById('orderStatusFilter').value:'';
-  var filtered=filter?orders.filter(function(o){return o.status===filter;}):orders;
+  var statusF=(document.getElementById('orderStatusFilter')||{value:''}).value;
+  var sortF=(document.getElementById('orderSortFilter')||{value:'valuedesc'}).value;
+  var filtered=statusF?orders.filter(function(o){return o.status===statusF;}):orders.slice();
+  if(sortF==='valuedesc') filtered.sort(function(a,b){return b.value-a.value;});
+  else if(sortF==='valueasc') filtered.sort(function(a,b){return a.value-b.value;});
+  else if(sortF==='newest') filtered.sort(function(a,b){return b.id>a.id?1:-1;});
+  else if(sortF==='oldest') filtered.sort(function(a,b){return a.id>b.id?1:-1;});
   var el=document.getElementById('ordersList');
   if(!filtered.length){el.innerHTML='<div class="empty">No orders found.</div>';return;}
   var h='';
   for(var i=0;i<filtered.length;i++){
     var o=filtered[i];
-    var statusColor=o.status==='COMPLETE'?'var(--green)':o.status==='PENDING'?'var(--amber)':'var(--muted)';
-    h+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">'+
-      '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:8px">'+
-        '<div>'+
-          '<div style="font-weight:600;font-size:14px;color:var(--text)">'+o.name+'</div>'+
-          '<div style="font-size:12px;color:var(--muted)">'+o.email+(o.phone?' &nbsp;·&nbsp; '+o.phone:'')+'</div>'+
-          '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+o.date+'</div>'+
+    var sc=o.status==='COMPLETE'?'var(--green)':o.status==='PARTIAL'?'var(--accent2)':'var(--amber)';
+    var pc=o.paid==='PAID'?'var(--green)':'var(--red)';
+    var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0;});
+    var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0;});
+    h+='<div class="ord-row" data-oid="'+o.id+'" style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--surface2);cursor:pointer;transition:border-color 0.15s">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-weight:700;font-size:14px;color:var(--text)">'+o.name+'</div>'+
+          '<div style="font-size:12px;color:var(--muted)">'+o.phone+'&nbsp;&nbsp;'+o.date+'</div>'+
+          '<div style="font-size:11px;color:var(--muted);margin-top:2px">'+reg.length+' item'+(reg.length!==1?'s':'')+(req.length?' + '+req.length+' request'+(req.length!==1?'s':''):'')+
+          (o.value>0?'&nbsp;&nbsp;<b style="color:var(--accent2)">~$'+o.value+'</b>':'')+
+          '</div>'+
         '</div>'+
-        '<span style="color:'+statusColor+';font-size:11px;font-weight:700;border:1px solid '+statusColor+';border-radius:20px;padding:2px 8px;white-space:nowrap">'+o.status+'</span>'+
-      '</div>'+
-      '<div style="margin-bottom:10px">'+
-        o.items.map(function(itm){return '<div style="padding:4px 8px;background:var(--surface);border-radius:6px;font-size:12px;margin-bottom:3px;color:var(--text)">'+itm+'</div>';}).join('')+
-      '</div>'+
-      '<div style="display:flex;gap:6px">'+
-        (o.status!=='COMPLETE'?
-          '<button class="ord-complete-btn" data-oid="'+o.id+'" '+
-            'style="flex:1;padding:6px;background:var(--green-bg);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
-            'Mark Complete</button>':'<div style="flex:1"></div>')+
-        '<button class="ord-delete-btn" data-oid="'+o.id+'" '+
-          'style="padding:6px 12px;background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:7px;font-size:12px;cursor:pointer;font-family:DM Sans,sans-serif">'+
-          'Delete</button>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+
+          '<span style="font-size:10px;font-weight:700;border:1px solid '+sc+';color:'+sc+';border-radius:20px;padding:2px 8px">'+o.status+'</span>'+
+          '<span style="font-size:10px;font-weight:700;border:1px solid '+pc+';color:'+pc+';border-radius:20px;padding:2px 8px">'+o.paid+'</span>'+
+        '</div>'+
       '</div>'+
     '</div>';
   }
   el.innerHTML=h;
+  // Click to open detail
+  el.onclick=function(e){
+    var row=e.target.closest('.ord-row');
+    if(row) openOrderDetail(row.getAttribute('data-oid'));
+  };
+}
+
+function openOrderDetail(oid){
+  var o=null;
+  for(var i=0;i<_allOrders.length;i++){if(_allOrders[i].id===oid){o=_allOrders[i];break;}}
+  if(!o) return;
+  document.getElementById('orderListView').style.display='none';
+  document.getElementById('orderDetail').style.display='block';
+  document.getElementById('orderDetailTitle').textContent=o.name+' - '+o.phone;
+  var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0;});
+  var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0;});
+  var sc=o.status==='COMPLETE'?'var(--green)':o.status==='PARTIAL'?'var(--accent2)':'var(--amber)';
+  var pc=o.paid==='PAID'?'var(--green)':'var(--red)';
+
+  var h='<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem">'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Email: <b style="color:var(--text)">'+o.email+'</b></div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Phone: <b style="color:var(--text)">'+o.phone+'</b></div>'+
+    '<div style="font-size:12px;color:var(--muted)">Date: <b style="color:var(--text)">'+o.date+'</b></div>'+
+    (o.notes?'<div style="font-size:12px;color:var(--muted);margin-top:4px">Notes: <b style="color:var(--text)">'+o.notes+'</b></div>':'')+
+  '</div>'+
+  '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Items Ordered</div>'+
+    reg.map(function(itm){return '<div style="padding:7px 10px;background:var(--surface);border-radius:7px;margin-bottom:4px;font-size:13px;color:var(--text)">'+itm+'</div>';}).join('')+
+    (req.length?
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px">Out of Stock Requests</div>'+
+      req.map(function(itm){
+        return '<div style="display:flex;align-items:center;padding:7px 10px;background:var(--surface);border-radius:7px;margin-bottom:4px;font-size:13px;color:var(--muted)">'+
+          itm.replace('[REQUEST] ','')+
+          '<span style="margin-left:auto;font-size:10px;background:var(--amber-bg);color:var(--amber);border-radius:20px;padding:1px 7px;font-weight:600">Request</span>'+
+        '</div>';
+      }).join('')
+    :'')+
+    (o.value>0?'<div style="margin-top:10px;font-size:13px;color:var(--accent2);font-weight:600;text-align:right">Est. Value: ~$'+o.value+'</div>':'')+
+  '</div>'+
+  '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Order Status</div>'+
+    '<div style="display:flex;gap:6px;margin-bottom:12px">'+
+      ['PENDING','COMPLETE','PARTIAL'].map(function(s){
+        var ssc=s==='COMPLETE'?'var(--green)':s==='PARTIAL'?'var(--accent2)':'var(--amber)';
+        var isA=o.status===s;
+        return '<button class="det-status-btn" data-oid="'+oid+'" data-status="'+s+'" '+
+          'style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;'+
+          'border:2px solid '+(isA?ssc:'var(--border)')+';background:'+(isA?'rgba(0,0,0,0.05)':'none')+';color:'+(isA?ssc:'var(--muted)')+'">'+s+'</button>';
+      }).join('')+
+    '</div>'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Payment</div>'+
+    '<div style="display:flex;gap:6px">'+
+      ['PAID','UNPAID'].map(function(p){
+        var ppc=p==='PAID'?'var(--green)':'var(--red)';
+        var isA=o.paid===p;
+        return '<button class="det-paid-btn" data-oid="'+oid+'" data-paid="'+p+'" '+
+          'style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;'+
+          'border:2px solid '+(isA?ppc:'var(--border)')+';background:'+(isA?'rgba(0,0,0,0.05)':'none')+';color:'+(isA?ppc:'var(--muted)')+'">'+p+'</button>';
+      }).join('')+
+    '</div>'+
+  '</div>'+
+  '<button class="det-delete-btn" data-oid="'+oid+'" style="width:100%;padding:9px;background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:8px;font-size:13px;cursor:pointer;font-family:DM Sans,sans-serif">Delete Order</button>';
+
+  var detContent=document.getElementById('orderDetailContent');
+  detContent.innerHTML=h;
+  // Event delegation for detail buttons
+  detContent.onclick=function(e){
+    var sb=e.target.closest('.det-status-btn');
+    var pb=e.target.closest('.det-paid-btn');
+    var db=e.target.closest('.det-delete-btn');
+    if(sb) updateOrderStatus(sb.getAttribute('data-oid'),sb.getAttribute('data-status'));
+    if(pb) updateOrderPaid(pb.getAttribute('data-oid'),pb.getAttribute('data-paid'));
+    if(db) deleteOrder(db.getAttribute('data-oid'));
+  };
+}
+
+function closeOrderDetail(){
+  document.getElementById('orderDetail').style.display='none';
+  document.getElementById('orderListView').style.display='block';
+  loadOrders();
 }
 
 function renderOrders(){loadOrders();}
 
-// Use event delegation to avoid quote conflicts
-document.addEventListener('click',function(e){
-  var completeBtn=e.target.closest('.ord-complete-btn');
-  var deleteBtn=e.target.closest('.ord-delete-btn');
-  if(completeBtn){updateOrderStatus(completeBtn.getAttribute('data-oid'),'COMPLETE');}
-  if(deleteBtn){deleteOrder(deleteBtn.getAttribute('data-oid'));}
-});
-
 function updateOrderStatus(orderId,status){
+  for(var i=0;i<_allOrders.length;i++){if(_allOrders[i].id===orderId){_allOrders[i].status=status;break;}}
   sendWrite({action:'updateOrder',orderId:orderId,status:status});
-  toast('Order marked '+status);
-  setTimeout(loadOrders,800);
   logActivity('Order '+status,'Order #'+orderId);
+  toast('Marked '+status);
+  openOrderDetail(orderId);
+}
+
+function updateOrderPaid(orderId,paid){
+  for(var i=0;i<_allOrders.length;i++){if(_allOrders[i].id===orderId){_allOrders[i].paid=paid;break;}}
+  sendWrite({action:'updateOrder',orderId:orderId,paid:paid});
+  logActivity('Order payment '+paid,'Order #'+orderId);
+  toast('Marked '+paid);
+  openOrderDetail(orderId);
 }
 
 function deleteOrder(orderId){
   if(!confirm('Delete this order?')) return;
+  _allOrders=_allOrders.filter(function(o){return o.id!==orderId;});
   sendWrite({action:'deleteOrder',orderId:orderId});
   toast('Order deleted');
-  setTimeout(loadOrders,800);
   logActivity('Deleted order','Order #'+orderId);
+  closeOrderDetail();
+}
+
+
+// ── DAY SUMMARY ──────────────────────────────────────────────
+function showDaySummary(){
+  var overlay=document.getElementById('summaryOverlay');
+  var content=document.getElementById('summaryContent');
+  // Get today's activity from log
+  var today=todayDate();
+  var todayLogs=activityLog.filter(function(e){return e.date===today;});
+  var sales=todayLogs.filter(function(e){return e.action==='End of Day Sales'||e.action==='Sold';});
+  var restocks=todayLogs.filter(function(e){return e.action==='Bulk Restock'||e.action==='Restocked';});
+  var priceChanges=todayLogs.filter(function(e){return e.action==='Updated'||e.action==='Updated pricing';});
+  var deals=todayLogs.filter(function(e){return e.action==='Added deal'||e.action==='Removed deal';});
+  var lowCount=inventory.filter(function(x){return x.status==='LOW';}).length;
+  var outCount=inventory.filter(function(x){return x.status==='OUT';}).length;
+
+  var h='<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">'+today+' &nbsp;|&nbsp; Signed in as <b style="color:var(--text)">'+currentUser+'</b></div>';
+
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem">';
+  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Sales Today</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--accent)">'+sales.length+'</div></div>';
+  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Restocks</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--green)">'+restocks.length+'</div></div>';
+  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Running Low</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--amber)">'+lowCount+'</div></div>';
+  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Out of Stock</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--red)">'+outCount+'</div></div>';
+  h+='</div>';
+
+  if(sales.length){
+    h+='<div style="margin-bottom:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Sales</div>';
+    for(var i=0;i<sales.length;i++) h+='<div style="font-size:12px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">'+sales[i].detail+'</div>';
+    h+='</div>';
+  }
+  if(restocks.length){
+    h+='<div style="margin-bottom:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Restocks</div>';
+    for(var i=0;i<restocks.length;i++) h+='<div style="font-size:12px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">'+restocks[i].detail+'</div>';
+    h+='</div>';
+  }
+
+  // Low/Out items
+  var lowItems=inventory.filter(function(x){return x.status==='LOW'||x.status==='OUT';}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(lowItems.length){
+    h+='<div><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Needs Restocking</div>';
+    for(var i=0;i<lowItems.length;i++){
+      var itm=lowItems[i];
+      var sc=itm.status==='OUT'?'var(--red)':'var(--amber)';
+      h+='<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">'+
+        '<span style="color:var(--text)">'+itm.name+' <span style="color:var(--muted);font-size:10px">('+tl(itm)+')</span></span>'+
+        '<span style="color:'+sc+';font-weight:600">'+itm.status+' - '+itm.qty+' left</span>'+
+      '</div>';
+    }
+    h+='</div>';
+  }
+
+  if(!sales.length&&!restocks.length&&!lowItems.length) h+='<div style="text-align:center;padding:2rem;color:var(--muted)">No activity recorded today.</div>';
+
+  content.innerHTML=h;
+  // Store for copy
+    content.setAttribute('data-summary',
+    today+' Summary | '+currentUser+
+    ' | Sales: '+sales.length+' | Restocks: '+restocks.length+' | Low: '+lowCount+' | Out: '+outCount+
+    (lowItems.length?' | Needs Restocking: '+lowItems.map(function(x){return x.name+'('+x.status+')';}).join(', '):'')+
+    (sales.length?' | Sales: '+sales.map(function(s){return s.detail;}).join('; '):'')+
+    (restocks.length?' | Restocks: '+restocks.map(function(r){return r.detail;}).join('; '):''));
+  overlay.style.display='flex';
+}
+
+function copySummary(){
+  var el=document.getElementById('summaryContent');
+  var txt=el.getAttribute('data-summary')||'No summary available';
+  navigator.clipboard.writeText(txt).then(function(){toast('Summary copied!');}).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Summary copied!');
+  });
 }
 
 function toggleHamburger(e){
