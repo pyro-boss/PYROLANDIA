@@ -614,7 +614,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn primary" id="modalSaveBtn" onclick="saveModal()">Save and Sync</button>
+      <button class="btn primary" id="modalSaveBtn" onclick="saveModal()" style="min-width:130px">Save and Sync</button>
     </div>
   </div>
 </div>
@@ -671,9 +671,17 @@ function startSession(u){
   document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
   loadDealsFromDB();loadActivityLog();
   loadAllTabs();renderStaffList();
+  setTimeout(pingScript,1500); // test connection to sheet
   if(window._autoReload) clearInterval(window._autoReload);
   var jitter=Math.floor(Math.random()*60000);
   window._autoReload=setInterval(function(){if(currentUser)loadAllTabs();},(5*60*1000)+jitter);
+}
+
+// Test script connection on login
+function pingScript(){
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'ping'})})
+    .then(function(){setSyncStatus('ok','Connected');})
+    .catch(function(){setSyncStatus('error','No connection to sheet');});
 }
 
 function doLogin(){
@@ -844,26 +852,62 @@ var _writeQueue={};
 var _writeTimer=null;
 
 function sendWrite(payload){
-  // Queue by item name+tab — last write wins per item
   if(payload.item&&payload.item.name){
     var key=(payload.item.tab||0)+'_'+(payload.item.name||'');
     _writeQueue[key]=payload;
   } else {
-    // Non-item payloads (sales, delete) send immediately
-    fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(function(){});
+    // Non-item payloads send immediately with retry
+    sendWithRetry(payload,0);
     return;
   }
-  // Debounce: flush after 800ms of no new writes
   if(_writeTimer) clearTimeout(_writeTimer);
   _writeTimer=setTimeout(function(){
     var keys=Object.keys(_writeQueue);
     for(var i=0;i<keys.length;i++){
-      fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(_writeQueue[keys[i]])}).catch(function(){});
+      sendWithRetry(_writeQueue[keys[i]],0);
     }
     _writeQueue={};
     _writeTimer=null;
-    setSyncStatus('ok','Saved '+keys.length+' item'+(keys.length===1?'':'s'));
+    setSyncStatus('ok','Synced '+keys.length+' item'+(keys.length===1?'':'s'));
   },800);
+}
+
+// Retry wrapper — tries up to 3 times with 2s gap
+function sendWithRetry(payload,attempt){
+  fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
+    .catch(function(){
+      if(attempt<2){
+        setTimeout(function(){sendWithRetry(payload,attempt+1);},2000);
+      } else {
+        setSyncStatus('error','Sync failed — check connection');
+      }
+    });
+}
+
+// Reliable write for critical operations (add/delete) — returns a promise
+// Uses a workaround: no-cors means we can not read the response, but we can
+// detect network failure. On success we trust the script received it.
+function sendWriteReliable(payload,onSuccess,onError){
+  setSyncStatus('','Saving...');
+  var attempts=0;
+  function attempt(){
+    fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
+      .then(function(){
+        // no-cors always resolves with opaque response — treat as success
+        setSyncStatus('ok','Saved');
+        if(onSuccess) onSuccess();
+      })
+      .catch(function(err){
+        attempts++;
+        if(attempts<3){
+          setTimeout(attempt,1500);
+        } else {
+          setSyncStatus('error','Could not save — check wifi');
+          if(onError) onError(err);
+        }
+      });
+  }
+  attempt();
 }
 
 function toast(msg,dur){dur=dur||2600;var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},dur);}
@@ -1457,6 +1501,15 @@ function saveModal(){
   var name=document.getElementById('mName').value.trim().toUpperCase();
   if(!name){alert('Name required.');return;}
   var btn=document.getElementById('modalSaveBtn');if(btn.disabled) return;
+  // Check for duplicate name in same tab
+  var tabVal=parseInt(document.getElementById('mTab').value);
+  if(isAdding){
+    var dupe=inventory.filter(function(x){return x.name===name&&x.tab===tabVal;});
+    if(dupe.length){
+      toast('Product "'+name+'" already exists in this tab');
+      return;
+    }
+  }
   btn.disabled=true;btn.textContent='Saving...';
   var tab=parseInt(document.getElementById('mTab').value);
   var price=document.getElementById('mPrice').value.trim();
@@ -1469,15 +1522,31 @@ function saveModal(){
   var item;
   if(isAdding){
     item={id:nextId++,tab:tab,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:cases+singles,lastUpdated:null};
-    recalc(item);inventory.push(item);
-    sendWrite({action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
-    logActivity('Added product',name);toast('Added '+name);
+    recalc(item);
+    // Use reliable write for add — keep button disabled until we know it sent
+    sendWriteReliable(
+      {action:'addItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}},
+      function(){ // success
+        inventory.push(item);
+        logActivity('Added product',name);
+        toast('Added '+name);
+        btn.disabled=false;btn.textContent='Save and Sync';
+        closeModal();updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
+      },
+      function(){ // failure — still add locally but warn
+        inventory.push(item);
+        toast('Added locally — sheet sync failed, try reload');
+        btn.disabled=false;btn.textContent='Save and Sync';
+        closeModal();updateStats();renderTable();renderLowStock();populateSaleDropdown();renderRestockList();
+      }
+    );
+    return; // don't fall through — callback handles the rest
   } else {
-    item=fi(editingId);var old=item.qty;
+    item=fi(editingId);var oldQty=item.qty;
     item.tab=tab;item.name=name;item.packed=packed;item.price=price;item.casePrice=casePrice;item.cases=cases;item.singles=singles;
     recalc(item);stampLastUpdated(item);
     sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases,singles:item.singles,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
-    logActivity('Edited',name+(old!==item.qty?' qty:'+old+' to '+item.qty:''));
+    logActivity('Edited',name+(oldQty!==item.qty?' qty:'+oldQty+' to '+item.qty:''));
     toast('Updated '+name);
   }
   btn.disabled=false;btn.textContent='Save and Sync';
