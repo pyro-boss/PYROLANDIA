@@ -250,8 +250,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       </div>
     </div>
     <div class="view active" id="view-inventory">
-      <button onclick="openAddModal()" id="addProductBtn"
-        style="position:fixed;bottom:24px;right:24px;z-index:500;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 20px rgba(255,77,0,0.5);display:flex;align-items:center;justify-content:center;line-height:1">+</button>
+
       <div class="toolbar">
         <input type="text" id="search" placeholder="Search products..." oninput="renderTable()" style="flex:1">
         <select id="statusFilter" onchange="renderTable()" style="width:110px">
@@ -452,7 +451,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   <div class="qs-box" onclick="event.stopPropagation()">
     <input class="qs-input" id="qsInput" placeholder="Search any product..." oninput="renderQS()" autocomplete="off">
     <div class="qs-results" id="qsResults"><div class="qs-empty">Start typing to find a product</div></div>
-    <div class="qs-hint"><span>+/- to adjust stock</span><span>Esc to close</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-top:1px solid var(--border)">
+      <div class="qs-hint" style="border:none;padding:0"><span>+/- to adjust stock</span><span>Esc to close</span></div>
+      <button onclick="closeQS();openAddModal();" style="padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap">+ Add Product</button>
+    </div>
   </div>
 </div>
 <div class="qe-overlay" id="sellOverlay" style="display:none" onclick="if(event.target===this)closeSell()">
@@ -900,7 +902,11 @@ function renderTable(){
     var x=inventory[i];
     if(activeTab>=0&&x.tab!==activeTab) continue;
     if(sf&&x.status!==sf) continue;
-    if(search&&x.name.toLowerCase().indexOf(search)===-1) continue;
+    if(search){
+      var sWords=search.toLowerCase().split(/\s+/).filter(Boolean);
+      var nm=x.name.toLowerCase();
+      if(!sWords.every(function(w){return nm.indexOf(w)>=0;})) continue;
+    }
     rows.push(x);
   }
   // Default sort: A-Z
@@ -999,6 +1005,51 @@ function saveCardPriceEl(el){
   saveCardPrice(id,el.value,field);
 }
 
+function editQtyInline(event,id,field){
+  event.stopPropagation();
+  var spanId=field==='cases'?'cc_'+id:'cs_'+id;
+  var span=document.getElementById(spanId);
+  if(!span) return;
+  var item=fi(id);if(!item) return;
+  var current=field==='cases'?(item.cases||0):(item.singles||0);
+  // Replace span with a small input
+  var inp=document.createElement('input');
+  inp.type='number';
+  inp.min='0';
+  inp.value=current;
+  inp.style.cssText='width:46px;height:30px;font-family:Bebas Neue,sans-serif;font-size:18px;text-align:center;border:2px solid var(--accent);border-radius:6px;background:var(--surface);color:var(--accent);padding:0 2px;';
+  span.replaceWith(inp);
+  inp.focus();inp.select();
+  function commit(){
+    var val=Math.max(0,parseInt(inp.value)||0);
+    var delta=val-current;
+    // Restore span
+    span.textContent=val;
+    inp.replaceWith(span);
+    if(delta===0) return;
+    // Apply the absolute value directly
+    var item2=fi(id);if(!item2) return;
+    if(field==='cases') item2.cases=val;
+    else item2.singles=val;
+    recalc(item2);
+    var tEl=document.getElementById('ct_'+id);
+    var card=document.getElementById('card_'+id);
+    if(tEl) tEl.textContent=item2.qty;
+    if(card){card.classList.remove('IN','LOW','OUT');card.classList.add(item2.status);}
+    stampLastUpdated(item2);
+    // Write delta to sheet
+    sendWrite({action:'adjustItem',item:{name:item2.name,tab:item2.tab},field:field,delta:delta});
+    logActivity('Updated',item2.name+' '+field+' set to '+val);
+    toast(item2.name+' '+field+' set to '+val);
+  }
+  inp.addEventListener('keydown',function(e){
+    e.stopPropagation();
+    if(e.key==='Enter'){commit();}
+    if(e.key==='Escape'){inp.replaceWith(span);}
+  });
+  inp.addEventListener('blur',commit);
+}
+
 function adjustCount(id,field,delta,event){
   event.stopPropagation();
   var item=fi(id);if(!item) return;
@@ -1080,7 +1131,7 @@ function renderCardGrid(rows){
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" '+
               'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
-            '<span id="cc_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.cases||0)+'</span>'+
+            '<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.cases||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" '+
               'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
           '</div>'+
@@ -1090,7 +1141,7 @@ function renderCardGrid(rows){
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" '+
               'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
-            '<span id="cs_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center">'+(item.singles||0)+'</span>'+
+            '<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.singles||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" '+
               'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
           '</div>'+
@@ -1848,7 +1899,11 @@ function renderPricingCards(){
   for(var i=0;i<inventory.length;i++){
     var x=inventory[i];
     if(tabF>=0&&x.tab!==tabF) continue;
-    if(search&&x.name.toLowerCase().indexOf(search)===-1) continue;
+    if(search){
+      var sWords=search.toLowerCase().split(/\s+/).filter(Boolean);
+      var nm=x.name.toLowerCase();
+      if(!sWords.every(function(w){return nm.indexOf(w)>=0;})) continue;
+    }
     var mp=!x.price,mcp=!x.casePrice;
     // 1/1 and 2/1 don't need packed info
     var mpk=!x.packed&&x.tab!==0&&x.tab!==1;
@@ -1941,7 +1996,9 @@ function renderQS(){
   var q=(document.getElementById('qsInput').value||'').toLowerCase().trim();
   var el=document.getElementById('qsResults');
   if(!q){el.innerHTML='<div class="qs-empty">Start typing to find a product</div>';return;}
-  var matches=[];for(var i=0;i<inventory.length;i++){if(inventory[i].name.toLowerCase().indexOf(q)>=0)matches.push(inventory[i]);}
+  // Match any word in query against product name
+  var qWords=q.split(' ').filter(function(w){return w.length>0;});
+  var matches=[];for(var i=0;i<inventory.length;i++){var nm=inventory[i].name.toLowerCase();if(qWords.every(function(w){return nm.indexOf(w)>=0;}))matches.push(inventory[i]);}
   matches.sort(function(a,b){return a.name.localeCompare(b.name);});
   if(!matches.length){
     var qUp=q.toUpperCase();
@@ -2305,7 +2362,10 @@ updateOnlineStatus();
 restoreSession();
 
 document.addEventListener('keydown',function(e){
-  if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key==='k'))&&currentUser){e.preventDefault();openQS();}
+  // Don't intercept keystrokes when user is typing in any input/textarea/select
+  var tag=(e.target.tagName||'').toLowerCase();
+  var isTyping=tag==='input'||tag==='textarea'||tag==='select'||e.target.isContentEditable;
+  if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key==='k'))&&currentUser&&!isTyping){e.preventDefault();openQS();}
   if(e.key==='Escape'){closeQS();closeQE();closeSell();}
 });
 document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
