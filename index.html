@@ -123,7 +123,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);letter-spacing:1px;margin-bottom:1.25rem}
 .field{margin-bottom:1rem}
 .field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif}
+.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif;min-height:48px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
 .field input[readonly]{opacity:0.5;cursor:not-allowed}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.5rem}
@@ -147,7 +147,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .toast.show{opacity:1}
 .qs-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:flex;align-items:flex-start;justify-content:center;padding-top:80px;backdrop-filter:blur(4px)}
 .qs-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
-.qs-input{width:100%;padding:16px 20px;border:none;background:transparent;color:var(--text);font-size:18px;font-family:'DM Sans',sans-serif;outline:none}
+.qs-input{width:100%;padding:16px 20px;border:none;background:transparent;color:var(--text);font-size:18px;font-family:'DM Sans',sans-serif;outline:none;-webkit-appearance:none}
 .qs-input::placeholder{color:var(--muted)}
 .qs-results{max-height:360px;overflow-y:auto}
 .qs-result{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);cursor:default;transition:background 0.1s}
@@ -172,33 +172,102 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   th{background:#f0f0f0;color:#333}
   td{border-bottom:1px solid #eee}
 }
-@media(max-width:480px){
-  .stats{grid-template-columns:1fr 1fr}
+/* ── MOBILE FIRST (phones under 640px) ─────────────────── */
+@media(max-width:640px){
+
+  /* TOPBAR - smaller, tighter */
+  .topbar{padding:0 .6rem;height:48px}
+  .logo{font-size:19px;letter-spacing:1px}
+  .user-badge{display:none}
+  .topbar-btn{padding:6px 10px;font-size:11px;min-height:36px}
+
+  /* NAV - scrollable row, bigger tap targets */
+  .nav{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;gap:4px;padding:.4rem .6rem;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-btn{padding:8px 12px;font-size:12px;white-space:nowrap;min-height:40px;flex-shrink:0}
+
+  /* TOOLBAR - stack search on top, buttons below */
+  .toolbar{flex-wrap:wrap;gap:6px;padding:.5rem .6rem}
+  .toolbar input{width:100%;flex:none;height:40px;font-size:14px}
+  .toolbar select{height:40px;font-size:13px}
+  .toolbar button{height:40px;padding:0 16px;font-size:13px;min-width:72px}
+
+  /* MAIN CONTENT */
+  .main{padding:.6rem}
+
+  /* STATS */
+  .stats{grid-template-columns:1fr 1fr;gap:6px}
+  .stat{padding:.6rem .75rem}
+  .stat-val{font-size:24px}
+  .stat-label{font-size:10px}
+
+  /* CARDS - 2 col, bigger internal targets */
+  .card-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .inv-card{padding:8px}
+
+  /* TWO-COL panels become single col */
   .two-col{grid-template-columns:1fr}
   .report-grid{grid-template-columns:1fr 1fr}
-  .card-grid{grid-template-columns:1fr 1fr;gap:6px}
-  .topbar{padding:0 .75rem;height:50px}
-  .logo{font-size:20px}
-  .user-badge{display:none}
-  .topbar-btn{padding:4px 7px;font-size:10px}
-  .nav-btn{padding:6px 9px;font-size:11px}
-  .main{padding:.75rem}
-  .stats{gap:6px}
-  .stat{padding:.65rem .75rem}
-  .stat-val{font-size:26px}
+
+  /* PANELS */
+  .panel{padding:1rem}
+  .panel-title{font-size:13px}
+
+  /* CHECKBOX ITEMS in restock - bigger tap area */
+  .checkbox-item{padding:12px 10px;min-height:48px}
+  .checkbox-item input[type=checkbox]{width:20px;height:20px;flex-shrink:0}
+  .checkbox-item label{font-size:13px}
+
+  /* SELECTS AND INPUTS - min 44px tall for thumbs */
+  select,input[type=text],input[type=number],input[type=email],input[type=tel],input[type=password]{
+    min-height:44px;font-size:16px!important;/* 16px prevents iOS zoom */
+  }
+  .field input,.field select{min-height:48px;font-size:16px}
+
+  /* BUTTONS - min 44px tall */
+  .btn{min-height:44px;padding:0 16px;font-size:14px}
+  button.btn,a.btn{min-height:44px}
+
+  /* MODAL - full width, slide from bottom feel */
+  .modal{padding:1.25rem;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0;max-height:90vh}
+  .overlay{align-items:flex-end;padding:0}
+
+  /* SELL MODAL */
+  .qe-modal{max-width:100%;border-radius:16px 16px 0 0}
+  .qe-overlay{align-items:flex-end;padding:0}
+  .sell-num-btn{width:56px;height:56px;font-size:26px}
+
+  /* QUICK SEARCH */
+  .qs-overlay{padding-top:0;align-items:flex-end}
+  .qs-box{border-radius:16px 16px 0 0;max-width:100%}
+  .qs-input{font-size:16px;padding:18px 16px}
+  .qs-btn{width:40px;height:40px;font-size:22px}
+  .qs-result{padding:14px 16px}
+  .qs-result-name{font-size:15px}
+
+  /* TOAST - bottom center on mobile */
+  .toast{bottom:16px;right:50%;transform:translateX(50%);width:90%;text-align:center}
+
+  /* ORDERS */
+  .ord-row{padding:10px 12px}
 }
+
+/* ── TABLET (481-768px) ─────────────────────────────────── */
 @media(min-width:481px)and(max-width:768px){
   .card-grid{grid-template-columns:repeat(2,1fr)}
   .stats{grid-template-columns:repeat(4,1fr)}
   .two-col{grid-template-columns:1fr}
 }
+
+/* ── SMALL TABLET / LARGE PHONE (641-1024px) ────────────── */
 @media(min-width:769px)and(max-width:1024px){
   .card-grid{grid-template-columns:repeat(3,1fr)}
 }
+
+/* ── DESKTOP ────────────────────────────────────────────── */
 @media(min-width:1025px){
   .card-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 }
-@media(max-width:640px){.report-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -207,7 +276,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="login-logo">PYROLANDIA</div>
     <div class="login-sub">Staff Portal</div>
     <label>Username</label>
-    <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" autocapitalize="characters" style="text-transform:uppercase">
+    <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" autocapitalize="characters" style="text-transform:uppercase;font-size:16px;min-height:50px;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:DM Sans,sans-serif;margin-bottom:10px">
     <label>Password</label>
     <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password">
     <button class="login-btn" onclick="doLogin()">Sign In</button>
@@ -224,7 +293,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="topbar-right">
       <span class="sync-status" id="syncStatus"></span>
       <span id="lastSyncTime" style="font-size:10px;color:var(--muted)"></span>
-      <button class="topbar-btn" onclick="openQS()" style="border-color:rgba(255,77,0,0.4);color:var(--accent)">Search</button>
+      <button class="topbar-btn" style="background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600" onclick="openQS()">&#128269;</button>
       <button class="topbar-btn" onclick="showDaySummary()">Summary</button>
       <button class="topbar-btn" onclick="loadAllTabs()">Reload</button>
       <button class="topbar-btn logout" onclick="doLogout()">Sign Out</button>
@@ -1107,9 +1176,9 @@ function renderCardGrid(rows){
           'x-was-onchange="saveCardField('+item.id+',\'name\',this.value)" '+
           'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
         '<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" title="Save name" '+
-          'style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:5px;padding:2px 5px;font-size:10px;cursor:pointer;flex-shrink:0">OK</button>'+
+          'style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">OK</button>'+
         '<button onclick="deleteCardItem('+item.id+')" title="Delete" '+
-          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 5px;font-size:10px;cursor:pointer;flex-shrink:0">X</button>'+
+          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>'+
       '</div>'+
 
       // Price + Case Price equal width
@@ -1131,17 +1200,17 @@ function renderCardGrid(rows){
           '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
             '<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.cases||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" '+
-              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
+              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
           '</div>'+
         '</div>'+
         '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
           '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>'+
           '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
             '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
+              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
             '<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.singles||0)+'</span>'+
             '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" '+
               'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
@@ -1152,12 +1221,12 @@ function renderCardGrid(rows){
       // Tab + PKD on one row (PKD hidden for 1/1 and 2/1)
       '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px">'+
         '<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" '+
-          'style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+          'style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
           tabOpts+
         '</select>'+
         (showPKD?
           '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-            'style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif">'+
+            'style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
             buildPackedOptions(packedVal)+
           '</select>'+
           '<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" '+
@@ -1177,20 +1246,20 @@ function renderCardGrid(rows){
         '</div>'
       :
         '<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">'+
-          '<select id="dq_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+          '<select id="dq_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
             buildQtyOptions()+
           '</select>'+
           '<span style="font-size:9px;color:var(--muted);flex-shrink:0">for $</span>'+
-          '<select id="dp_'+item.id+'" style="flex:1;padding:2px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;font-family:DM Sans,sans-serif">'+
+          '<select id="dp_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
             buildPriceOptions()+
           '</select>'+
-          '<button onclick="addDealFromCard('+item.id+')" style="padding:2px 5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">+Deal</button>'+
+          '<button onclick="addDealFromCard('+item.id+')" style="padding:6px 8px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:36px">+Deal</button>'+
         '</div>'
       )+
 
       // Sell + timestamp
       '<button onclick="openSellModal('+item.id+')" '+
-        'style="width:100%;padding:4px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">'+
+        'style="width:100%;padding:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:44px">'+
         'Sell'+
       '</button>'+
       '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">'+stamp+'</div>'+
@@ -1494,8 +1563,8 @@ function renderRestockList(){
     if(tabF>=0&&item.tab!==tabF) continue;
     if(statusF&&item.status!==statusF) continue;
     if(search&&item.name.toLowerCase().indexOf(search)===-1) continue;
-    h+='<div class="checkbox-item" style="flex-wrap:wrap;gap:6px" onclick="toggleRestock('+item.id+')">'+
-      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()" style="flex-shrink:0">'+
+    h+='<div class="checkbox-item" style="flex-wrap:wrap;gap:6px;min-height:52px" onclick="toggleRestock('+item.id+')">'+
+      '<input type="checkbox" id="rc_'+item.id+'" onclick="event.stopPropagation();updateBulkBtn()" style="flex-shrink:0;width:22px;height:22px">'+
       '<label for="rc_'+item.id+'" style="flex:1;min-width:100px">'+item.name+
         ' <span style="color:var(--muted);font-size:11px">('+tl(item)+')</span>'+
       '</label>'+
