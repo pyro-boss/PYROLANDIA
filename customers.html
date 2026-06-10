@@ -6,27 +6,20 @@
 <title>Pyrolandia Fireworks 2026 - Gary, IN</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
-:root{
-  --bg:#f5f5f5;--surface:#ffffff;--surface2:#f0f0f0;--border:#e0e0e0;
-  --accent:#e63900;--accent2:#cc7700;--text:#1a1a1a;--muted:#666666;
-  --green:#16a34a;--amber:#b45309;--red:#dc2626;
-  --green-bg:#dcfce7;--amber-bg:#fef3c7;--red-bg:#fee2e2;
-  --shadow:0 2px 8px rgba(0,0,0,0.08);
-}
+:root{--bg:#f5f5f5;--surface:#ffffff;--surface2:#f0f0f0;--border:#e0e0e0;--accent:#e63900;--accent2:#cc7700;--text:#1a1a1a;--muted:#666666;--green:#16a34a;--amber:#b45309;--red:#dc2626;--green-bg:#dcfce7;--amber-bg:#fef3c7;--red-bg:#fee2e2;--shadow:0 2px 8px rgba(0,0,0,0.08)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 .hero{width:100%;background:#0e0e0f;display:flex;align-items:center;justify-content:center;padding:.4rem 1.5rem;max-height:100px;overflow:hidden;border-bottom:3px solid var(--accent)}
 .hero img{max-height:88px;width:auto;object-fit:contain}
 .ticker-wrap{background:#0e0e0f;border-bottom:1px solid #333;padding:5px 0;overflow:hidden;white-space:nowrap;position:sticky;top:0;z-index:200}
 .ticker-track{display:inline-flex;animation:tickerScroll 22s linear infinite}
-.ticker-seg{display:inline-block;font-size:12px;color:#aaa;padding-right:0}
+.ticker-seg{display:inline-block;font-size:12px;color:#aaa}
 @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .store-bar{background:var(--surface);border-bottom:2px solid var(--border);padding:.5rem 1rem;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow)}
 .store-bar a,.store-bar button{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;font-family:inherit;border:none;transition:opacity 0.15s}
 .btn-call{background:var(--accent);color:#fff}
 .btn-dir{background:var(--surface2);color:var(--text);border:1px solid var(--border)!important}
 .btn-share{background:var(--surface2);color:var(--text);border:1px solid var(--border)!important}
-.store-bar a:hover,.store-bar button:hover{opacity:0.85}
 .deals-panel{max-width:1100px;margin:0 auto;padding:.5rem 1rem;display:none}
 .deals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:.5rem}
 .deal-card{background:linear-gradient(135deg,#1a0800,#2d1200);border:1px solid rgba(255,77,0,0.4);border-radius:12px;padding:12px;position:relative;color:#f0ede8}
@@ -36,48 +29,47 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .deal-card-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
 .best-badge{position:absolute;top:8px;right:8px;background:#ffaa00;color:#000;border-radius:20px;padding:2px 7px;font-size:9px;font-weight:800;letter-spacing:1px}
 .controls{max-width:1100px;margin:0 auto;padding:.4rem 1rem .2rem;background:var(--bg);position:sticky;top:58px;z-index:100}
-.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.3rem;align-items:center}
-.filters input{flex:1;min-width:140px;height:36px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow)}
+.filters{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:.3rem;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.filters input{flex:1;min-width:140px;height:36px;padding:0 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif}
 .filters input:focus{outline:none;border-color:var(--accent)}
-.filter-btn{padding:4px 11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;box-shadow:var(--shadow)}
-.filter-btn:hover,.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.deals-filter-btn{padding:4px 11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:11px;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap}
-.deals-filter-btn.has-deals{border-color:var(--accent);color:var(--accent);background:#fff5f3}
+.filter-btn{padding:5px 11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;flex-shrink:0}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.deals-filter-btn{padding:5px 11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0}
+.deals-filter-btn.has-deals{border-color:var(--accent);color:var(--accent)}
 .deals-filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.sort-sel{height:34px;padding:0 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;width:120px}
-.cart-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 2px 8px rgba(230,57,0,0.3)}
+.sort-sel{height:36px;padding:0 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;flex-shrink:0;width:120px}
+.cart-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
 .tab-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.2rem}
 .tab-f{padding:3px 9px;font-size:11px;border:1.5px solid var(--border);border-radius:20px;background:var(--surface);color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:all 0.15s}
-.tab-f:hover,.tab-f.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.last-updated{font-size:10px;color:var(--muted);padding:.1rem 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tab-f.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.last-updated{font-size:10px;color:var(--muted);padding:.1rem 0}
 .main{max-width:1100px;margin:0 auto;padding:.5rem 1rem 3rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
 .card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:all 0.15s}
-.card:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(230,57,0,0.12);transform:translateY(-1px)}
+.card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .card.OUT{opacity:0.7}
 .card.LOW{border-color:#f59e0b}
-.card-tab{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.card-tab{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
 .card-name{font-weight:600;font-size:14px;line-height:1.3;margin-bottom:auto;padding-bottom:10px;color:var(--text)}
 .card-footer{margin-top:auto}
 .card-price{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1}
 .card-price.none{color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif}
-.card-case-price{font-size:11px;color:var(--muted);margin-top:1px}
+.card-case-price{font-size:11px;color:var(--muted)}
 .card-packed{font-size:11px;color:var(--muted);margin-bottom:5px}
-.deal-badge{display:inline-flex;align-items:center;gap:4px;background:#fff5f3;border:1px solid rgba(230,57,0,0.3);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--accent);font-weight:700;margin-bottom:6px}
-.status-row{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.deal-badge{display:inline-flex;align-items:center;background:#fff5f3;border:1px solid rgba(230,57,0,0.3);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--accent);font-weight:700;margin-bottom:6px}
+.status-row{display:flex;align-items:center;gap:6px;margin-top:6px}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .badge.IN{background:var(--green-bg);color:var(--green)}
 .badge.LOW{background:var(--amber-bg);color:var(--amber)}
 .badge.OUT{background:var(--red-bg);color:var(--red)}
 .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
-.add-btn{width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px;transition:opacity 0.15s}
-.add-btn:hover{opacity:0.85}
+.add-btn{width:100%;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px}
 .add-btn.added{background:#16a34a}
-.req-btn{width:100%;padding:7px;background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px;transition:all 0.15s}
+.req-btn{width:100%;padding:7px;background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:6px}
 .req-btn.active{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .loading-state{text-align:center;padding:3rem;color:var(--muted);font-size:13px;grid-column:1/-1}
 .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;backdrop-filter:blur(3px)}
-.cart-panel{position:absolute;right:0;top:0;bottom:0;width:100%;max-width:420px;background:#fff;border-left:1px solid var(--border);padding:1.5rem;overflow-y:auto;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,0.12)}
+.cart-panel{position:absolute;right:0;top:0;bottom:0;width:100%;max-width:420px;background:#fff;border-left:1px solid var(--border);padding:1.5rem;overflow-y:auto;display:flex;flex-direction:column}
 .cart-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem}
 .cart-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);letter-spacing:1px}
 .cart-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
@@ -93,28 +85,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .req-section{margin-top:6px;padding-top:8px;border-top:1px solid var(--border);display:none}
 .req-section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
 .cart-submit-area{margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem}
-.submit-btn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(230,57,0,0.3)}
-.submit-btn:hover{opacity:0.9}
+.submit-btn{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
 .cart-form{display:none;margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem}
 .cart-form input,.cart-form textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;margin-bottom:8px}
-.cart-form input:focus,.cart-form textarea:focus{outline:none;border-color:var(--accent)}
 .cart-form textarea{resize:none;font-size:13px}
 .disclaimer{font-size:11px;color:var(--muted);text-align:center;padding:8px;line-height:1.5;border:1px solid var(--border);border-radius:6px;background:var(--surface2);margin-bottom:10px}
-.disclaimer b{color:var(--accent2)}
 .confirm-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-.confirm-btn:disabled{opacity:0.6}
 .cart-msg{font-size:12px;margin-top:8px;text-align:center;display:none}
 @media(max-width:500px){.cart-panel{max-width:100%}}
-@media(max-width:480px){
-  .grid{grid-template-columns:1fr 1fr;gap:8px}
-  .controls{top:54px}
-  .card-name{font-size:12px}
-  .card-price{font-size:24px}
-  .main{padding:.5rem .6rem 2rem}
-  .store-bar{gap:6px}
-  .store-bar a,.store-bar button{padding:5px 8px;font-size:11px}
-  .hero{max-height:70px;padding:.3rem 1rem}
-}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:8px}.controls{top:54px}.main{padding:.5rem .6rem 2rem}}
 @media(min-width:769px)and(max-width:1024px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:1025px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
@@ -137,23 +116,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="deals-grid" id="dealsGrid"></div>
 </div>
 <div class="controls">
-  <!-- Row 1: Category dropdown + Sort + Cart + Deals -->
   <div class="filters">
-    <select id="categoryDrop" onchange="setCategoryDrop(this)" style="height:38px;padding:0 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;flex-shrink:0;max-width:130px">
+    <select id="categoryDrop" onchange="setCategoryDrop(this)" style="height:36px;padding:0 8px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;flex-shrink:0;max-width:130px">
       <option value="-1">All Types</option>
     </select>
-    <select class="sort-sel" id="sortOrder" onchange="render()" style="width:110px;flex-shrink:0">
+    <select class="sort-sel" id="sortOrder" onchange="render()">
       <option value="az">A to Z</option>
       <option value="za">Z to A</option>
       <option value="status">By Status</option>
       <option value="priceasc">$ Low-High</option>
       <option value="pricedesc">$ High-Low</option>
     </select>
-    <button class="cart-btn" onclick="toggleCart()" style="flex-shrink:0">&#128722; <span id="cartCount" style="background:rgba(255,255,255,0.3);border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700">0</span></button>
-    <button class="deals-filter-btn" id="dealsFilterBtn" onclick="toggleDealsPanel(this)" style="flex-shrink:0">&#128293; Deals</button>
+    <button class="cart-btn" onclick="toggleCart()">&#128722; Cart <span id="cartCount" style="background:rgba(255,255,255,0.3);border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700">0</span></button>
+    <button class="deals-filter-btn" id="dealsFilterBtn" onclick="toggleDealsPanel(this)">&#128293; Deals</button>
   </div>
-  <!-- Row 2: All / In Stock / Low Stock + price filters -->
-  <div class="tab-filters" style="flex-wrap:wrap">
+  <div class="tab-filters">
     <button class="filter-btn active" onclick="setStatus('',this)">All</button>
     <button class="filter-btn" onclick="setStatus('IN',this)">In Stock</button>
     <button class="filter-btn" onclick="setStatus('LOW',this)">Low Stock</button>
@@ -165,24 +142,50 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="tab-f" onclick="setPriceFilter('25to100',this)">$25-100</button>
     <button class="tab-f" onclick="setPriceFilter('o250',this)">$250+</button>
   </div>
-  <!-- Row 3: Search bar full width -->
   <div style="margin-top:4px">
-    <input type="text" id="search" placeholder="Search fireworks..." oninput="render()"
-      style="width:100%;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif">
+    <input type="text" id="search" placeholder="Search fireworks..." oninput="render()" style="width:100%;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif">
   </div>
   <div class="last-updated" id="lastUpdated"></div>
 </div>
-
-<!-- DEALS PANEL -->
-<div class="deals-panel" id="dealsPanel" style="display:none"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:1px;margin-bottom:.5rem">&#128293; HOT DEALS</div><div class="deals-grid" id="dealsGrid"></div></div>
-
-<!-- PRODUCT GRID -->
-<div class="main"><div class="grid" id="grid"><div class="loading-state">Loading inventory...</div></div></div>
-
-<!-- FLOAT CART BTN -->
+<div class="main">
+  <div class="grid" id="grid">
+    <div class="loading-state">Loading inventory...</div>
+  </div>
+</div>
 <button id="floatCartBtn" onclick="toggleCart()" style="display:none;position:fixed;bottom:20px;right:20px;z-index:500;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(230,57,0,0.4);align-items:center;justify-content:center;flex-direction:column;font-size:22px">&#128722;<span id="floatCartCount" style="font-size:10px;font-weight:700;display:block;line-height:1">0</span></button>
-
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this)toggleCart()">
+  <div class="cart-panel">
+    <div class="cart-hdr">
+      <div class="cart-title">MY WISHLIST</div>
+      <button class="cart-close" onclick="toggleCart()">&#10005;</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="req-section" id="reqSection">
+      <div class="req-section-title">Requesting When Back In Stock</div>
+      <div id="requestList"></div>
+    </div>
+    <div class="cart-empty" id="cartEmpty">Your cart is empty.<br>Tap <b>+ Add to Cart</b> on any product.</div>
+    <div class="cart-submit-area" id="cartSubmitArea" style="display:none">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;text-align:center">Review your items, then tap to submit.</div>
+      <button class="submit-btn" onclick="showCartForm()">Proceed to Submit &#8594;</button>
+    </div>
+    <div class="cart-form" id="cartForm">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:.75rem">Your Contact Info</div>
+      <input type="text" id="cartName" placeholder="Full Name *" autocapitalize="words">
+      <input type="email" id="cartEmail" placeholder="Email Address *">
+      <input type="tel" id="cartPhone" placeholder="Phone Number *">
+      <textarea id="cartNotes" placeholder="Any notes? (optional)" rows="2"></textarea>
+      <div class="disclaimer"><b>Please Note:</b> Wishlists are not confirmed orders. A Pyrolandia staff member will contact you to confirm availability and arrange payment.</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="hideCartForm()" style="flex:1;padding:11px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--muted)">&#8592; Back</button>
+        <button class="confirm-btn" id="confirmOrderBtn" onclick="submitOrder()" style="flex:2">Submit Wishlist</button>
+      </div>
+      <div class="cart-msg" id="cartMsg"></div>
+    </div>
+  </div>
+</div>
 <script>
+
 var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
 var TAB_NAMES=['1/1','2/1','500G','200G','SHELLS','CANDLES','ROCKETS','FOUNTAINS','MISC'];
@@ -307,6 +310,7 @@ updateFloatBtn();window.addEventListener('resize',updateFloatBtn);
 loadData();
 var jitter=Math.floor(Math.random()*60000);
 setInterval(loadData,3*60*1000+jitter);
+
 </script>
 </body>
 </html>
