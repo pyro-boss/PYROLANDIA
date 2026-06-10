@@ -1269,7 +1269,7 @@ function renderCardGrid(rows){
     var tabOpts='';
     for(var t=0;t<TABS.length;t++) tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
 
-    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'" style="min-height:180px;position:relative">';
+    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'" style="position:relative;overflow:hidden">';
 
     // ── FRONT FACE (default) ──────────────────────────────────
     h+='<div id="cardfront_'+item.id+'" style="display:'+(isFlipped?'none':'block')+'">';
@@ -1278,22 +1278,22 @@ function renderCardGrid(rows){
     if(item.status!=='IN') h+='<div class="inv-card-status-strip">'+(item.status==='LOW'?'LOW':'OUT')+'</div>';
 
     // Name row: status dot + name (truncated) + total + edit btn
-    h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">';
+    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
     h+='<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+statusColor+'"></div>';
     h+='<div style="flex:1;min-width:0;font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3">'+item.name+'</div>';
-    h+='<div style="flex-shrink:0;text-align:center;margin-left:2px">';
-    h+='<div style="font-size:8px;color:var(--muted);line-height:1">Total</div>';
+    if(item.packed) h+='<span style="font-size:9px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;flex-shrink:0;white-space:nowrap">'+item.packed+'</span>';
+    h+='<div style="flex-shrink:0;text-align:center">';
+    h+='<div style="font-size:8px;color:var(--muted);line-height:1">QTY</div>';
     h+='<div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--accent);line-height:1">'+item.qty+'</div>';
     h+='</div>';
-    h+='<button onclick="toggleCardExpand('+item.id+')" style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:2px 6px;font-size:10px;cursor:pointer;line-height:1.4">Edit</button>';
+    h+='<button onclick="toggleCardExpand('+item.id+')" style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:3px 7px;font-size:11px;cursor:pointer;line-height:1.4;min-height:28px">Edit</button>';
     h+='</div>';
 
-    // Packed + price on one row
-    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
-    if(item.packed) h+='<span style="font-size:10px;color:var(--muted);background:var(--surface2);border-radius:4px;padding:1px 5px;flex-shrink:0">'+item.packed+'</span>';
-    if(item.price) h+='<span style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--accent2)">$'+item.price+'</span>';
+    // Price row
+    h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">';
+    if(item.price) h+='<span style="font-family:Bebas Neue,sans-serif;font-size:17px;color:var(--accent2)">$'+item.price+'</span>';
     if(item.casePrice) h+='<span style="font-size:10px;color:var(--muted)">C$'+item.casePrice+'</span>';
-    if(deal) h+='<span style="margin-left:auto;font-size:10px;color:var(--accent);font-weight:700;background:rgba(255,77,0,0.1);border-radius:4px;padding:1px 5px">'+deal.qty+' for $'+deal.price+'</span>';
+    if(deal) h+='<span style="margin-left:auto;font-size:10px;color:var(--accent);font-weight:700;background:rgba(255,77,0,0.1);border-radius:4px;padding:1px 5px;white-space:nowrap">'+deal.qty+' for $'+deal.price+'</span>';
     h+='</div>';
 
     // Cases + Singles
@@ -1320,18 +1320,18 @@ function renderCardGrid(rows){
     h+='</div>'; // end front
 
     // ── BACK / EDIT FACE ──────────────────────────────────────
-    h+='<div id="cardback_'+item.id+'" style="display:'+(isFlipped?'block':'none')+'">';
+    h+='<div id="cardback_'+item.id+'" style="display:'+(isFlipped?'block':'none')+';overflow:hidden;">';
 
     // Header: Back button + name
     h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">';
     h+='<button onclick="toggleCardExpand('+item.id+')" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer">&#8592;</button>';
-    h+='<div style="flex:1;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
+    h+='<div style="flex:1;min-width:0;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
     h+='<button onclick="deleteCardItem('+item.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 6px;font-size:10px;cursor:pointer">X</button>';
     h+='</div>';
 
     // Editable name
     h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
-    h+='<input type="text" id="cname_'+item.id+'" value="'+item.name+'" data-saveid="'+item.id+'" autocapitalize="characters" class="cname-inp" placeholder="Product name" style="flex:1;min-width:0;padding:5px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">';
+    h+='<input type="text" id="cname_'+item.id+'" value="'+item.name+'" data-saveid="'+item.id+'" autocapitalize="characters" class="cname-inp" placeholder="Name" style="flex:1;min-width:0;width:0;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">';
     h+='<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:5px;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0">OK</button>';
     h+='</div>';
 
@@ -2314,8 +2314,8 @@ function renderOrdersList(orders){
     var o=filtered[i];
     var sc=o.status==='COMPLETE'?'var(--green)':o.status==='PARTIAL'?'var(--accent2)':'var(--amber)';
     var pc=o.paid==='PAID'?'var(--green)':'var(--red)';
-    var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0;});
-    var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0;});
+    var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0&&x.trim()!=='';});
+    var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0&&x.trim()!=='';});
     h+='<div class="ord-row" data-oid="'+o.id+'" style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;background:var(--surface2);cursor:pointer;transition:border-color 0.15s">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
         '<div style="flex:1;min-width:0">'+
@@ -2347,8 +2347,8 @@ function openOrderDetail(oid){
   document.getElementById('orderListView').style.display='none';
   document.getElementById('orderDetail').style.display='block';
   document.getElementById('orderDetailTitle').textContent=o.name+' - '+o.phone;
-  var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0;});
-  var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0;});
+  var reg=o.items.filter(function(x){return x.indexOf('[REQUEST]')<0&&x.trim()!=='';});
+  var req=o.items.filter(function(x){return x.indexOf('[REQUEST]')>=0&&x.trim()!=='';});
   var sc=o.status==='COMPLETE'?'var(--green)':o.status==='PARTIAL'?'var(--accent2)':'var(--amber)';
   var pc=o.paid==='PAID'?'var(--green)':'var(--red)';
 
@@ -2360,7 +2360,13 @@ function openOrderDetail(oid){
   '</div>'+
   '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:1rem">'+
     '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Items Ordered</div>'+
-    reg.map(function(itm){return '<div style="padding:7px 10px;background:var(--surface);border-radius:7px;margin-bottom:4px;font-size:13px;color:var(--text)">'+itm+'</div>';}).join('')+
+    reg.map(function(itm,ii){
+      var cbId='orditem_'+oid+'_'+ii;
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border-radius:7px;margin-bottom:4px">'+
+        '<input type="checkbox" id="'+cbId+'" style="width:18px;height:18px;flex-shrink:0;cursor:pointer">'+
+        '<label for="'+cbId+'" style="flex:1;font-size:13px;color:var(--text);cursor:pointer;line-height:1.3">'+itm+'</label>'+
+      '</div>';
+    }).join('')+
     (req.length?
       '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px">Out of Stock Requests</div>'+
       req.map(function(itm){
