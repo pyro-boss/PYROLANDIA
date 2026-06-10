@@ -250,6 +250,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
   /* ORDERS */
   .ord-row{padding:10px 12px}
+  #dealsTabLayout{grid-template-columns:1fr!important}
+  .pricing-card{padding:10px}
 }
 
 /* ── TABLET (481-768px) ─────────────────────────────────── */
@@ -311,26 +313,34 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div style="margin-left:auto;position:relative">
         <button class="nav-btn" onclick="toggleHamburger(event)" id="hamburgerBtn" style="border:1px solid var(--border);border-radius:8px;padding:5px 12px">More</button>
         <div id="hamburgerMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:200;overflow:hidden">
-          <button class="ham-item" onclick="switchViewHam('sales',this)">End of Day Sales</button>
-          <button class="ham-item" onclick="switchViewHam('report',this)">Sales Report</button>
-          <button class="ham-item" onclick="switchViewHam('actlog',this)">Activity Log</button>
-          <button class="ham-item" onclick="switchViewHam('settings',this)">Settings</button>
+          <button class="ham-item" onclick="switchViewHam('deals',this)">&#128293; Deals</button>
+          <button class="ham-item" onclick="switchViewHam('pricing',this)">&#128176; Pricing</button>
+          <button class="ham-item" onclick="switchViewHam('sales',this)">&#128200; End of Day Sales</button>
+          <button class="ham-item" onclick="switchViewHam('report',this)">&#128202; Sales Report</button>
+          <button class="ham-item" onclick="switchViewHam('actlog',this)">&#128203; Activity Log</button>
+          <button class="ham-item" onclick="switchViewHam('settings',this)">&#9881; Settings</button>
         </div>
       </div>
     </div>
     <div class="view active" id="view-inventory">
 
       <div class="toolbar">
-        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()" style="flex:1">
-        <select id="statusFilter" onchange="renderTable()" style="width:110px">
-          <option value="">All Status</option>
+        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()" style="flex:1;min-width:0">
+        <select id="statusFilter" onchange="renderTable()" style="height:40px;width:100px;flex-shrink:0">
+          <option value="">All</option>
           <option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option>
         </select>
-        <button onclick="openAddModal()" style="height:36px;padding:0 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">+ Add</button>
-
+        <!-- View toggle: cards / list -->
+        <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;height:40px">
+          <button id="viewCardBtn" onclick="setViewMode('card')" title="Card view"
+            style="width:38px;background:var(--accent);color:#fff;border:none;font-size:16px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.2)">&#9647;</button>
+          <button id="viewListBtn" onclick="setViewMode('list')" title="List view"
+            style="width:38px;background:var(--surface2);color:var(--muted);border:none;font-size:16px;cursor:pointer">&#9776;</button>
+        </div>
+        <button onclick="openAddModal()" style="height:40px;padding:0 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">+ Add</button>
       </div>
       <div class="tab-bar" id="tabBar"></div>
-      <div class="tbl-wrap" id="tblWrap" style="display:none!important">
+      <div class="tbl-wrap" id="tblWrap" style="display:none">
         <table>
           <thead><tr>
             <th style="width:60px">Status</th><th>Product</th>
@@ -423,7 +433,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div id="reportOutput"></div>
     </div>
     <div class="view" id="view-deals">
-      <div class="two-col">
+      <div class="two-col" id="dealsTabLayout">
         <div><div class="panel">
           <div class="panel-title">Add New Deal</div>
           <div class="field"><label>1. Product Type</label>
@@ -456,8 +466,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="view" id="view-pricing">
       <div style="margin-bottom:.75rem;font-size:13px;color:var(--muted)">Items with missing price, case price, or packed info.</div>
       <div class="toolbar">
-        <input type="text" id="priceSearch" placeholder="Search..." oninput="renderPricingCards()">
-        <select id="priceTabFilter" onchange="renderPricingCards()"><option value="-1">All Tabs</option></select>
+        <input type="text" id="priceSearch" placeholder="Search products..." oninput="renderPricingCards()" style="flex:1">
+        <select id="priceTabFilter" onchange="renderPricingCards()" style="height:40px;min-width:110px"><option value="-1">All Tabs</option></select>
         <select id="priceFilter" onchange="renderPricingCards()">
           <option value="incomplete" selected>Missing Something</option>
           <option value="noprice">No Price</option><option value="nopacked">No Packed</option>
@@ -608,7 +618,6 @@ tr:hover td{background:rgba(255,255,255,0.02)}
       <div class="field"><label>Cases</label><input id="mCases" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
       <div class="field"><label>Singles</label><input id="mSingles" type="number" min="0" placeholder="0" oninput="updateModalTotal()"></div>
     </div>
-    <div class="field"><label>Total</label><input id="mTotal" type="number" readonly placeholder="Auto-calculated"></div>
     <div class="field"><label>Status</label>
       <select id="mStatus"><option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option></select>
     </div>
@@ -669,6 +678,8 @@ function startSession(u){
   var today=new Date(),prior=new Date(today);prior.setDate(prior.getDate()-30);
   document.getElementById('reportTo').value=today.toISOString().split('T')[0];
   document.getElementById('reportFrom').value=prior.toISOString().split('T')[0];
+  // Default view: list on desktop, cards on mobile
+  viewMode=window.innerWidth>640?'list':'card';
   loadDealsFromDB();loadActivityLog();
   loadAllTabs();renderStaffList();
   setTimeout(pingScript,1500); // test connection to sheet
@@ -997,7 +1008,17 @@ function updateStats(){
 }
 
 function setViewMode(mode){
-  viewMode='card';
+  viewMode=mode;
+  var cardBtn=document.getElementById('viewCardBtn');
+  var listBtn=document.getElementById('viewListBtn');
+  if(cardBtn&&listBtn){
+    cardBtn.style.background=mode==='card'?'var(--accent)':'var(--surface2)';
+    cardBtn.style.color=mode==='card'?'#fff':'var(--muted)';
+    listBtn.style.background=mode==='list'?'var(--accent)':'var(--surface2)';
+    listBtn.style.color=mode==='list'?'#fff':'var(--muted)';
+  }
+  // On mobile always use cards regardless
+  if(window.innerWidth<=640) viewMode='card';
   renderTable();
 }
 function buildTabBar(){
@@ -1025,8 +1046,11 @@ function renderTable(){
   }
   // Default sort: A-Z
   rows.sort(function(a,b){return a.name.localeCompare(b.name);});
+  var tblWrap=document.getElementById('tblWrap');
   var cardGrid=document.getElementById('cardGrid');
-  cardGrid.style.display='';
+  var useList=viewMode==='list'&&window.innerWidth>640;
+  tblWrap.style.display=useList?'':'none';
+  cardGrid.style.display=useList?'none':'';
   var empty=document.getElementById('emptyMsg');
   if(!rows.length){document.getElementById('tbody').innerHTML='';cardGrid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
@@ -1051,6 +1075,37 @@ function renderTable(){
   }
   document.getElementById('tbody').innerHTML=h;
   if(viewMode==='card') renderCardGrid(rows);
+}
+
+// Handle Enter key on card name inputs via event delegation
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter'&&e.target.classList.contains('cname-inp')){
+    var id=parseInt(e.target.getAttribute('data-saveid'));
+    if(id) saveCardNameBtn(id);
+    e.target.blur();
+  }
+});
+
+function toggleCardExpand(id){
+  _expandedCards[id]=!_expandedCards[id];
+  // Re-render just this card by re-rendering all (fast enough)
+  renderTable();
+  // Scroll expanded card into view
+  setTimeout(function(){
+    var el=document.getElementById('card_'+id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+  },50);
+}
+
+function removeDealById(dealId){
+  deals=deals.filter(function(d){return d.id!==dealId;});
+  saveDealsToDB();
+  renderTable();
+  if(document.getElementById('view-deals').classList.contains('active')){
+    populateDealDropdown();renderDealsList();
+  }
+  logActivity('Removed deal','Deal #'+dealId);
+  toast('Deal removed');
 }
 
 function saveCardNameBtn(id){
@@ -1192,7 +1247,7 @@ function adjustCount(id,field,delta,event){
 
 function renderCardGrid(rows){
   var grid=document.getElementById('cardGrid');
-  if(!rows.length){grid.innerHTML='';return;}
+  if(!rows.length){grid.innerHTML='<div class="empty">No products match.</div>';return;}
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
@@ -1200,114 +1255,91 @@ function renderCardGrid(rows){
     var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
     var statusStrip=item.status==='LOW'?'LOW STOCK':item.status==='OUT'?'OUT OF STOCK':'';
     var showPKD=item.tab>1;
-    // Force-match packed to known option if possible
-    var packedVal=item.packed||'';
+    var expanded=(_expandedCards[item.id]===true);
     var tabOpts='';
     for(var t=0;t<TABS.length;t++) tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
 
-    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">'+
-      '<div class="inv-card-status-strip">'+statusStrip+'</div>'+
+    // ── COMPACT (default) — name, status strip, Cases+Singles ──
+    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">';
+    h+='<div class="inv-card-status-strip">'+statusStrip+'</div>';
 
-      // Total + Name + Delete on top row
-      '<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">'+
-        '<div style="text-align:center;flex-shrink:0;min-width:36px">'+
-          '<div style="font-size:8px;color:var(--muted);line-height:1">Total</div>'+
-          '<div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--accent);line-height:1">'+item.qty+'</div>'+
-        '</div>'+
-        '<input type="text" id="cname_'+item.id+'" value="'+item.name+'" '+
-          'data-id="'+item.id+'" data-field="name" autocapitalize="characters" '+
-          'onkeydown="if(event.key===\'Enter\')saveCardNameBtn('+item.id+')" '+
-          'x-was-onchange="saveCardField('+item.id+',\'name\',this.value)" '+
-          'style="flex:1;min-width:0;padding:3px 5px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">'+
-        '<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" title="Save name" '+
-          'style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">OK</button>'+
-        '<button onclick="deleteCardItem('+item.id+')" title="Delete" '+
-          'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>'+
-      '</div>'+
+    // Top row: expand toggle + name + status dot
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px" onclick="toggleCardExpand('+item.id+')">';
+    h+='<div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:'+(item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)')+'"></div>';
+    h+='<div style="flex:1;min-width:0;font-weight:600;font-size:12px;color:var(--text);text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
+    h+='<div style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--accent2);flex-shrink:0">'+(item.price?'$'+item.price:'--')+'</div>';
+    h+='<div style="color:var(--muted);font-size:14px;flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:4px;line-height:1">'+(expanded?'&#9650;':'&#9660;')+'</div>';
+    h+='</div>';
 
-      // Price + Case Price equal width
-      '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:4px 6px">'+
-        '<span style="font-size:10px;color:var(--muted);flex-shrink:0">$</span>'+
-        '<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" '+
-          'data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" '+
-          'style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
-        '<span style="font-size:9px;color:var(--border);margin:0 3px;flex-shrink:0">|</span>'+
-        '<span style="font-size:10px;color:var(--muted);flex-shrink:0">C$</span>'+
-        '<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" '+
-          'data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" '+
-          'style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
-      '</div>'+
+    // Cases + Singles — always visible
+    h+='<div style="display:flex;gap:4px;margin-bottom:'+(expanded?'6px':'0')+'">';
+    h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';
+    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;gap:3px">';
+    h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.cases||0)+'</span>';
+    h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div></div>';
+    h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';
+    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;gap:3px">';
+    h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
+    h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.singles||0)+'</span>';
+    h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='</div></div>';
+    h+='</div>';
 
-      // Cases + Singles with bigger tap targets
-      '<div style="display:flex;gap:3px;margin-bottom:3px">'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
-          '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>'+
-          '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
-            '<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
-            '<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.cases||0)+'</span>'+
-            '<button onclick="adjustCount('+item.id+',\'cases\',1,event)" '+
-              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
-          '</div>'+
-        '</div>'+
-        '<div style="flex:1;background:var(--surface2);border-radius:6px;padding:3px 4px;text-align:center">'+
-          '<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>'+
-          '<div style="display:flex;align-items:center;justify-content:center;gap:2px">'+
-            '<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" '+
-              'style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>'+
-            '<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.singles||0)+'</span>'+
-            '<button onclick="adjustCount('+item.id+',\'singles\',1,event)" '+
-              'style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
+    // ── EXPANDED section — shown when card tapped ──────────────
+    h+='<div id="cardexp_'+item.id+'" style="display:'+(expanded?'block':'none')+'">';
 
-      // Tab + PKD on one row (PKD hidden for 1/1 and 2/1)
-      '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px">'+
-        '<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" '+
-          'style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
-          tabOpts+
-        '</select>'+
-        (showPKD?
-          '<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" '+
-            'style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
-            buildPackedOptions(packedVal)+
-          '</select>'+
-          '<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" '+
-            'style="display:none;width:50px;padding:2px 3px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text);font-size:10px;font-family:DM Sans,sans-serif" '+
-            'data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">'
-        :'')+
-      '</div>'+
+    // Editable name row
+    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+    h+='<input type="text" id="cname_'+item.id+'" value="'+item.name+'" data-saveid="'+item.id+'" autocapitalize="characters" class="cname-inp" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">';
+    h+='<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">OK</button>';
+    h+='<button onclick="deleteCardItem('+item.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>';
+    h+='</div>';
 
-      // Deal badge+delete OR deal picker
-      (deal?
-        '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'+
-          '<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:3px 7px;font-size:11px;color:var(--accent);font-weight:700">'+
-            deal.qty+' for $'+deal.price+
-          '</div>'+
-          '<button onclick="removeDeal('+deal.id+')" title="Remove deal" '+
-            'style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:2px 6px;font-size:11px;cursor:pointer;flex-shrink:0">X</button>'+
-        '</div>'
-      :
-        '<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px">'+
-          '<select id="dq_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
-            buildQtyOptions()+
-          '</select>'+
-          '<span style="font-size:9px;color:var(--muted);flex-shrink:0">for $</span>'+
-          '<select id="dp_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+
-            buildPriceOptions()+
-          '</select>'+
-          '<button onclick="addDealFromCard('+item.id+')" style="padding:6px 8px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;min-height:36px">+Deal</button>'+
-        '</div>'
-      )+
+    // Price row
+    h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:6px;background:var(--surface2);border-radius:8px;padding:6px 8px">';
+    h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">$</span>';
+    h+='<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px 4px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif">';
+    h+='<span style="font-size:10px;color:var(--border);margin:0 4px;flex-shrink:0">|</span>';
+    h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">C$</span>';
+    h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px 4px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:13px;font-family:DM Sans,sans-serif">';
+    h+='</div>';
 
-      // Sell + timestamp
-      '<button onclick="openSellModal('+item.id+')" '+
-        'style="width:100%;padding:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:44px">'+
-        'Sell'+
-      '</button>'+
-      '<div id="cts_'+item.id+'" style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">'+stamp+'</div>'+
-    '</div>';
+    // Tab + PKD row
+    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+    h+='<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+tabOpts+'</select>';
+    if(showPKD){
+      h+='<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildPackedOptions(item.packed)+'</select>';
+      h+='<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" style="display:none;width:60px;padding:4px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif" data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">';
+    }
+    h+='</div>';
+
+    // Deal row
+    if(deal){
+      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+      h+='<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--accent);font-weight:700">'+deal.qty+' for $'+deal.price+'</div>';
+      h+='<button class="ord-delete-btn" data-oid="'+deal.id+'" onclick="removeDealById('+deal.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>';
+      h+='</div>';
+    } else {
+      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+      h+='<select id="dq_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildQtyOptions()+'</select>';
+      h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">for $</span>';
+      h+='<select id="dp_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildPriceOptions()+'</select>';
+      h+='<button onclick="addDealFromCard('+item.id+')" style="padding:6px 8px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">+Deal</button>';
+      h+='</div>';
+    }
+
+    // Sell + Total + timestamp
+    h+='<div style="display:flex;align-items:center;gap:6px">';
+    h+='<button onclick="openSellModal('+item.id+')" style="flex:1;padding:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:44px">Sell</button>';
+    h+='<div style="text-align:center;flex-shrink:0"><div style="font-size:9px;color:var(--muted)">Total</div><div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--accent)">'+item.qty+'</div></div>';
+    h+='</div>';
+
+    h+='</div>'; // end expanded
+    h+='</div>'; // end card
   }
   grid.innerHTML=h;
 }
@@ -1463,7 +1495,7 @@ function confirmSell(){
 function updateModalTotal(){
   var c=parseInt(document.getElementById('mCases').value)||0;
   var s=parseInt(document.getElementById('mSingles').value)||0;
-  document.getElementById('mTotal').value=c+s;
+  // mTotal removed
 }
 function buildTabSelect(sel){
   var h='';for(var i=0;i<TABS.length;i++) h+='<option value="'+i+'"'+(i===sel?' selected':'')+'>'+TABS[i].name+'</option>';
@@ -1482,7 +1514,7 @@ function openEdit(id){
   }
   document.getElementById('mCases').value=item.cases||0;
   document.getElementById('mSingles').value=item.singles||0;
-  document.getElementById('mTotal').value=item.qty||0;
+  // mTotal removed
   document.getElementById('mStatus').value=item.status;
   buildTabSelect(item.tab||0);
   document.getElementById('editOverlay').style.display='flex';
@@ -1490,7 +1522,7 @@ function openEdit(id){
 function openAddModal(){
   isAdding=true;editingId=null;
   document.getElementById('modalTitle').textContent='Add New Product';
-  ['mName','mPrice','mCasePrice','mCases','mSingles','mTotal'].forEach(function(id){document.getElementById(id).value='';});
+  ['mName','mPrice','mCasePrice','mCases','mSingles'].forEach(function(id){document.getElementById(id).value='';});
   var mps=document.getElementById('mPackedSel');var mpi=document.getElementById('mPacked');
   if(mps){mps.value='';}if(mpi){mpi.value='';mpi.style.display='none';}
   document.getElementById('mStatus').value='IN';
