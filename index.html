@@ -324,20 +324,26 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="view active" id="view-inventory">
 
-      <div class="toolbar">
-        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()" style="flex:1;min-width:0">
-        <select id="statusFilter" onchange="renderTable()" style="height:40px;width:100px;flex-shrink:0">
-          <option value="">All</option>
-          <option value="IN">IN</option><option value="LOW">LOW</option><option value="OUT">OUT</option>
+      <!-- Row 1: Search bar full width -->
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <input type="text" id="search" placeholder="Search products..." oninput="renderTable()"
+          style="flex:1;height:44px;padding:0 14px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif">
+        <button onclick="openAddModal()" style="height:44px;padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">+ Add</button>
+      </div>
+      <!-- Row 2: Status filter + view toggle -->
+      <div class="toolbar" style="margin-bottom:0">
+        <select id="statusFilter" onchange="renderTable()" style="height:40px;min-width:100px;flex-shrink:0">
+          <option value="">All Status</option>
+          <option value="IN">IN Stock</option>
+          <option value="LOW">Low Stock</option>
+          <option value="OUT">Out of Stock</option>
         </select>
-        <!-- View toggle: cards / list -->
         <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;height:40px">
           <button id="viewCardBtn" onclick="setViewMode('card')" title="Card view"
-            style="width:38px;background:var(--accent);color:#fff;border:none;font-size:16px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.2)">&#9647;</button>
+            style="width:42px;background:var(--accent);color:#fff;border:none;font-size:18px;cursor:pointer;border-right:1px solid rgba(255,255,255,0.2)">&#9647;</button>
           <button id="viewListBtn" onclick="setViewMode('list')" title="List view"
-            style="width:38px;background:var(--surface2);color:var(--muted);border:none;font-size:16px;cursor:pointer">&#9776;</button>
+            style="width:42px;background:var(--surface2);color:var(--muted);border:none;font-size:18px;cursor:pointer">&#9776;</button>
         </div>
-        <button onclick="openAddModal()" style="height:40px;padding:0 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">+ Add</button>
       </div>
       <div class="tab-bar" id="tabBar"></div>
       <div class="tbl-wrap" id="tblWrap" style="display:none">
@@ -1247,102 +1253,117 @@ function adjustCount(id,field,delta,event){
 
 function renderCardGrid(rows){
   var grid=document.getElementById('cardGrid');
-  if(!rows.length){grid.innerHTML='<div class="empty">No products match.</div>';return;}
+  if(!rows||!rows.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:2rem;text-align:center;color:var(--muted)">No products match.</div>';return;}
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];
     var deal=getBestDeal(item.name);
-    var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
-    var statusStrip=item.status==='LOW'?'LOW STOCK':item.status==='OUT'?'OUT OF STOCK':'';
-    var showPKD=item.tab>1;
     var expanded=(_expandedCards[item.id]===true);
+    var showPKD=(item.tab>1);
+    var statusColor=item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)';
     var tabOpts='';
-    for(var t=0;t<TABS.length;t++) tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
+    for(var t=0;t<TABS.length;t++){
+      tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
+    }
 
-    // ── COMPACT (default) — name, status strip, Cases+Singles ──
     h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'">';
-    h+='<div class="inv-card-status-strip">'+statusStrip+'</div>';
 
-    // Top row: expand toggle + name + status dot
-    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px" onclick="toggleCardExpand('+item.id+')">';
-    h+='<div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:'+(item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)')+'"></div>';
-    h+='<div style="flex:1;min-width:0;font-weight:600;font-size:12px;color:var(--text);text-transform:uppercase;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
+    // Status strip
+    if(item.status==='LOW') h+='<div class="inv-card-status-strip">LOW STOCK</div>';
+    else if(item.status==='OUT') h+='<div class="inv-card-status-strip">OUT OF STOCK</div>';
+
+    // ── COMPACT ROW: dot + name + price + expand arrow ──
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;cursor:pointer" onclick="toggleCardExpand('+item.id+')">';
+    h+='<div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;background:'+statusColor+'"></div>';
+    h+='<div style="flex:1;min-width:0;font-weight:700;font-size:12px;color:var(--text);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3">'+item.name+'</div>';
     h+='<div style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--accent2);flex-shrink:0">'+(item.price?'$'+item.price:'--')+'</div>';
-    h+='<div style="color:var(--muted);font-size:14px;flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:4px;line-height:1">'+(expanded?'&#9650;':'&#9660;')+'</div>';
+    h+='<div style="color:var(--muted);font-size:13px;flex-shrink:0;width:22px;text-align:center">'+(expanded?'&#9650;':'&#9660;')+'</div>';
     h+='</div>';
 
-    // Cases + Singles — always visible
-    h+='<div style="display:flex;gap:4px;margin-bottom:'+(expanded?'6px':'0')+'">';
+    // ── CASES + SINGLES (always visible) ──
+    h+='<div style="display:flex;gap:4px;margin-bottom:'+(expanded?'8px':'0')+'">';
+
+    // Cases
     h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';
-    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>';
+    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">Cases</div>';
     h+='<div style="display:flex;align-items:center;justify-content:center;gap:3px">';
-    h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.cases||0)+'</span>';
-    h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center">-</button>';
+    h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" style="font-family:Bebas Neue,sans-serif;font-size:24px;color:var(--text);min-width:30px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.cases||0)+'</span>';
+    h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center">+</button>';
     h+='</div></div>';
+
+    // Singles
     h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';
-    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>';
+    h+='<div style="font-size:9px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">Singles</div>';
     h+='<div style="display:flex;align-items:center;justify-content:center;gap:3px">';
-    h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-    h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" title="Tap to enter qty" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:1px dashed var(--muted)">'+(item.singles||0)+'</span>';
-    h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
+    h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center">-</button>';
+    h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" style="font-family:Bebas Neue,sans-serif;font-size:24px;color:var(--text);min-width:30px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.singles||0)+'</span>';
+    h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:20px;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center">+</button>';
     h+='</div></div>';
-    h+='</div>';
 
-    // ── EXPANDED section — shown when card tapped ──────────────
-    h+='<div id="cardexp_'+item.id+'" style="display:'+(expanded?'block':'none')+'">';
+    h+='</div>'; // end cases+singles row
 
-    // Editable name row
-    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
-    h+='<input type="text" id="cname_'+item.id+'" value="'+item.name+'" data-saveid="'+item.id+'" autocapitalize="characters" class="cname-inp" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">';
-    h+='<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">OK</button>';
-    h+='<button onclick="deleteCardItem('+item.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>';
-    h+='</div>';
+    // ── EXPANDED SECTION ──
+    if(expanded){
+      h+='<div id="cardexp_'+item.id+'">';
 
-    // Price row
-    h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:6px;background:var(--surface2);border-radius:8px;padding:6px 8px">';
-    h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">$</span>';
-    h+='<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px 4px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif">';
-    h+='<span style="font-size:10px;color:var(--border);margin:0 4px;flex-shrink:0">|</span>';
-    h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">C$</span>';
-    h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px 4px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:13px;font-family:DM Sans,sans-serif">';
-    h+='</div>';
-
-    // Tab + PKD row
-    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
-    h+='<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+tabOpts+'</select>';
-    if(showPKD){
-      h+='<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" style="flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildPackedOptions(item.packed)+'</select>';
-      h+='<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" style="display:none;width:60px;padding:4px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif" data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">';
-    }
-    h+='</div>';
-
-    // Deal row
-    if(deal){
+      // Editable name
       h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
-      h+='<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--accent);font-weight:700">'+deal.qty+' for $'+deal.price+'</div>';
-      h+='<button class="ord-delete-btn" data-oid="'+deal.id+'" onclick="removeDealById('+deal.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;flex-shrink:0;min-height:36px">X</button>';
+      h+='<input type="text" id="cname_'+item.id+'" value="'+item.name+'" data-saveid="'+item.id+'" autocapitalize="characters" class="cname-inp" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;font-family:DM Sans,sans-serif;text-transform:uppercase">';
+      h+='<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0">OK</button>';
+      h+='<button onclick="deleteCardItem('+item.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:8px 10px;font-size:13px;cursor:pointer;flex-shrink:0">X</button>';
       h+='</div>';
+
+      // Price row
+      h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;background:var(--surface2);border-radius:8px;padding:8px 10px">';
+      h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">$</span>';
+      h+='<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--accent2);font-size:15px;font-weight:600;font-family:DM Sans,sans-serif">';
+      h+='<span style="font-size:10px;color:var(--border);margin:0 2px">|</span>';
+      h+='<span style="font-size:11px;color:var(--muted);flex-shrink:0">C$</span>';
+      h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:4px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;font-family:DM Sans,sans-serif">';
+      h+='</div>';
+
+      // Tab + PKD row
+      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+      h+='<select id="ctab_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif;min-height:40px">'+tabOpts+'</select>';
+      if(showPKD){
+        h+='<select id="pkd_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:DM Sans,sans-serif;min-height:40px">'+buildPackedOptions(item.packed)+'</select>';
+        h+='<input type="text" id="pkd_custom_'+item.id+'" placeholder="e.g. 3/24" style="display:none;width:60px;padding:6px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px" data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">';
+      }
+      h+='</div>';
+
+      // Deal row
+      if(deal){
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+        h+='<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:6px 10px;font-size:13px;color:var(--accent);font-weight:700">'+deal.qty+' for $'+deal.price+'</div>';
+        h+='<button onclick="removeDealById('+deal.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;flex-shrink:0;min-height:40px">X</button>';
+        h+='</div>';
+      } else {
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+        h+='<select id="dq_'+item.id+'" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:12px;min-height:40px">'+buildQtyOptions()+'</select>';
+        h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">for $</span>';
+        h+='<select id="dp_'+item.id+'" style="flex:1;padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:12px;min-height:40px">'+buildPriceOptions()+'</select>';
+        h+='<button onclick="addDealFromCard('+item.id+')" style="padding:6px 10px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:40px">+Deal</button>';
+        h+='</div>';
+      }
+
+      // Sell + Total
+      h+='<div style="display:flex;align-items:center;gap:8px">';
+      h+='<button onclick="openSellModal('+item.id+')" style="flex:1;padding:12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:48px">Sell</button>';
+      h+='<div style="text-align:center;flex-shrink:0;min-width:44px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Total</div><div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:24px;color:var(--accent)">'+item.qty+'</div></div>';
+      h+='</div>';
+
+      h+='</div>'; // end expanded div
     } else {
-      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
-      h+='<select id="dq_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildQtyOptions()+'</select>';
-      h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">for $</span>';
-      h+='<select id="dp_'+item.id+'" style="flex:1;padding:4px 4px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif;min-height:36px">'+buildPriceOptions()+'</select>';
-      h+='<button onclick="addDealFromCard('+item.id+')" style="padding:6px 8px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:36px">+Deal</button>';
-      h+='</div>';
+      // When collapsed just show the total inline
+      h+='<div id="ct_'+item.id+'" style="display:none">'+item.qty+'</div>';
     }
 
-    // Sell + Total + timestamp
-    h+='<div style="display:flex;align-items:center;gap:6px">';
-    h+='<button onclick="openSellModal('+item.id+')" style="flex:1;padding:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:44px">Sell</button>';
-    h+='<div style="text-align:center;flex-shrink:0"><div style="font-size:9px;color:var(--muted)">Total</div><div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--accent)">'+item.qty+'</div></div>';
-    h+='</div>';
-
-    h+='</div>'; // end expanded
-    h+='</div>'; // end card
+    h+='</div>'; // end inv-card
   }
   grid.innerHTML=h;
 }
+
 
 function renderLowStock(){
   var rows=[];for(var i=0;i<inventory.length;i++){if(inventory[i].status==='LOW'||inventory[i].status==='OUT')rows.push(inventory[i]);}
