@@ -1281,7 +1281,6 @@ function renderCardGrid(rows){
     h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
     h+='<div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:'+statusColor+'"></div>';
     h+='<div style="flex:1;min-width:0;font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3">'+item.name+'</div>';
-    if(item.packed) h+='<span style="font-size:9px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;flex-shrink:0;white-space:nowrap">'+item.packed+'</span>';
     h+='<div style="flex-shrink:0;text-align:center">';
     h+='<div style="font-size:8px;color:var(--muted);line-height:1">QTY</div>';
     h+='<div id="ct_'+item.id+'" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--accent);line-height:1">'+item.qty+'</div>';
@@ -1289,11 +1288,12 @@ function renderCardGrid(rows){
     h+='<button onclick="toggleCardExpand('+item.id+')" style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:3px 7px;font-size:11px;cursor:pointer;line-height:1.4;min-height:28px">Edit</button>';
     h+='</div>';
 
-    // Price row
+    // Price + Case Price on same row, packed below edit
     h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">';
     if(item.price) h+='<span style="font-family:Bebas Neue,sans-serif;font-size:17px;color:var(--accent2)">$'+item.price+'</span>';
-    if(item.casePrice) h+='<span style="font-size:10px;color:var(--muted)">C$'+item.casePrice+'</span>';
-    if(deal) h+='<span style="margin-left:auto;font-size:10px;color:var(--accent);font-weight:700;background:rgba(255,77,0,0.1);border-radius:4px;padding:1px 5px;white-space:nowrap">'+deal.qty+' for $'+deal.price+'</span>';
+    if(item.casePrice) h+='<span style="font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--muted)">C$'+item.casePrice+'</span>';
+    if(item.packed) h+='<span style="margin-left:auto;font-size:9px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;white-space:nowrap">'+item.packed+'</span>';
+    if(deal) h+='<span style="'+(item.packed?'':'margin-left:auto;')+'font-size:10px;color:var(--accent);font-weight:700;background:rgba(255,77,0,0.1);border-radius:4px;padding:1px 5px;white-space:nowrap">'+deal.qty+' for $'+deal.price+'</span>';
     h+='</div>';
 
     // Cases + Singles
