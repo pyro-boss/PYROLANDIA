@@ -2452,90 +2452,59 @@ function deleteOrder(orderId){
 // ── DAY SUMMARY ──────────────────────────────────────────────
 function showDaySummary(){
   var overlay=document.getElementById('summaryOverlay');
-  var content=document.getElementById('summaryContent');
-  // Get today's activity from log
-  var today=todayDate();
-  var todayLogs=activityLog.filter(function(e){return e.date===today;});
-  var sales=todayLogs.filter(function(e){return e.action==='End of Day Sales'||e.action==='Sold';});
-  var restocks=todayLogs.filter(function(e){return e.action==='Bulk Restock'||e.action==='Restocked';});
-  var priceChanges=todayLogs.filter(function(e){return e.action==='Updated'||e.action==='Updated pricing';});
-  var deals=todayLogs.filter(function(e){return e.action==='Added deal'||e.action==='Removed deal';});
+  var el=document.getElementById('summaryContent');
+
+  // Count low/out
   var lowCount=inventory.filter(function(x){return x.status==='LOW';}).length;
   var outCount=inventory.filter(function(x){return x.status==='OUT';}).length;
 
-  var h='<div style="font-size:12px;color:var(--muted);margin-bottom:1rem">'+today+' &nbsp;|&nbsp; Signed in as <b style="color:var(--text)">'+currentUser+'</b></div>';
-
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem">';
-  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Sales Today</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--accent)">'+sales.length+'</div></div>';
-  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Restocks</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--green)">'+restocks.length+'</div></div>';
-  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Running Low</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--amber)">'+lowCount+'</div></div>';
-  h+='<div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Out of Stock</div><div style="font-family:Bebas Neue,sans-serif;font-size:28px;color:var(--red)">'+outCount+'</div></div>';
-  h+='</div>';
-
-  if(sales.length){
-    h+='<div style="margin-bottom:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Sales</div>';
-    for(var i=0;i<sales.length;i++) h+='<div style="font-size:12px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">'+sales[i].detail+'</div>';
-    h+='</div>';
-  }
-  if(restocks.length){
-    h+='<div style="margin-bottom:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Restocks</div>';
-    for(var i=0;i<restocks.length;i++) h+='<div style="font-size:12px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">'+restocks[i].detail+'</div>';
-    h+='</div>';
-  }
-
-  // Low/Out items
-  var lowItems=inventory.filter(function(x){return x.status==='LOW'||x.status==='OUT';}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  if(lowItems.length){
-    h+='<div><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">Needs Restocking</div>';
-    for(var i=0;i<lowItems.length;i++){
-      var itm=lowItems[i];
-      var sc=itm.status==='OUT'?'var(--red)':'var(--amber)';
-      h+='<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)">'+
-        '<span style="color:var(--text)">'+itm.name+' <span style="color:var(--muted);font-size:10px">('+tl(itm)+')</span></span>'+
-        '<span style="color:'+sc+';font-weight:600">'+itm.status+' - '+itm.qty+' left</span>'+
-      '</div>';
-    }
-    h+='</div>';
-  }
-
-  // Full inventory list with retail price
+  // Sort inventory A-Z
   var allItems=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  if(allItems.length){
-    h+='<div style="margin-top:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Full Inventory ('+allItems.length+' products)</div>';
-    h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
-    h+='<thead><tr style="background:var(--surface2)">';
-    h+='<th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Product</th>';
-    h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tab</th>';
-    h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Retail</th>';
-    h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Qty</th>';
-    h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Status</th>';
-    h+='</tr></thead><tbody>';
-    for(var ai=0;ai<allItems.length;ai++){
-      var ai2=allItems[ai];
-      var sc2=ai2.status==='OUT'?'var(--red)':ai2.status==='LOW'?'var(--amber)':'var(--green)';
-      h+='<tr style="border-bottom:1px solid var(--border)">';
-      h+='<td style="padding:5px 8px;font-weight:500;color:var(--text)">'+ai2.name+'</td>';
-      h+='<td style="padding:5px 8px;text-align:center;font-size:10px;color:var(--muted)">'+tl(ai2)+'</td>';
-      h+='<td style="padding:5px 8px;text-align:right;color:var(--accent2);font-weight:600">'+(ai2.price?'$'+ai2.price:'--')+'</td>';
-      h+='<td style="padding:5px 8px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--text)">'+ai2.qty+'</td>';
-      h+='<td style="padding:5px 8px;text-align:center"><span style="color:'+sc2+';font-size:10px;font-weight:700;border:1px solid '+sc2+';border-radius:20px;padding:1px 6px">'+ai2.status+'</span></td>';
-      h+='</tr>';
-    }
-    h+='</tbody></table></div></div>';
+
+  var h='<div style="font-size:12px;color:var(--muted);margin-bottom:.75rem">'+todayDate()+' &nbsp;|&nbsp; Signed in as <b style="color:var(--text)">'+currentUser+'</b>'+
+    '&nbsp;|&nbsp; <span style="color:var(--amber);font-weight:600">'+lowCount+' Low</span>'+
+    '&nbsp;|&nbsp; <span style="color:var(--red);font-weight:600">'+outCount+' Out\n';
+
+  // Full inventory table
+  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  h+='<thead><tr style="background:var(--surface2)">';
+  h+='<th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;white-space:nowrap">Product</th>';
+  h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tab</th>';
+  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Retail</th>';
+  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Case $</th>';
+  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Qty</th>';
+  h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Status</th>';
+  h+='</tr></thead><tbody>';
+
+  for(var i=0;i<allItems.length;i++){
+    var it=allItems[i];
+    var sc=it.status==='OUT'?'var(--red)':it.status==='LOW'?'var(--amber)':'var(--green)';
+    var rowBg=it.status==='OUT'?'background:rgba(239,68,68,0.04)':it.status==='LOW'?'background:rgba(245,158,11,0.04)':'';
+    h+='<tr style="border-bottom:1px solid var(--border);'+rowBg+'">';
+    h+='<td style="padding:5px 8px;font-weight:500;color:var(--text)">'+it.name+'</td>';
+    h+='<td style="padding:5px 8px;text-align:center;font-size:10px;color:var(--muted)">'+tl(it)+'</td>';
+    h+='<td style="padding:5px 8px;text-align:right;color:var(--accent2);font-weight:600">'+(it.price?'$'+it.price:'--')+'</td>';
+    h+='<td style="padding:5px 8px;text-align:right;color:var(--muted)">'+(it.casePrice?'$'+it.casePrice:'--')+'</td>';
+    h+='<td style="padding:5px 8px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--text)">'+it.qty+'</td>';
+    h+='<td style="padding:5px 8px;text-align:center"><span style="color:'+sc+';font-size:10px;font-weight:700;border:1px solid '+sc+';border-radius:20px;padding:1px 6px">'+it.status+'</span></td>';
+    h+='</tr>';
   }
+  h+='</tbody></table></div>';
 
-  if(!sales.length&&!restocks.length&&!lowItems.length) h+='<div style="text-align:center;padding:1rem;color:var(--muted)">No activity recorded today.</div>';
+  if(!allItems.length) h+='<div style="text-align:center;padding:2rem;color:var(--muted)">No inventory loaded.</div>';
 
-  content.innerHTML=h;
-  // Store for copy
-    content.setAttribute('data-summary',
-    today+' Summary | '+currentUser+
-    ' | Sales: '+sales.length+' | Restocks: '+restocks.length+' | Low: '+lowCount+' | Out: '+outCount+
-    (lowItems.length?' | Needs Restocking: '+lowItems.map(function(x){return x.name+'('+x.status+')';}).join(', '):'')+
-    (sales.length?' | Sales: '+sales.map(function(s){return s.detail;}).join('; '):'')+
-    (restocks.length?' | Restocks: '+restocks.map(function(r){return r.detail;}).join('; '):''));
+  // Store plain text for copy
+  var txt=todayDate()+' | '+currentUser+' | '+allItems.length+' products | '+lowCount+' Low | '+outCount+' Out\n';
+  txt+='Product\tTab\tRetail\tCase$\tQty\tStatus\n';
+  for(var j=0;j<allItems.length;j++){
+    var it2=allItems[j];
+    txt+=it2.name+'\t'+tl(it2)+'\t'+(it2.price?'$'+it2.price:'--')+'\t'+(it2.casePrice?'$'+it2.casePrice:'--')+'\t'+it2.qty+'\t'+it2.status+'\n';
+  }
+  el.setAttribute('data-summary',txt);
+  el.innerHTML=h;
   overlay.style.display='flex';
 }
+
 
 function copySummary(){
   var el=document.getElementById('summaryContent');
