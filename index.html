@@ -2498,7 +2498,33 @@ function showDaySummary(){
     h+='</div>';
   }
 
-  if(!sales.length&&!restocks.length&&!lowItems.length) h+='<div style="text-align:center;padding:2rem;color:var(--muted)">No activity recorded today.</div>';
+  // Full inventory list with retail price
+  var allItems=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(allItems.length){
+    h+='<div style="margin-top:.75rem"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Full Inventory ('+allItems.length+' products)</div>';
+    h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+    h+='<thead><tr style="background:var(--surface2)">';
+    h+='<th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Product</th>';
+    h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tab</th>';
+    h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Retail</th>';
+    h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Qty</th>';
+    h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Status</th>';
+    h+='</tr></thead><tbody>';
+    for(var ai=0;ai<allItems.length;ai++){
+      var ai2=allItems[ai];
+      var sc2=ai2.status==='OUT'?'var(--red)':ai2.status==='LOW'?'var(--amber)':'var(--green)';
+      h+='<tr style="border-bottom:1px solid var(--border)">';
+      h+='<td style="padding:5px 8px;font-weight:500;color:var(--text)">'+ai2.name+'</td>';
+      h+='<td style="padding:5px 8px;text-align:center;font-size:10px;color:var(--muted)">'+tl(ai2)+'</td>';
+      h+='<td style="padding:5px 8px;text-align:right;color:var(--accent2);font-weight:600">'+(ai2.price?'$'+ai2.price:'--')+'</td>';
+      h+='<td style="padding:5px 8px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--text)">'+ai2.qty+'</td>';
+      h+='<td style="padding:5px 8px;text-align:center"><span style="color:'+sc2+';font-size:10px;font-weight:700;border:1px solid '+sc2+';border-radius:20px;padding:1px 6px">'+ai2.status+'</span></td>';
+      h+='</tr>';
+    }
+    h+='</tbody></table></div></div>';
+  }
+
+  if(!sales.length&&!restocks.length&&!lowItems.length) h+='<div style="text-align:center;padding:1rem;color:var(--muted)">No activity recorded today.</div>';
 
   content.innerHTML=h;
   // Store for copy
