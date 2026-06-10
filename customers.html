@@ -171,7 +171,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       style="width:100%;height:40px;padding:0 14px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:16px;font-family:'DM Sans',sans-serif">
   </div>
   <div class="last-updated" id="lastUpdated"></div>
-</div>TYPE html>
+</div>
+
+<!-- DEALS PANEL -->
+<div class="deals-panel" id="dealsPanel" style="display:none"><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:1px;margin-bottom:.5rem">&#128293; HOT DEALS</div><div class="deals-grid" id="dealsGrid"></div></div>
+
+<!-- PRODUCT GRID -->
+<div class="main"><div class="grid" id="grid"><div class="loading-state">Loading inventory...</div></div></div>
+
+<!-- FLOAT CART BTN -->
+<button id="floatCartBtn" onclick="toggleCart()" style="display:none;position:fixed;bottom:20px;right:20px;z-index:500;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(230,57,0,0.4);align-items:center;justify-content:center;flex-direction:column;font-size:22px">&#128722;<span id="floatCartCount" style="font-size:10px;font-weight:700;display:block;line-height:1">0</span></button>
+
 <script>
 var SHEET_ID='16J7v_ODo4Ru4ZSytQI80dlA5a_Mh8fkgU5nqxEXd8U0';
 var SCRIPT_URL='https://script.google.com/macros/s/AKfycbymiNjOrGlYfZLD_D24IPw5Q7Pu5YWnsF2ZihsvY-NbADRwQPB_UdpvGKTfJjiDPnOf3A/exec';
@@ -239,7 +249,24 @@ function updateInventoryCount(source){
 function getBestDeal(name){var pd=deals.filter(function(d){return d.productName.toUpperCase()===name.toUpperCase();});if(!pd.length)return null;var best=pd[0];for(var i=1;i<pd.length;i++){if((pd[i].price/pd[i].qty)<(best.price/best.qty))best=pd[i];}return best;}
 function toggleDealsPanel(btn){showingDeals=!showingDeals;btn.classList.toggle('active',showingDeals);var panel=document.getElementById('dealsPanel');if(showingDeals){panel.style.display='block';renderDealsPanel();}else{panel.style.display='none';}}
 function renderDealsPanel(){var grid=document.getElementById('dealsGrid');if(!deals.length){grid.innerHTML='<div style="color:var(--muted);font-size:13px;padding:.5rem">No active deals right now.</div>';return;}var grouped={};for(var i=0;i<deals.length;i++){var d=deals[i];if(!grouped[d.productName])grouped[d.productName]={deals:[],tab:d.tab};grouped[d.productName].deals.push(d);}var h='';var keys=Object.keys(grouped).sort();for(var k=0;k<keys.length;k++){var g=grouped[keys[k]];var best=getBestDeal(keys[k]);for(var i=0;i<g.deals.length;i++){var d=g.deals[i];h+='<div class="deal-card">'+(best&&best.id===d.id?'<div class="best-badge">BEST</div>':'')+'<div class="deal-card-tab">'+TAB_ICONS[d.tab]+' '+TAB_LABELS[d.tab]+'</div><div class="deal-card-name">'+d.productName+'</div><div class="deal-card-price">'+d.qty+' for $'+d.price+'</div><div class="deal-card-sub">$'+(d.price/d.qty).toFixed(2)+' each'+(d.note?' - '+d.note:'')+'</div></div>';}}grid.innerHTML=h;}
-function buildTabFilters(){var h='<button class="tab-f'+(tabFilter===-1?' active':'')+'" onclick="setTab(-1,this)">All</button>';for(var i=0;i<TAB_NAMES.length;i++){var has=false;for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){has=true;break;}}if(has)h+='<button class="tab-f'+(tabFilter===i?' active':'')+'" onclick="setTab('+i+',this)">'+TAB_ICONS[i]+' '+TAB_LABELS[i]+'</button>';}document.getElementById('tabFilters').innerHTML=h;}
+function buildTabFilters(){
+  var sel=document.getElementById('categoryDrop');
+  if(!sel) return;
+  // Keep only first "All Types" option
+  while(sel.options.length>1) sel.remove(1);
+  for(var i=0;i<TAB_NAMES.length;i++){
+    var has=false;
+    for(var j=0;j<DATA.length;j++){if(DATA[j].t===i){has=true;break;}}
+    if(has){
+      var opt=document.createElement('option');
+      opt.value=String(i);
+      opt.textContent=TAB_LABELS[i]; // plain text, no emoji for dropdown
+      if(tabFilter===i) opt.selected=true;
+      sel.appendChild(opt);
+    }
+  }
+}
+function setCategoryDrop(sel){tabFilter=parseInt(sel.value);render();}
 function setTab(t,btn){tabFilter=t;render();}
 function setStatus(s,btn){statusFilter=s;var bs=document.querySelectorAll('.filter-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');btn.classList.add('active');render();}
 function setPriceFilter(f,btn){priceFilter=f;var bs=document.querySelectorAll('.tab-f');for(var i=0;i<bs.length;i++)bs[i].classList.remove('active');btn.classList.add('active');render();}
