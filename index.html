@@ -82,7 +82,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px}
 .view-toggle-btn{padding:4px 10px;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .view-toggle-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:0 2px}@media(max-width:480px){.card-grid{grid-template-columns:1fr 1fr;gap:6px;padding:0 4px}}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:2px 4px;box-sizing:border-box}@media(max-width:480px){.card-grid{grid-template-columns:1fr 1fr;gap:6px;padding:0 4px}}
 .inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 8px 10px 8px;position:relative;transition:border-color 0.15s;overflow:visible}
 .inv-card:hover{border-color:rgba(255,77,0,0.4)}
 .inv-card.LOW{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25)}
@@ -1109,6 +1109,23 @@ function toggleCardExpand(id){
   }
 }
 
+function openDealEdit(id){
+  var item=fi(id);if(!item) return;
+  var deal=getBestDeal(item.name);
+  if(deal){
+    if(confirm('Remove deal: '+deal.qty+' for $'+deal.price+'?')){removeDealById(deal.id);}
+  } else {
+    var qty=parseInt(prompt('Deal qty (e.g. 2):','2'));
+    if(!qty||isNaN(qty)) return;
+    var price=parseFloat(prompt('Deal price $:',''));
+    if(!price||isNaN(price)) return;
+    deals.push({id:dealNextId++,productId:id,productName:item.name,tab:item.tab,qty:qty,price:price,note:''});
+    saveDealsToDB();renderTable();
+    logActivity('Added deal',item.name+': '+qty+' for $'+price);
+    toast('Deal added!');
+  }
+}
+
 function removeDealById(dealId){
   deals=deals.filter(function(d){return d.id!==dealId;});
   saveDealsToDB();
@@ -1326,23 +1343,16 @@ function renderCardGrid(rows){
     }
     h+='</div>';
 
-    // Deal
+    // Deal badge (if active - show compact, no picker on front)
     if(deal){
-      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">';
-      h+='<div style="flex:1;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.25);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--accent);font-weight:700">'+deal.qty+' for $'+deal.price+'</div>';
-      h+='<button onclick="removeDealById('+deal.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:6px;padding:3px 7px;font-size:11px;cursor:pointer;flex-shrink:0">X</button>';
-      h+='</div>';
-    } else {
-      h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px">';
-      h+='<select id="dq_'+item.id+'" style="flex:1;padding:3px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;min-height:32px">'+buildQtyOptions()+'</select>';
-      h+='<span style="font-size:9px;color:var(--muted);flex-shrink:0">for $</span>';
-      h+='<select id="dp_'+item.id+'" style="flex:1;padding:3px 3px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:10px;min-height:32px">'+buildPriceOptions()+'</select>';
-      h+='<button onclick="addDealFromCard('+item.id+')" style="padding:3px 7px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:32px">+Deal</button>';
-      h+='</div>';
+      h+='<div style="background:rgba(255,77,0,0.08);border:1px solid rgba(255,77,0,0.2);border-radius:5px;padding:2px 6px;font-size:10px;color:var(--accent);font-weight:700;text-align:center;margin-bottom:3px">&#128293; '+deal.qty+' for $'+deal.price+'</div>';
     }
 
-    // Sell + timestamp
-    h+='<button onclick="openSellModal('+item.id+')" style="width:100%;padding:8px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:40px">Sell</button>';
+    // Sell + Deal side by side
+    h+='<div style="display:flex;gap:4px">';
+    h+='<button onclick="openSellModal('+item.id+')" style="flex:1;padding:7px 4px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:38px">Sell</button>';
+    h+='<button onclick="openEdit('+item.id+')" style="flex:1;padding:7px 4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:38px">Edit</button>';
+    h+='</div>';
     h+='<div style="font-size:9px;color:var(--muted);margin-top:3px;text-align:right">'+stamp+'</div>';
 
     h+='</div>';
