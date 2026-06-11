@@ -82,7 +82,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 .view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px}
 .view-toggle-btn{padding:4px 10px;border:none;background:none;color:var(--muted);cursor:pointer;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;transition:all 0.15s}
 .view-toggle-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:0 2px}@media(max-width:480px){.card-grid{grid-template-columns:1fr 1fr;gap:6px}}
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:0 2px}@media(max-width:480px){.card-grid{grid-template-columns:1fr 1fr;gap:6px;padding:0 4px}}
 .inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 8px 10px 8px;position:relative;transition:border-color 0.15s;overflow:visible}
 .inv-card:hover{border-color:rgba(255,77,0,0.4)}
 .inv-card.LOW{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25)}
@@ -202,7 +202,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
   .stat-label{font-size:10px}
 
   /* CARDS - 2 col, bigger internal targets */
-  .card-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .card-grid{grid-template-columns:1fr 1fr;gap:6px;padding:0 4px}
   .inv-card{padding:8px}
 
   /* TWO-COL panels become single col */
@@ -1269,7 +1269,7 @@ function renderCardGrid(rows){
     var tabOpts='';
     for(var t=0;t<TABS.length;t++) tabOpts+='<option value="'+t+'"'+(t===item.tab?' selected':'')+'>'+TABS[t].short+'</option>';
 
-    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'" style="position:relative;overflow:hidden">';
+    h+='<div class="inv-card '+item.status+'" id="card_'+item.id+'" style="position:relative;overflow:visible;min-width:0">';
 
     // ── FRONT FACE (default) ──────────────────────────────────
     h+='<div id="cardfront_'+item.id+'" style="display:'+(isFlipped?'none':'flex')+';flex-direction:column;gap:4px">';
@@ -1296,14 +1296,14 @@ function renderCardGrid(rows){
     h+='<div style="display:flex;gap:3px">';
     h+='<div style="flex:1;background:var(--surface2);border-radius:7px;padding:3px;text-align:center">';
     h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Cases</div>';
-    h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px">';
+    h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px;min-width:0">';
     h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:16px;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center">-</button>';
     h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:24px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.cases||0)+'</span>';
     h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:16px;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center">+</button>';
     h+='</div></div>';
     h+='<div style="flex:1;background:var(--surface2);border-radius:7px;padding:3px;text-align:center">';
     h+='<div style="font-size:9px;color:var(--muted);margin-bottom:1px">Singles</div>';
-    h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px">';
+    h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px;min-width:0">';
     h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:16px;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center">-</button>';
     h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:24px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.singles||0)+'</span>';
     h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:16px;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center">+</button>';
@@ -1343,14 +1343,17 @@ function renderCardGrid(rows){
     h+='<button id="savename_'+item.id+'" onclick="saveCardNameBtn('+item.id+')" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);border-radius:5px;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0">OK</button>';
     h+='</div>';
 
-    // Price + Case Price
-    h+='<div style="display:flex;gap:3px;margin-bottom:5px;background:var(--surface2);border-radius:6px;padding:4px 7px">';
-    h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0;align-self:center">$</span>';
-    h+='<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="Price" min="0" data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--accent2);font-size:13px;font-weight:600;font-family:DM Sans,sans-serif">';
-    h+='<span style="font-size:9px;color:var(--border);margin:0 3px;align-self:center">|</span>';
-    h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0;align-self:center">C$</span>';
-    h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="Case$" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">';
+    // ── BACK / EDIT FACE ──────────────────────────────────────
+    h+='<div id="cardback_'+item.id+'" style="display:'+(isFlipped?'block':'none')+';overflow:hidden;">';
+
+    // Header: Back button + name
+    h+='<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px">';
+    h+='<button onclick="toggleCardExpand('+item.id+')" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer">&#8592;</button>';
+    h+='<div style="flex:1;min-width:0;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
+    h+='<button onclick="deleteCardItem('+item.id+')" style="background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);border-radius:5px;padding:2px 6px;font-size:10px;cursor:pointer">X</button>';
     h+='</div>';
+
+    // Editable name
 
     // Tab + PKD
     h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:5px">';
@@ -1375,7 +1378,7 @@ function renderCardGrid(rows){
       h+='<select id="dq_'+item.id+'" style="flex:1;padding:4px 5px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;min-height:34px">'+buildQtyOptions()+'</select>';
       h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">for $</span>';
       h+='<select id="dp_'+item.id+'" style="flex:1;padding:4px 5px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-size:11px;min-height:34px">'+buildPriceOptions()+'</select>';
-      h+='<button onclick="addDealFromCard('+item.id+')" style="padding:4px 8px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;min-height:34px">+</button>';
+      
       h+='</div>';
     }
 
