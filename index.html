@@ -346,6 +346,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
           <button class="ham-item" onclick="switchViewHam('sales',this)">&#128200; End of Day Sales</button>
           <button class="ham-item" onclick="switchViewHam('report',this)">&#128202; Sales Report</button>
           <button class="ham-item" onclick="switchViewHam('actlog',this)">&#128203; Activity Log</button>
+          <button class="ham-item" onclick="verifySaveTest()">&#128295; Test Save</button>
           <button class="ham-item" onclick="switchViewHam('settings',this)">&#9881; Settings</button>
         </div>
       </div>
@@ -907,6 +908,28 @@ function sendWrite(payload){
   // some saves landed and others silently vanished.
   setSyncStatus('','Saving...');
   sendWithRetry(payload,0);
+}
+
+function verifySaveTest(){
+  // Diagnostic: pick the first inventory item, write a test price, read it back
+  if(!inventory.length){alert('No inventory loaded');return;}
+  var item=inventory[0];
+  var testPrice=String(Math.floor(Math.random()*900)+100); // random 100-999
+  toast('Testing save on: '+item.name+' → $'+testPrice);
+  // Send the write
+  sendWithRetry({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:testPrice,casePrice:item.casePrice||'',packed:item.packed||''}},0);
+  // Wait 4 seconds then read it back from the sheet
+  setTimeout(function(){
+    var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet='+encodeURIComponent(TABS[item.tab].name)+'&t='+Date.now();
+    fetch(url).then(function(r){return r.text();}).then(function(csv){
+      var found=csv.indexOf(testPrice)>=0 && csv.toUpperCase().indexOf(item.name.toUpperCase())>=0;
+      if(found){
+        alert('✅ SAVE WORKS! Wrote $'+testPrice+' to '+item.name+' and read it back from the sheet. The pipeline is healthy.');
+      } else {
+        alert('❌ SAVE FAILED. Wrote $'+testPrice+' to '+item.name+' but it is NOT in the sheet after 4 seconds.\n\nThis means the Apps Script deployment needs to be redeployed (Extensions → Apps Script → Deploy → Manage Deployments → Edit → New Version → Deploy).');
+      }
+    }).catch(function(){alert('Could not read back — check connection');});
+  },4000);
 }
 
 function flushWrites(){
