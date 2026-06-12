@@ -2156,34 +2156,42 @@ function renderPricingCards(){
   var h='';
   for(var r=0;r<rows.length;r++){
     var item=rows[r];var tabLabel=TABS[item.tab]?TABS[item.tab].short:'';
+    var isSingleOnly=(item.tab===0); // 1/1 = no case price
+    var showPKD=(item.tab!==0&&item.tab!==1);
     var mp=!item.price,mpk=!item.packed,mcp=!item.casePrice;
     var dots='';
     if(mp) dots+='<span style="background:var(--red-bg);color:var(--red);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">$</span>';
-    if(mcp) dots+='<span style="background:var(--amber-bg);color:var(--amber);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">C$</span>';
-    if(mpk) dots+='<span style="background:var(--surface2);color:var(--muted);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700">PKD</span>';
+    if(mcp&&!isSingleOnly) dots+='<span style="background:var(--amber-bg);color:var(--amber);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;margin-right:3px">C$</span>';
+    if(mpk&&showPKD) dots+='<span style="background:var(--surface2);color:var(--muted);border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700">PKD</span>';
     var stamp=item.lastUpdated?'Updated '+formatStamp(item.lastUpdated):'';
-    h+='<div class="inv-card" style="'+(mp?'border-color:rgba(239,68,68,0.3);':mcp?'border-color:rgba(245,158,11,0.3);':'')+'">'+
-      '<div class="inv-card-top"><div class="inv-card-name">'+item.name+'</div><span style="font-size:10px;color:var(--muted)">'+tabLabel+'</span></div>'+
-      '<div style="margin-bottom:5px">'+dots+'</div>'+
-      // Price + Case Price on same row
-      '<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;background:var(--surface2);border-radius:6px;padding:4px 6px">'+
-        '<span style="font-size:10px;color:var(--muted)">$</span>'+
-        '<input type="number" min="0" placeholder="Price" value="'+(item.price||'')+'" id="pp_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="width:44px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--accent2);font-size:12px;font-weight:600;font-family:DM Sans,sans-serif">'+
-        '<span style="font-size:9px;color:var(--border);margin:0 3px">|</span>'+
-        '<span style="font-size:10px;color:var(--muted)">C$</span>'+
-        '<input type="number" min="0" placeholder="--" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="width:44px;padding:2px 3px;border:none;border-bottom:1px solid var(--border);border-radius:0;background:transparent;color:var(--muted);font-size:11px;font-family:DM Sans,sans-serif">'+
-      '</div>'+
-      (item.tab!==0&&item.tab!==1?
-        '<div style="display:flex;align-items:center;gap:3px;margin-bottom:8px">'+
-          '<span style="font-size:10px;color:var(--muted);width:24px">PKD</span>'+
-          '<select id="ppk_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="flex:1;padding:3px 4px;border:1px solid '+(mpk?'rgba(136,136,132,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-size:11px;font-family:DM Sans,sans-serif">'+
-            buildPackedOptions(item.packed)+
-          '</select>'+
-        '</div>'
-      :'')+
-      '<div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:5px">'+stamp+'</div>'+
-      '<button onclick="saveSinglePrice('+item.id+')" style="width:100%;padding:5px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Save</button>'+
-    '</div>';
+    h+='<div class="inv-card" style="'+(mp?'border-color:rgba(239,68,68,0.3);':(mcp&&!isSingleOnly)?'border-color:rgba(245,158,11,0.3);':'')+'">';
+      // Name + tab
+      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';
+        h+='<div style="flex:1;min-width:0;font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.name+'</div>';
+        h+='<span style="flex-shrink:0;font-size:9px;color:var(--muted);background:var(--surface2);border-radius:4px;padding:1px 5px">'+tabLabel+'</span>';
+      h+='</div>';
+      // Missing-field badges
+      if(dots) h+='<div style="margin-bottom:5px">'+dots+'</div>';
+      // Price + Case Price (clean, no big box)
+      h+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:5px">';
+        h+='<span style="font-size:11px;color:var(--muted)">$</span>';
+        h+='<input type="number" min="0" placeholder="--" value="'+(item.price||'')+'" id="pp_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="width:52px;padding:1px 2px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--accent2);font-weight:700;font-family:DM Sans,sans-serif">';
+        if(!isSingleOnly){
+          h+='<span style="font-size:10px;color:var(--muted);margin-left:8px">C$</span>';
+          h+='<input type="number" min="0" placeholder="--" value="'+(item.casePrice||'')+'" id="pcp_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="width:56px;padding:1px 2px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-family:DM Sans,sans-serif">';
+        }
+      h+='</div>';
+      // Packed
+      if(showPKD){
+        h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
+          h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">PKD</span>';
+          h+='<select id="ppk_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="flex:1;min-width:0;padding:4px 5px;border:1px solid '+(mpk?'rgba(180,83,9,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-family:DM Sans,sans-serif;min-height:34px">'+buildPackedOptions(item.packed)+'</select>';
+        h+='</div>';
+      }
+      // Timestamp + Save
+      h+='<div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:5px">'+stamp+'</div>';
+      h+='<button onclick="saveSinglePrice('+item.id+')" style="width:100%;padding:7px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:36px">Save</button>';
+    h+='</div>';
   }
   grid.innerHTML=h;document.getElementById('pricingSaveStatus').textContent='';
 }
@@ -2194,7 +2202,7 @@ function saveSinglePrice(id){
   var cpEl=document.getElementById('pcp_'+id);
   var pkdEl=document.getElementById('ppk_'+id);
   item.price=priceEl?priceEl.value.trim():'';
-  item.casePrice=cpEl?cpEl.value.trim():'';
+  item.casePrice=(item.tab===0)?'':(cpEl?cpEl.value.trim():item.casePrice||'');
   item.packed=pkdEl?(pkdEl.value==='Custom'?'':pkdEl.value):'';
   stampLastUpdated(item);
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
