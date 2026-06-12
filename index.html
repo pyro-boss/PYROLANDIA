@@ -2500,6 +2500,46 @@ function deleteOrder(orderId){
 
 
 // ── DAY SUMMARY ──────────────────────────────────────────────
+function summaryEdit(id,field,val){
+  var item=fi(id);if(!item) return;
+  if(field==='tab'){
+    var newTab=parseInt(val);
+    if(isNaN(newTab)||newTab===item.tab) return;
+    item.tab=newTab;
+    // 1/1 has no case price — clear it when moving into 1/1
+    if(newTab===0) item.casePrice='';
+    stampLastUpdated(item);
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+    logActivity('Updated',item.name+' moved to '+TABS[newTab].short);
+    toast(item.name+' → '+TABS[newTab].short);
+    showDaySummary(); // re-render so the row reflects the change
+  }
+}
+
+function summaryEditNum(event,id,field){
+  event.stopPropagation();
+  var span=event.target;
+  var item=fi(id);if(!item) return;
+  var current=(field==='casePrice')?(item.casePrice||''):(item.price||'');
+  var inp=document.createElement('input');
+  inp.type='number';inp.min='0';inp.value=current;
+  inp.style.cssText='width:60px;font-size:13px;text-align:right;border:2px solid var(--accent);border-radius:5px;background:var(--surface);color:var(--accent2);padding:2px 4px;font-family:DM Sans,sans-serif';
+  span.replaceWith(inp);
+  inp.focus();inp.select();
+  function commit(){
+    var val=inp.value.trim();
+    if(field==='casePrice') item.casePrice=val;
+    else item.price=val;
+    stampLastUpdated(item);
+    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+    logActivity('Updated',item.name+' '+field);
+    toast(item.name+' saved');
+    showDaySummary(); // re-render
+  }
+  inp.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Enter'){commit();}if(e.key==='Escape'){showDaySummary();}});
+  inp.addEventListener('blur',commit);
+}
+
 function showDaySummary(){
   var overlay=document.getElementById('summaryOverlay');
   var el=document.getElementById('summaryContent');
@@ -2526,16 +2566,30 @@ function showDaySummary(){
   h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Status</th>';
   h+='</tr></thead><tbody>';
 
+  var tabSelOpts='';
+  for(var ti=0;ti<TABS.length;ti++) tabSelOpts+='<option value="'+ti+'">'+TABS[ti].short+'</option>';
+
   for(var i=0;i<allItems.length;i++){
     var it=allItems[i];
+    var isSingleOnly=(it.tab===0); // 1/1 = no case price
     var sc=it.status==='OUT'?'var(--red)':it.status==='LOW'?'var(--amber)':'var(--green)';
     var rowBg=it.status==='OUT'?'background:rgba(239,68,68,0.04)':it.status==='LOW'?'background:rgba(245,158,11,0.04)':'';
     h+='<tr style="border-bottom:1px solid var(--border);'+rowBg+'">';
+    // Product (read-only)
     h+='<td style="padding:5px 8px;font-weight:500;color:var(--text)">'+it.name+'</td>';
-    h+='<td style="padding:5px 8px;text-align:center;font-size:10px;color:var(--muted)">'+tl(it)+'</td>';
-    h+='<td style="padding:5px 8px;text-align:right;color:var(--accent2);font-weight:600">'+(it.price?'$'+it.price:'--')+'</td>';
-    h+='<td style="padding:5px 8px;text-align:right;color:var(--muted)">'+(it.casePrice?'$'+it.casePrice:'--')+'</td>';
+    // Tab — tap to change (dropdown)
+    h+='<td style="padding:3px 4px;text-align:center"><select onchange="summaryEdit('+it.id+',\'tab\',this.value)" style="font-size:11px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;padding:2px;-webkit-appearance:none;text-align:center" onfocus="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--surface)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+tabSelOpts.replace('value="'+it.tab+'"','value="'+it.tab+'" selected')+'</select></td>';
+    // Retail — tap to edit
+    h+='<td style="padding:3px 4px;text-align:right"><span style="color:var(--accent2);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--border);padding:1px 3px" onclick="summaryEditNum(event,'+it.id+',\'price\')">'+(it.price?'$'+it.price:'--')+'</span></td>';
+    // Case $ — tap to edit (hidden/-- for 1/1)
+    if(isSingleOnly){
+      h+='<td style="padding:5px 8px;text-align:right;color:var(--border)">&mdash;</td>';
+    } else {
+      h+='<td style="padding:3px 4px;text-align:right"><span style="color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border);padding:1px 3px" onclick="summaryEditNum(event,'+it.id+',\'casePrice\')">'+(it.casePrice?'$'+it.casePrice:'--')+'</span></td>';
+    }
+    // Qty (read-only)
     h+='<td style="padding:5px 8px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--text)">'+it.qty+'</td>';
+    // Status (read-only)
     h+='<td style="padding:5px 8px;text-align:center"><span style="color:'+sc+';font-size:10px;font-weight:700;border:1px solid '+sc+';border-radius:20px;padding:1px 6px">'+it.status+'</span></td>';
     h+='</tr>';
   }
