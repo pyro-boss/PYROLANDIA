@@ -2580,21 +2580,37 @@ function summaryEditNum(event,id,field){
   var current=(field==='casePrice')?(item.casePrice||''):(item.price||'');
   var inp=document.createElement('input');
   inp.type='number';inp.min='0';inp.value=current;
-  inp.style.cssText='width:60px;font-size:13px;text-align:right;border:2px solid var(--accent);border-radius:5px;background:var(--surface);color:var(--accent2);padding:2px 4px;font-family:DM Sans,sans-serif';
+  inp.style.cssText='width:64px;font-size:16px;text-align:right;border:2px solid var(--accent);border-radius:5px;background:var(--surface);color:var(--accent2);padding:3px 5px;font-family:DM Sans,sans-serif';
   span.replaceWith(inp);
   inp.focus();inp.select();
-  function commit(){
+  var done=false; // guard: only commit once
+  function commit(reRender){
+    if(done) return;
+    done=true;
     var val=inp.value.trim();
     if(field==='casePrice') item.casePrice=val;
     else item.price=val;
     stampLastUpdated(item);
-    sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}});
+    // Send immediately (bypass debounce queue) so summary edits can't get stuck
+    setSyncStatus('saving','Saving '+item.name+'...');
+    sendWithRetry({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}},0);
+    setSyncStatus('ok','Saved '+item.name);
     logActivity('Updated',item.name+' '+field);
     toast(item.name+' saved');
-    showDaySummary(); // re-render
+    if(reRender) showDaySummary();
   }
-  inp.addEventListener('keydown',function(e){e.stopPropagation();if(e.key==='Enter'){commit();}if(e.key==='Escape'){showDaySummary();}});
-  inp.addEventListener('blur',commit);
+  function cancel(){
+    if(done) return;
+    done=true;
+    showDaySummary();
+  }
+  inp.addEventListener('keydown',function(e){
+    e.stopPropagation();
+    if(e.key==='Enter'){e.preventDefault();inp.blur();} // blur triggers the single commit
+    if(e.key==='Escape'){cancel();}
+  });
+  // blur is the single source of truth for saving — fires on Enter (via blur()), tap-away, or keyboard close
+  inp.addEventListener('blur',function(){commit(true);});
 }
 
 function showDaySummary(){
