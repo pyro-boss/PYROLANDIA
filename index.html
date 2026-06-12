@@ -340,7 +340,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
       <div style="margin-left:auto;position:relative;z-index:650">
         <button class="nav-btn" onclick="toggleHamburger(event)" id="hamburgerBtn" style="border:1px solid var(--border);border-radius:8px;padding:5px 12px">More</button>
-        <div id="hamburgerMenu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:700;overflow:hidden">
+        <div id="hamburgerMenu" style="display:none;position:fixed;right:10px;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.5);z-index:99999;overflow:hidden">
           <button class="ham-item" onclick="switchViewHam('deals',this)">&#128293; Deals</button>
           <button class="ham-item" onclick="switchViewHam('pricing',this)">&#128176; Pricing</button>
           <button class="ham-item" onclick="switchViewHam('sales',this)">&#128200; End of Day Sales</button>
@@ -2585,9 +2585,6 @@ function showDaySummary(){
   h+='<th style="width:44px;text-align:center;padding:5px 2px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Stat</th>';
   h+='</tr></thead><tbody>';
 
-  var tabSelOpts='';
-  for(var ti=0;ti<TABS.length;ti++) tabSelOpts+='<option value="'+ti+'">'+TABS[ti].short+'</option>';
-
   for(var i=0;i<allItems.length;i++){
     var it=allItems[i];
     var isSingleOnly=(it.tab===0); // 1/1 = no case price
@@ -2596,8 +2593,8 @@ function showDaySummary(){
     h+='<tr style="border-bottom:1px solid var(--border);'+rowBg+'">';
     // Product (read-only)
     h+='<td style="padding:4px;font-weight:500;color:var(--text);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+it.name+'</td>';
-    // Tab — tap to change (dropdown)
-    h+='<td style="padding:3px 2px;text-align:center"><select onchange="summaryEdit('+it.id+',\'tab\',this.value)" style="font-size:10px;width:50px;max-width:50px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--muted);cursor:pointer;padding:2px 1px;text-align:center" onfocus="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--surface)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+tabSelOpts.replace('value="'+it.tab+'"','value="'+it.tab+'" selected')+'</select></td>';
+    // Tab (read-only text)
+    h+='<td style="padding:3px 2px;text-align:center;font-size:10px;color:var(--muted)">'+tl(it)+'</td>';
     // Retail — tap to edit
     h+='<td style="padding:3px 2px;text-align:right"><span style="color:var(--accent2);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--border);font-size:11px" onclick="summaryEditNum(event,'+it.id+',\'price\')">'+(it.price?'$'+it.price:'--')+'</span></td>';
     // Case $ — tap to edit (hidden/-- for 1/1)
@@ -2638,8 +2635,18 @@ function copySummary(){
 }
 
 function toggleHamburger(e){
-  e.stopPropagation();var menu=document.getElementById('hamburgerMenu');
-  menu.style.display=menu.style.display==='none'?'block':'none';
+  e.stopPropagation();
+  var menu=document.getElementById('hamburgerMenu');
+  var btn=document.getElementById('hamburgerBtn');
+  if(menu.style.display==='block'){menu.style.display='none';return;}
+  // Position the fixed menu right under the More button
+  if(btn){
+    var rect=btn.getBoundingClientRect();
+    menu.style.top=(rect.bottom+4)+'px';
+    menu.style.right=(window.innerWidth-rect.right)+'px';
+    menu.style.left='auto';
+  }
+  menu.style.display='block';
 }
 document.addEventListener('click',function(){var menu=document.getElementById('hamburgerMenu');if(menu) menu.style.display='none';});
 function switchViewHam(view,btn){
