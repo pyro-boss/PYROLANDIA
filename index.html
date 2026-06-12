@@ -901,44 +901,32 @@ var _writeQueue={};
 var _writeTimer=null;
 
 function sendWrite(payload){
-  if(payload.item&&payload.item.name){
-    var key=(payload.item.tab||0)+'_'+(payload.item.name||'');
-    _writeQueue[key]=payload;
-  } else {
-    // Non-item payloads send immediately with retry
-    sendWithRetry(payload,0);
-    return;
-  }
-  if(_writeTimer) clearTimeout(_writeTimer);
-  _writeTimer=setTimeout(function(){
-    var keys=Object.keys(_writeQueue);
-    for(var i=0;i<keys.length;i++){
-      sendWithRetry(_writeQueue[keys[i]],0);
-    }
-    _writeQueue={};
-    _writeTimer=null;
-    setSyncStatus('ok','Synced '+keys.length+' item'+(keys.length===1?'':'s'));
-  },800);
+  // Send EVERY write immediately with retry — no debounce queue.
+  // The old 800ms debounce could strand writes if you edited faster than
+  // every 800ms or closed a view before the timer fired, which is why
+  // some saves landed and others silently vanished.
+  setSyncStatus('','Saving...');
+  sendWithRetry(payload,0);
 }
 
 function flushWrites(){
-  // Immediately send anything sitting in the debounce queue (e.g. when closing summary)
+  // No-op now that writes send immediately. Kept for compatibility with close handlers.
   if(_writeTimer){clearTimeout(_writeTimer);_writeTimer=null;}
-  var keys=Object.keys(_writeQueue);
-  if(!keys.length) return;
-  for(var i=0;i<keys.length;i++){ sendWithRetry(_writeQueue[keys[i]],0); }
-  _writeQueue={};
-  setSyncStatus('ok','Synced '+keys.length+' item'+(keys.length===1?'':'s'));
+  var keys=Object.keys(_writeQueue||{});
+  if(keys.length){for(var i=0;i<keys.length;i++){sendWithRetry(_writeQueue[keys[i]],0);}_writeQueue={};}
 }
 
 // Retry wrapper — tries up to 3 times with 2s gap
 function sendWithRetry(payload,attempt){
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})
+    .then(function(){
+      setSyncStatus('ok','Saved');
+    })
     .catch(function(){
-      if(attempt<2){
-        setTimeout(function(){sendWithRetry(payload,attempt+1);},2000);
+      if(attempt<3){
+        setTimeout(function(){sendWithRetry(payload,attempt+1);},1500);
       } else {
-        setSyncStatus('error','Sync failed — check connection');
+        setSyncStatus('error','Save failed — check wifi & try again');
       }
     });
 }
