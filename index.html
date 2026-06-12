@@ -1019,10 +1019,25 @@ function buildPackedOptions(current){
   h+='<option value="Custom"'+(isCustomPacked(current)?' selected':'')+'>Custom...</option>';
   return h;
 }
+function handlePricingPacked(id,sel){
+  var customEl=document.getElementById('ppk_custom_'+id);
+  if(sel.value==='Custom'){
+    if(customEl){customEl.style.display='block';customEl.focus();}
+  } else {
+    if(customEl) customEl.style.display='none';
+  }
+  markPricingDirty(id);
+}
+
 function handlePackedSelect(id,sel){
-  var customEl=document.getElementById('pkd_custom_'+id);
-  if(sel.value==='Custom'){if(customEl){customEl.style.display='block';customEl.focus();}}
-  else{if(customEl) customEl.style.display='none';saveCardPrice(id,sel.value,'packed');}
+  // Custom input may be pkd_custom_ (pricing) or pkd_custom2_ (edit card) — find whichever exists
+  var customEl=document.getElementById('pkd_custom2_'+id)||document.getElementById('pkd_custom_'+id);
+  if(sel.value==='Custom'){
+    if(customEl){customEl.style.display='block';customEl.focus();}
+  } else {
+    if(customEl) customEl.style.display='none';
+    saveCardPrice(id,sel.value,'packed');
+  }
 }
 function handleQEPackedSelect(sel){
   var inp=document.getElementById('qePacked');
@@ -1397,7 +1412,7 @@ function renderCardGrid(rows){
           h+='<select id="ctab2_'+item.id+'" onchange="saveCardField('+item.id+',\'tab\',this.value)" style="flex:1;min-width:0;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--muted);font-family:DM Sans,sans-serif;min-height:34px">'+tabOpts+'</select>';
           if(showPKD){
             h+='<select id="pkd2_'+item.id+'" onchange="handlePackedSelect('+item.id+',this)" style="flex:1;min-width:0;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-family:DM Sans,sans-serif;min-height:34px">'+buildPackedOptions(item.packed)+'</select>';
-            h+='<input type="text" id="pkd_custom2_'+item.id+'" placeholder="3/24" style="display:none;width:50px;border:1px solid var(--accent);border-radius:5px;background:var(--surface2);color:var(--text)" data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">';
+            h+='<input type="text" id="pkd_custom2_'+item.id+'" placeholder="e.g. 96/12" style="display:none;flex:1;min-width:0;padding:5px 7px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);min-height:34px" data-id="'+item.id+'" data-field="packed" onchange="saveCardPriceEl(this)">';
           }
         h+='</div>';
 
@@ -1985,6 +2000,7 @@ function generateReport(){
 function buildQtyOptions(){
   var opts='<option value="">Qty</option>';
   for(var i=2;i<=20;i++) opts+='<option value="'+i+'">'+i+'</option>';
+  opts+='<option value="custom">Custom...</option>';
   return opts;
 }
 
@@ -1992,19 +2008,35 @@ function buildPriceOptions(){
   var prices=[10,20,25,50,75,100,150,200,250,300,400,500,750,1000];
   var opts='<option value="">Price</option>';
   for(var i=0;i<prices.length;i++) opts+='<option value="'+prices[i]+'">$'+prices[i]+'</option>';
+  opts+='<option value="custom">Custom...</option>';
   return opts;
 }
 
 function tryAutoAddDeal(id){
-  // Auto-add the deal only when BOTH qty and price are selected
   var dqEl=document.getElementById('dq_'+id);
   var dpEl=document.getElementById('dp_'+id);
   if(!dqEl||!dpEl) return;
+  // Handle Custom qty
+  if(dqEl.value==='custom'){
+    var cq=prompt('Enter custom deal quantity (e.g. 96):','');
+    if(cq&&!isNaN(parseInt(cq))){
+      // add the typed value as a temporary option and select it
+      var optq=document.createElement('option');optq.value=parseInt(cq);optq.text=parseInt(cq);
+      dqEl.insertBefore(optq,dqEl.lastChild);dqEl.value=parseInt(cq);
+    } else { dqEl.value=''; return; }
+  }
+  // Handle Custom price
+  if(dpEl.value==='custom'){
+    var cp=prompt('Enter custom deal price (e.g. 96):','');
+    if(cp&&!isNaN(parseFloat(cp))){
+      var optp=document.createElement('option');optp.value=parseFloat(cp);optp.text='$'+parseFloat(cp);
+      dpEl.insertBefore(optp,dpEl.lastChild);dpEl.value=parseFloat(cp);
+    } else { dpEl.value=''; return; }
+  }
   var qty=parseInt(dqEl.value);
   var price=parseFloat(dpEl.value);
   if(qty&&price) addDealFromCard(id);
 }
-
 function addDealFromCard(id){
   var item=fi(id);if(!item) return;
   var qty=parseInt(document.getElementById('dq_'+id).value);
@@ -2213,12 +2245,13 @@ function renderPricingCards(){
       if(showPKD){
         h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">';
           h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">PKD</span>';
-          h+='<select id="ppk_'+item.id+'" oninput="markPricingDirty('+item.id+')" style="flex:1;min-width:0;padding:4px 5px;border:1px solid '+(mpk?'rgba(180,83,9,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-family:DM Sans,sans-serif;min-height:34px">'+buildPackedOptions(item.packed)+'</select>';
+          h+='<select id="ppk_'+item.id+'" onchange="handlePricingPacked('+item.id+',this)" style="flex:1;min-width:0;padding:4px 5px;border:1px solid '+(mpk?'rgba(180,83,9,0.4)':'var(--border)')+';border-radius:6px;background:var(--surface2);color:var(--text);font-family:DM Sans,sans-serif;min-height:34px">'+buildPackedOptions(item.packed)+'</select>';
+          h+='<input type="text" id="ppk_custom_'+item.id+'" placeholder="e.g. 96/12" style="display:'+(isCustomPacked(item.packed)?'block':'none')+';width:80px;flex-shrink:0;padding:4px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--surface2);color:var(--text);min-height:34px" value="'+(isCustomPacked(item.packed)?item.packed:'')+'" oninput="markPricingDirty('+item.id+')">';
         h+='</div>';
       }
       // Timestamp + Save
       h+='<div style="font-size:9px;color:var(--muted);text-align:right;margin-bottom:5px">'+stamp+'</div>';
-      h+='<button onclick="saveSinglePrice('+item.id+')" style="width:100%;padding:7px;background:rgba(255,77,0,0.1);border:1px solid rgba(255,77,0,0.3);color:var(--accent);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;min-height:36px">Save</button>';
+      h+='<button onclick="saveSinglePrice('+item.id+')" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;min-height:48px">Save</button>';
     h+='</div>';
   }
   grid.innerHTML=h;document.getElementById('pricingSaveStatus').textContent='';
@@ -2231,7 +2264,12 @@ function saveSinglePrice(id){
   var pkdEl=document.getElementById('ppk_'+id);
   item.price=priceEl?priceEl.value.trim():'';
   item.casePrice=(item.tab===0)?'':(cpEl?cpEl.value.trim():item.casePrice||'');
-  item.packed=pkdEl?(pkdEl.value==='Custom'?'':pkdEl.value):'';
+  if(pkdEl){
+    if(pkdEl.value==='Custom'){
+      var pcEl=document.getElementById('ppk_custom_'+id);
+      item.packed=pcEl?pcEl.value.trim():'';
+    } else { item.packed=pkdEl.value; }
+  } else { item.packed=item.packed||''; }
   stampLastUpdated(item);
   sendWrite({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice,packed:item.packed}});
   logActivity('Updated pricing',item.name);
