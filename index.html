@@ -666,12 +666,12 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 </div>
 <div class="toast" id="toast"></div>
 <!-- DAY SUMMARY MODAL -->
-<div class="overlay" id="summaryOverlay" style="display:none" onclick="if(event.target===this)document.getElementById('summaryOverlay').style.display='none'">
+<div class="overlay" id="summaryOverlay" style="display:none" onclick="if(event.target===this){flushWrites();document.getElementById('summaryOverlay').style.display='none';}">
   <div class="modal" style="max-width:520px">
     <div class="modal-title">Session Summary</div>
     <div id="summaryContent"></div>
     <div style="display:flex;gap:8px;margin-top:1rem">
-      <button class="btn" onclick="document.getElementById('summaryOverlay').style.display='none'" style="flex:1">Close</button>
+      <button class="btn" onclick="flushWrites();document.getElementById('summaryOverlay').style.display='none'" style="flex:1">Close</button>
       <button class="btn primary" onclick="copySummary()" style="flex:1">Copy Summary</button>
     </div>
   </div>
@@ -919,6 +919,16 @@ function sendWrite(payload){
     _writeTimer=null;
     setSyncStatus('ok','Synced '+keys.length+' item'+(keys.length===1?'':'s'));
   },800);
+}
+
+function flushWrites(){
+  // Immediately send anything sitting in the debounce queue (e.g. when closing summary)
+  if(_writeTimer){clearTimeout(_writeTimer);_writeTimer=null;}
+  var keys=Object.keys(_writeQueue);
+  if(!keys.length) return;
+  for(var i=0;i<keys.length;i++){ sendWithRetry(_writeQueue[keys[i]],0); }
+  _writeQueue={};
+  setSyncStatus('ok','Synced '+keys.length+' item'+(keys.length===1?'':'s'));
 }
 
 // Retry wrapper — tries up to 3 times with 2s gap
@@ -2588,15 +2598,8 @@ function summaryEditNum(event,id,field){
     if(done) return;
     done=true;
     var val=inp.value.trim();
-    if(field==='casePrice') item.casePrice=val;
-    else item.price=val;
-    stampLastUpdated(item);
-    // Send immediately (bypass debounce queue) so summary edits can't get stuck
-    setSyncStatus('saving','Saving '+item.name+'...');
-    sendWithRetry({action:'updateItem',item:{name:item.name,tab:item.tab,qty:item.qty,cases:item.cases||0,singles:item.singles||0,status:item.status,price:item.price,casePrice:item.casePrice||'',packed:item.packed||''}},0);
-    setSyncStatus('ok','Saved '+item.name);
-    logActivity('Updated',item.name+' '+field);
-    toast(item.name+' saved');
+    // saveCardPrice handles: assign value, stamp, send to sheet, toast — same path the cards use
+    saveCardPrice(id,val,field);
     if(reRender) showDaySummary();
   }
   function cancel(){
@@ -2703,6 +2706,9 @@ function toggleHamburger(e){
   menu.style.display='block';
 }
 document.addEventListener('click',function(){var menu=document.getElementById('hamburgerMenu');if(menu) menu.style.display='none';});
+// Safety: flush any pending writes when the app is backgrounded or closed
+document.addEventListener('visibilitychange',function(){if(document.hidden&&typeof flushWrites==='function')flushWrites();});
+window.addEventListener('pagehide',function(){if(typeof flushWrites==='function')flushWrites();});
 function switchViewHam(view,btn){
   // Admin-only views
   if((view==='settings'||view==='actlog')&&currentUser){
