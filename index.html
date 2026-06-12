@@ -27,7 +27,7 @@
 select{background-image:none}
 input,select,textarea{-webkit-appearance:none;appearance:none}
 select{-webkit-appearance:menulist;appearance:menulist}
-html,body{overflow-x:hidden;max-width:100vw}
+html,body{overflow-x:hidden;overflow-y:auto;max-width:100vw;width:100%;margin:0;overscroll-behavior-x:none}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,rgba(255,77,0,0.15) 0%,transparent 60%),var(--bg)}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;width:100%;max-width:380px;box-shadow:0 32px 80px rgba(0,0,0,0.6)}
@@ -41,7 +41,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .login-err{color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none}
 #appShell{display:none;min-height:100vh}
 #offlineBanner{display:none;background:var(--red);color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600;position:sticky;top:0;z-index:200}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:500;overflow:visible}
 .topbar-left{display:flex;align-items:center;gap:12px}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);letter-spacing:2px}
 .user-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--muted)}
@@ -58,12 +58,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1}
 .stat-val.g{color:var(--green)}.stat-val.a{color:var(--amber)}.stat-val.r{color:var(--red)}
-.nav{display:flex;gap:4px;margin-bottom:1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center;position:relative;z-index:120}
+.nav{display:flex;gap:4px;margin-bottom:1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
 .nav-btn{padding:7px 13px;font-size:12px;font-weight:500;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:color 0.2s;white-space:nowrap}
 .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .nav-btn:hover{color:var(--text)}
 .view{display:none}.view.active{display:block}
-.toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;position:sticky;top:56px;z-index:90;background:var(--bg);padding:.4rem 0}
+.toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.toolbar-inner{display:flex;gap:8px;flex-wrap:wrap}
+.search-sticky{position:sticky;top:56px;z-index:80;background:var(--bg);padding:.5rem 0;margin-bottom:.5rem}
 .toolbar input,.toolbar select{height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif}
 .toolbar input{flex:1;min-width:140px}
 .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--accent)}
@@ -350,6 +352,8 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     </div>
     <div class="view active" id="view-inventory">
 
+      <!-- Sticky search area: Row 1 (search+add) + Row 2 (filters) locked together -->
+      <div class="search-sticky">
       <!-- Row 1: Search bar full width -->
       <div style="display:flex;gap:8px;margin-bottom:6px">
         <input type="text" id="search" placeholder="Search products..." oninput="renderTable()"
@@ -357,7 +361,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
         <button onclick="openAddModal()" style="height:44px;padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">+ Add</button>
       </div>
       <!-- Row 2: Status filter + view toggle -->
-      <div class="toolbar" style="margin-bottom:0">
+      <div class="toolbar-inner" style="margin-bottom:0">
         <select id="statusFilter" onchange="renderTable()" style="height:40px;min-width:100px;flex-shrink:0">
           <option value="">All Status</option>
           <option value="IN">IN Stock</option>
@@ -371,6 +375,7 @@ tr:hover td{background:rgba(255,255,255,0.02)}
             style="width:42px;background:var(--surface2);color:var(--muted);border:none;font-size:18px;cursor:pointer">&#9776;</button>
         </div>
       </div>
+      </div><!-- end search-sticky -->
       <div class="tab-bar" id="tabBar"></div>
       <div class="tbl-wrap" id="tblWrap" style="display:none">
         <table>
