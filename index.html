@@ -27,8 +27,8 @@
 select{background-image:none}
 input,select,textarea{-webkit-appearance:none;appearance:none}
 select{-webkit-appearance:menulist;appearance:menulist}
-html,body{overflow-x:hidden;overflow-y:auto;max-width:100vw;width:100%;margin:0;overscroll-behavior-x:none}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+html,body{max-width:100%;margin:0;overscroll-behavior-y:contain}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:clip}
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,rgba(255,77,0,0.15) 0%,transparent 60%),var(--bg)}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;width:100%;max-width:380px;box-shadow:0 32px 80px rgba(0,0,0,0.6)}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--accent);letter-spacing:2px;margin-bottom:4px}
@@ -65,7 +65,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .view{display:none}.view.active{display:block}
 .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
 .toolbar-inner{display:flex;gap:8px;flex-wrap:wrap}
-.search-sticky{position:sticky;top:56px;z-index:80;background:var(--bg);padding:.5rem 0;margin-bottom:.5rem}
+.search-sticky{position:sticky;top:56px;z-index:80;background:var(--bg);padding:.5rem 0;margin-bottom:.5rem;box-shadow:0 4px 8px -4px rgba(0,0,0,0.3)}
 .toolbar input,.toolbar select{height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif}
 .toolbar input{flex:1;min-width:140px}
 .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--accent)}
@@ -2575,14 +2575,14 @@ function showDaySummary(){
     '&nbsp;|&nbsp; <span style="color:var(--red);font-weight:600">'+outCount+' Out\n';
 
   // Full inventory table
-  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">';
   h+='<thead><tr style="background:var(--surface2)">';
-  h+='<th style="text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600;white-space:nowrap">Product</th>';
-  h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tab</th>';
-  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Retail</th>';
-  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Case $</th>';
-  h+='<th style="text-align:right;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Qty</th>';
-  h+='<th style="text-align:center;padding:5px 8px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Status</th>';
+  h+='<th style="width:auto;text-align:left;padding:5px 4px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Product</th>';
+  h+='<th style="width:56px;text-align:center;padding:5px 2px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tab</th>';
+  h+='<th style="width:48px;text-align:right;padding:5px 3px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Retail</th>';
+  h+='<th style="width:48px;text-align:right;padding:5px 3px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Case</th>';
+  h+='<th style="width:34px;text-align:right;padding:5px 3px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Qty</th>';
+  h+='<th style="width:44px;text-align:center;padding:5px 2px;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Stat</th>';
   h+='</tr></thead><tbody>';
 
   var tabSelOpts='';
@@ -2595,21 +2595,21 @@ function showDaySummary(){
     var rowBg=it.status==='OUT'?'background:rgba(239,68,68,0.04)':it.status==='LOW'?'background:rgba(245,158,11,0.04)':'';
     h+='<tr style="border-bottom:1px solid var(--border);'+rowBg+'">';
     // Product (read-only)
-    h+='<td style="padding:5px 8px;font-weight:500;color:var(--text)">'+it.name+'</td>';
+    h+='<td style="padding:4px;font-weight:500;color:var(--text);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+it.name+'</td>';
     // Tab — tap to change (dropdown)
-    h+='<td style="padding:3px 4px;text-align:center"><select onchange="summaryEdit('+it.id+',\'tab\',this.value)" style="font-size:11px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--muted);cursor:pointer;padding:3px 4px;text-align:center" onfocus="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--surface)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+tabSelOpts.replace('value="'+it.tab+'"','value="'+it.tab+'" selected')+'</select></td>';
+    h+='<td style="padding:3px 2px;text-align:center"><select onchange="summaryEdit('+it.id+',\'tab\',this.value)" style="font-size:10px;width:50px;max-width:50px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--muted);cursor:pointer;padding:2px 1px;text-align:center" onfocus="this.style.borderColor=\'var(--accent)\';this.style.background=\'var(--surface)\'" onblur="this.style.borderColor=\'transparent\';this.style.background=\'transparent\'">'+tabSelOpts.replace('value="'+it.tab+'"','value="'+it.tab+'" selected')+'</select></td>';
     // Retail — tap to edit
-    h+='<td style="padding:3px 4px;text-align:right"><span style="color:var(--accent2);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--border);padding:1px 3px" onclick="summaryEditNum(event,'+it.id+',\'price\')">'+(it.price?'$'+it.price:'--')+'</span></td>';
+    h+='<td style="padding:3px 2px;text-align:right"><span style="color:var(--accent2);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--border);font-size:11px" onclick="summaryEditNum(event,'+it.id+',\'price\')">'+(it.price?'$'+it.price:'--')+'</span></td>';
     // Case $ — tap to edit (hidden/-- for 1/1)
     if(isSingleOnly){
-      h+='<td style="padding:5px 8px;text-align:right;color:var(--border)">&mdash;</td>';
+      h+='<td style="padding:3px 2px;text-align:right;color:var(--border);font-size:11px">&mdash;</td>';
     } else {
-      h+='<td style="padding:3px 4px;text-align:right"><span style="color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border);padding:1px 3px" onclick="summaryEditNum(event,'+it.id+',\'casePrice\')">'+(it.casePrice?'$'+it.casePrice:'--')+'</span></td>';
+      h+='<td style="padding:3px 2px;text-align:right"><span style="color:var(--muted);cursor:pointer;border-bottom:1px dashed var(--border);font-size:11px" onclick="summaryEditNum(event,'+it.id+',\'casePrice\')">'+(it.casePrice?'$'+it.casePrice:'--')+'</span></td>';
     }
     // Qty (read-only)
-    h+='<td style="padding:5px 8px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:15px;color:var(--text)">'+it.qty+'</td>';
+    h+='<td style="padding:3px 2px;text-align:right;font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--text)">'+it.qty+'</td>';
     // Status (read-only)
-    h+='<td style="padding:5px 8px;text-align:center"><span style="color:'+sc+';font-size:10px;font-weight:700;border:1px solid '+sc+';border-radius:20px;padding:1px 6px">'+it.status+'</span></td>';
+    h+='<td style="padding:3px 1px;text-align:center"><span style="color:'+sc+';font-size:9px;font-weight:800;border:1px solid '+sc+';border-radius:4px;padding:1px 3px">'+it.status+'</span></td>';
     h+='</tr>';
   }
   h+='</tbody></table></div>';
