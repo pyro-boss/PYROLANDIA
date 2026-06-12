@@ -1297,6 +1297,7 @@ function renderCardGrid(rows){
     var deal=getBestDeal(item.name);
     var stamp=item.lastUpdated?formatStamp(item.lastUpdated):'';
     var showPKD=(item.tab>1);
+    var isSingleOnly=(item.tab===0); // 1/1 tab = singles only, no cases/case price
     var isFlipped=(_expandedCards[item.id]===true);
     var sColor=item.status==='IN'?'var(--green)':item.status==='LOW'?'var(--amber)':'var(--red)';
     var sLabel=item.status==='IN'?'IN':item.status==='LOW'?'LOW':'OUT';
@@ -1318,8 +1319,10 @@ function renderCardGrid(rows){
         h+='<div style="display:flex;align-items:center;gap:2px;margin-bottom:5px">';
           h+='<span style="font-size:11px;color:var(--muted)">$</span>';
           h+='<input type="number" id="cp_'+item.id+'" value="'+(item.price||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="price" onchange="saveCardPriceEl(this)" style="width:48px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--accent2);font-weight:700;font-family:DM Sans,sans-serif;text-align:left">';
-          h+='<span style="font-size:10px;color:var(--muted);margin-left:6px">C$</span>';
-          h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="width:52px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-family:DM Sans,sans-serif;text-align:left">';
+          if(!isSingleOnly){
+            h+='<span style="font-size:10px;color:var(--muted);margin-left:6px">C$</span>';
+            h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="width:52px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-family:DM Sans,sans-serif;text-align:left">';
+          }
           if(item.packed) h+='<span style="margin-left:auto;font-size:9px;color:var(--muted);background:var(--surface2);border-radius:3px;padding:1px 4px;white-space:nowrap">'+item.packed+'</span>';
         h+='</div>';
 
@@ -1335,7 +1338,7 @@ function renderCardGrid(rows){
 
         // singles row
         h+='<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:6px;padding:2px 6px;margin-bottom:4px">';
-          h+='<span style="font-size:10px;color:var(--muted)">Singles</span>';
+          h+='<span style="font-size:10px;color:var(--muted)">'+'In Store'+'</span>';
           h+='<div style="display:flex;align-items:center;gap:3px">';
             h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:17px;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;padding:0">-</button>';
             h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" style="font-family:Bebas Neue,sans-serif;font-size:19px;color:var(--text);min-width:22px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.singles||0)+'</span>';
