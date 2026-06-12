@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e0e0f">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Pyrolandia Fireworks 2026 - Gary, IN</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');
 :root{--bg:#f5f5f5;--surface:#ffffff;--surface2:#f0f0f0;--border:#e0e0e0;--accent:#e63900;--accent2:#cc7700;--text:#1a1a1a;--muted:#666666;--green:#16a34a;--amber:#b45309;--red:#dc2626;--green-bg:#dcfce7;--amber-bg:#fef3c7;--red-bg:#fee2e2;--shadow:0 2px 8px rgba(0,0,0,0.08)}
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+select{-webkit-appearance:menulist;appearance:menulist}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 .hero{width:100%;background:#0e0e0f;display:flex;align-items:center;justify-content:center;padding:.4rem 1.5rem;max-height:100px;overflow:hidden;border-bottom:3px solid var(--accent)}
 .hero img{max-height:88px;width:auto;object-fit:contain}
@@ -198,7 +201,7 @@ function parseCSVRow(row){var result=[],inQ=false,cur='';for(var i=0;i<row.lengt
 function isBlank(l){return l.replace(/","/g,'').replace(/"/g,'').replace(/,/g,'').trim()==='';}
 function parseTab(csv,ti){var lines=csv.split('\n'),items=[],seen={},hIdx=-1,hdrs=[];for(var i=0;i<Math.min(lines.length,5);i++){if(isBlank(lines[i]))continue;var row=parseCSVRow(lines[i]);for(var c=0;c<row.length;c++){if(row[c].toUpperCase().trim()==='PRODUCT NAME'){hIdx=i;hdrs=row;break;}}if(hIdx>=0)break;}if(hIdx<0)return[];var sC=-1,nC=-1,pC=-1,cpC=-1,pkC=-1,csC=-1,siC=-1,tC=-1;for(var h=0;h<hdrs.length;h++){var hdr=hdrs[h].toUpperCase().trim();if(hdr==='STATUS')sC=h;else if(hdr==='PRODUCT NAME')nC=h;else if(hdr==='PRICE'||hdr==='RETAIL')pC=h;else if(hdr==='CASE PRICE'||hdr==='CASEPRICE')cpC=h;else if(hdr==='PACKED')pkC=h;else if(hdr==='CASES'||hdr==='CONTAINER')csC=h;else if(hdr==='SINGLES'||hdr==='STORE')siC=h;else if(hdr==='TOTAL'||hdr==='QTY')tC=h;}if(nC<0)return[];for(var i=hIdx+1;i<lines.length;i++){if(!lines[i].trim()||isBlank(lines[i]))continue;var row=parseCSVRow(lines[i]);var name=row[nC].trim();if(!name||name.toUpperCase()==='PRODUCT NAME')continue;var key=ti+'_'+name.toUpperCase();if(seen[key])continue;seen[key]=true;var price=pC>=0?row[pC].replace(/[^0-9.]/g,'').trim():'';var casePrice=cpC>=0?row[cpC].replace(/[^0-9.]/g,'').trim():'';var packed=pkC>=0?row[pkC].trim():'';var cases=csC>=0?parseInt(row[csC])||0:0;var singles=siC>=0?parseInt(row[siC])||0:0;var total=tC>=0?parseInt(row[tC])||0:0;var qty=total>0?total:cases+singles;var rawS=sC>=0?row[sC].trim().toUpperCase():'';var status;if(qty>0)status=qty<=2?'LOW':'IN';else if(rawS==='IN'||rawS==='LOW'||rawS==='OUT')status=rawS;else continue;items.push({t:ti,s:status,n:name,p:price,cp:casePrice,pk:packed,qty:qty});}return items;}
 // Cache API URL — set after Vercel deploy
-var CACHE_URL='';
+var CACHE_URL='https://pyrolandia-inv.vercel.app/api/inventory';
 
 function loadData(){
   // Show cached data instantly
