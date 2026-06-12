@@ -13,6 +13,7 @@
   --green-bg:rgba(34,197,94,0.12);--amber-bg:rgba(245,158,11,0.12);--red-bg:rgba(239,68,68,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100vw}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 60% 40%,rgba(255,77,0,0.15) 0%,transparent 60%),var(--bg)}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;width:100%;max-width:380px;box-shadow:0 32px 80px rgba(0,0,0,0.6)}
@@ -1321,27 +1322,23 @@ function renderCardGrid(rows){
           h+='<input type="number" id="ccp_'+item.id+'" value="'+(item.casePrice||'')+'" placeholder="--" min="0" data-id="'+item.id+'" data-field="casePrice" onchange="saveCardPriceEl(this)" style="flex:1;min-width:0;padding:2px 3px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:DM Sans,sans-serif">';
         h+='</div>';                                                                               // -1
 
-        // Cases + Singles row
-        h+='<div style="display:flex;gap:3px;margin-bottom:4px">';                                // +1
-          // Cases
-          h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';  // +1
-            h+='<div style="font-size:9px;color:var(--muted);margin-bottom:2px">Cases</div>';
-            h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px">';    // +1
-              h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-              h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.cases||0)+'</span>';
-              h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
-            h+='</div>';                                                                           // -1
-          h+='</div>';                                                                             // -1
-          // Singles
-          h+='<div style="flex:1;background:var(--surface2);border-radius:8px;padding:4px;text-align:center">';  // +1
-            h+='<div style="font-size:9px;color:var(--muted);margin-bottom:2px">Singles</div>';
-            h+='<div style="display:flex;align-items:center;justify-content:center;gap:2px">';    // +1
-              h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">-</button>';
-              h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" style="font-family:Bebas Neue,sans-serif;font-size:22px;color:var(--text);min-width:28px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.singles||0)+'</span>';
-              h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</button>';
-            h+='</div>';                                                                           // -1
-          h+='</div>';                                                                             // -1
-        h+='</div>';                                                                               // -1 (cases+singles row)
+        // Cases + Singles — stacked full-width rows (fits narrow cards)
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:4px;background:var(--surface2);border-radius:8px;padding:3px 6px;margin-bottom:4px">';
+          h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">Cases</span>';
+          h+='<div style="display:flex;align-items:center;gap:4px">';
+            h+='<button onclick="adjustCount('+item.id+',\'cases\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0">-</button>';
+            h+='<span id="cc_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'cases\')" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.cases||0)+'</span>';
+            h+='<button onclick="adjustCount('+item.id+',\'cases\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0">+</button>';
+          h+='</div>';
+        h+='</div>';
+        h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:4px;background:var(--surface2);border-radius:8px;padding:3px 6px;margin-bottom:4px">';
+          h+='<span style="font-size:10px;color:var(--muted);flex-shrink:0">Singles</span>';
+          h+='<div style="display:flex;align-items:center;gap:4px">';
+            h+='<button onclick="adjustCount('+item.id+',\'singles\',-1,event)" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0">-</button>';
+            h+='<span id="cs_'+item.id+'" onclick="editQtyInline(event,'+item.id+',\'singles\')" style="font-family:Bebas Neue,sans-serif;font-size:20px;color:var(--text);min-width:26px;text-align:center;cursor:pointer;border-bottom:2px dashed var(--border)">'+(item.singles||0)+'</span>';
+            h+='<button onclick="adjustCount('+item.id+',\'singles\',1,event)" style="background:var(--surface);border:1px solid rgba(255,77,0,0.3);color:var(--accent);cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0">+</button>';
+          h+='</div>';
+        h+='</div>';
 
         // Total + tab row
         h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:5px">';             // +1
