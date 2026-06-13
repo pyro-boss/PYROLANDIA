@@ -25,7 +25,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* Android: ensure native select arrows show and inputs don't zoom */
 select{background-image:none}
-input,select,textarea{-webkit-appearance:none;appearance:none}
+input:not([type=checkbox]):not([type=radio]),select,textarea{-webkit-appearance:none;appearance:none}
+input[type=checkbox],input[type=radio]{-webkit-appearance:auto !important;appearance:auto !important;accent-color:var(--accent)}
 select{-webkit-appearance:menulist;appearance:menulist}
 html,body{max-width:100%;margin:0;overscroll-behavior-y:contain}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:clip}
@@ -58,9 +59,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1}
 .stat-val.g{color:var(--green)}.stat-val.a{color:var(--amber)}.stat-val.r{color:var(--red)}
-.nav{display:flex;gap:4px;margin-bottom:1.1rem;border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
-.nav-btn{padding:7px 13px;font-size:12px;font-weight:500;border:none;background:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'DM Sans',sans-serif;transition:color 0.2s;white-space:nowrap}
-.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav{display:flex;gap:5px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.nav-btn{padding:7px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;white-space:nowrap;min-height:38px;flex:0 0 auto}
+.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .nav-btn:hover{color:var(--text)}
 .view{display:none}.view.active{display:block}
 .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
@@ -333,28 +334,16 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div class="stats" id="stats"></div>
     <div class="nav">
       <button class="nav-btn active" onclick="switchView('inventory',this)">Inventory</button>
-      <button class="nav-btn" onclick="switchView('restock',this)">Bulk Restock</button>
-      <button class="nav-btn" onclick="switchView('deals',this)">Deals</button>
       <button class="nav-btn" onclick="switchView('orders',this)" id="ordersNavBtn">Orders <span id="ordersBadge" style="display:none;background:var(--red);color:#fff;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:3px">0</span></button>
+      <button class="nav-btn" onclick="switchView('deals',this)">Deals</button>
       <button class="nav-btn" onclick="switchView('pricing',this)">Pricing</button>
-
-      <div style="margin-left:auto;position:relative;z-index:650">
-        <button class="nav-btn" onclick="toggleHamburger(event)" id="hamburgerBtn" style="border:1px solid var(--border);border-radius:8px;padding:5px 12px">More</button>
-        <div id="hamburgerMenu" style="display:none;position:fixed;right:10px;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:12px;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.5);z-index:99999;overflow:hidden">
-          <button class="ham-item" onclick="switchViewHam('deals',this)">&#128293; Deals</button>
-          <button class="ham-item" onclick="switchViewHam('pricing',this)">&#128176; Pricing</button>
-          <button class="ham-item" onclick="switchViewHam('sales',this)">&#128200; End of Day Sales</button>
-          <button class="ham-item" onclick="switchViewHam('report',this)">&#128202; Sales Report</button>
-          <button class="ham-item" onclick="switchViewHam('actlog',this)">&#128203; Activity Log</button>
-          <button class="ham-item" onclick="verifySaveTest()">&#128295; Test Save</button>
-          <button class="ham-item" onclick="switchViewHam('settings',this)">&#9881; Settings</button>
-        </div>
-      </div>
-    </div>
-    <div class="view active" id="view-inventory">
-
-      <!-- Sticky search area: Row 1 (search+add) + Row 2 (filters) locked together -->
-      <div class="search-sticky">
+      <button class="nav-btn" onclick="switchView('restock',this)">Restock</button>
+      <button class="nav-btn" onclick="switchViewHam('sales',this)">Sales</button>
+      <button class="nav-btn" onclick="switchViewHam('report',this)">Report</button>
+      <button class="nav-btn" onclick="switchViewHam('actlog',this)">Log</button>
+      <button class="nav-btn" onclick="switchViewHam('settings',this)">Settings</button>
+      <button class="nav-btn" onclick="verifySaveTest()" style="border:1px solid var(--accent);color:var(--accent)">Test Save</button>
+    <div class="search-sticky">
       <!-- Row 1: Search bar full width -->
       <div style="display:flex;gap:8px;margin-bottom:6px">
         <input type="text" id="search" placeholder="Search products..." oninput="renderTable()"
@@ -853,7 +842,7 @@ function parseTab(csv,tabIndex){
     var status;
     if(qty>0) status=qty<=2?'LOW':'IN';
     else if(rawStatus==='IN'||rawStatus==='LOW'||rawStatus==='OUT') status=rawStatus;
-    else continue;
+    else status='OUT'; // keep the row (e.g. priced item with 0 stock) instead of skipping
     items.push({id:nextId++,tab:tabIndex,status:status,name:name,packed:packed,price:price,casePrice:casePrice,cases:cases,singles:singles,qty:qty,lastUpdated:null});
   }
   return items;
@@ -2081,12 +2070,12 @@ function loadDealsFromDB(){
   fetch(url).then(function(r){return r.text();}).then(function(csv){
     deals=[];dealNextId=0;
     var lines=csv.split('\n');
-    if(lines.length<2) return;
-    // Validate header - must start with ID column, not inventory data
+    if(lines.length<1) return;
+    // Detect if first row is a header (starts with ID/PRODUCT) or actual data
     var hdr=parseCSVRow(lines[0]);
     var firstHdr=(hdr[0]||'').toUpperCase().trim();
-    if(firstHdr!=='ID'&&firstHdr!=='') return; // wrong sheet
-    for(var i=1;i<lines.length;i++){
+    var startRow=(firstHdr==='ID'||firstHdr==='PRODUCT NAME'||firstHdr==='PRODUCT')?1:0;
+    for(var i=startRow;i<lines.length;i++){
       if(!lines[i].trim()) continue;
       var row=parseCSVRow(lines[i]);
       if(!row[0]) continue;
@@ -2737,6 +2726,7 @@ function switchViewHam(view,btn){
   document.getElementById('view-'+view).classList.add('active');
   if(view==='actlog'){renderActLog();updateActLogFilter();}
   if(view==='settings') renderStaffList();
+  if(view==='deals'){loadDealsFromDB();populateDealDropdown();}
 }
 function switchView(view,btn){
   var menu=document.getElementById('hamburgerMenu');if(menu) menu.style.display='none';
@@ -2749,7 +2739,7 @@ function switchView(view,btn){
   if(view==='restock') renderRestockList();
   if(view==='settings') renderStaffList();
   if(view==='pricing'){buildPriceTabFilter();renderPricingCards();}
-  if(view==='deals'){populateDealDropdown();renderDealsList();}
+  if(view==='deals'){loadDealsFromDB();populateDealDropdown();renderDealsList();}
   if(view==='orders'){document.getElementById('ordersList').innerHTML='<div class="empty">Loading orders...</div>';loadOrders();}
 }
 
