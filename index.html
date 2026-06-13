@@ -350,6 +350,22 @@ function setSync(state,msg){
 }
 
 /* ── CSV PARSING ── */
+function splitCSVRows(csv){
+  // Split CSV into rows, but keep newlines that appear INSIDE quoted fields
+  // (e.g. multi-line order notes the customer typed with Enter).
+  var rows=[],cur='',q=false;
+  for(var i=0;i<csv.length;i++){
+    var c=csv[i];
+    if(c==='"'){q=!q;cur+=c;}
+    else if((c==='\n'||c==='\r')&&!q){
+      if(c==='\r'&&csv[i+1]==='\n') i++; // handle CRLF
+      rows.push(cur);cur='';
+    }
+    else cur+=c;
+  }
+  if(cur!=='') rows.push(cur);
+  return rows;
+}
 function parseCSVRow(row){
   var out=[],q=false,cur='';
   for(var i=0;i<row.length;i++){
@@ -950,15 +966,14 @@ function loadOrders(){
   var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:csv&sheet=ORDERS&t='+Date.now();
   fetch(url).then(function(r){return r.text();}).then(function(csv){
     orders=[];
-    var lines=csv.split('\n');
+    var lines=splitCSVRows(csv); // quote-aware: keeps newlines inside quoted notes together
     for(var i=1;i<lines.length;i++){
       if(!lines[i].trim()||isBlankLine(lines[i])) continue;
       var row=parseCSVRow(lines[i]);
       if(!row[0]) continue;
       // ORDERS columns: ID,Date,Name,Email,Phone,Items,Status,Notes,Paid (9).
-      // If a note contained unquoted commas, the row splits into >9 fields and
-      // the note spills into later cells. Rejoin everything between Status(6)
-      // and the final Paid column back into Notes.
+      // If a note still contained unquoted commas, rejoin everything between
+      // Status(6) and the final Paid column back into Notes.
       var notes, paid;
       if(row.length>9){
         paid=row[row.length-1];
@@ -1020,7 +1035,7 @@ function openOrderDetail(oid){
     '<div>Email: <b>'+esc(o.email)+'</b></div>'+
     '<div>Phone: <b>'+esc(o.phone)+'</b></div>'+
     '<div>Date: <b>'+esc(o.date)+'</b></div>'+
-    (o.notes?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">Notes: <b style="color:var(--accent2)">'+esc(o.notes)+'</b></div>':'')+
+    (o.notes?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">Notes: <b style="color:var(--accent2);white-space:pre-wrap">'+esc(o.notes)+'</b></div>':'')+
   '</div>';
   // items with checkboxes
   h+='<div class="section-title">Items Ordered</div>';
