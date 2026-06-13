@@ -955,10 +955,22 @@ function loadOrders(){
       if(!lines[i].trim()||isBlankLine(lines[i])) continue;
       var row=parseCSVRow(lines[i]);
       if(!row[0]) continue;
+      // ORDERS columns: ID,Date,Name,Email,Phone,Items,Status,Notes,Paid (9).
+      // If a note contained unquoted commas, the row splits into >9 fields and
+      // the note spills into later cells. Rejoin everything between Status(6)
+      // and the final Paid column back into Notes.
+      var notes, paid;
+      if(row.length>9){
+        paid=row[row.length-1];
+        notes=row.slice(7,row.length-1).join(', ');
+      } else {
+        notes=row[7]||'';
+        paid=row[8]||'UNPAID';
+      }
       orders.push({
         id:row[0],date:row[1]||'',name:row[2]||'',email:row[3]||'',phone:row[4]||'',
         items:(row[5]||'').split('|').filter(Boolean),
-        status:row[6]||'PENDING',notes:row[7]||'',paid:row[8]||'UNPAID'
+        status:row[6]||'PENDING',notes:notes,paid:paid||'UNPAID'
       });
     }
     orders.reverse(); // newest first
