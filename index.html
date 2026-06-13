@@ -25,7 +25,8 @@
   --red:#ef4444; --red-bg:rgba(239,68,68,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{max-width:100%;overflow-x:clip;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+html,body{max-width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+*{box-sizing:border-box}
 /* iOS anti-zoom: any focusable input must render >=16px or Safari zooms */
 input,select,textarea{font-size:16px;font-family:'DM Sans',sans-serif}
 input:not([type=checkbox]):not([type=radio]),textarea{-webkit-appearance:none;appearance:none}
@@ -44,7 +45,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer}
 .icon-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:600;min-height:38px}
 
 /* ── Nav (2-row wrap, no dropdown) ── */
-.nav{position:sticky;top:54px;z-index:90;display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
+.nav{display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;background:var(--bg);border-bottom:1px solid var(--border)}
 .nav-btn{padding:7px 12px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap;min-height:36px;flex:0 0 auto}
 .nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .nav-btn .badge{background:var(--red);color:#fff;border-radius:20px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px}
@@ -54,7 +55,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer}
 .view.active{display:block}
 
 /* ── Search/filter sticky bar (inventory) ── */
-.filters{position:sticky;top:108px;z-index:80;background:var(--bg);padding:8px 0;margin-bottom:8px}
+.filters{position:sticky;top:54px;z-index:80;background:var(--bg);padding:8px 0;margin-bottom:8px;box-shadow:0 6px 8px -6px rgba(0,0,0,0.4)}
 .filter-row{display:flex;gap:8px;margin-bottom:6px}
 .filter-row:last-child{margin-bottom:0}
 .search-input{flex:1;height:44px;padding:0 14px;border:1px solid var(--border);border-radius:9px;background:var(--surface2);color:var(--text)}
@@ -636,10 +637,11 @@ function cardHTML(it){
       for(var t=0;t<TABS.length;t++) h+='<option value="'+t+'"'+(t===it.tab?' selected':'')+'>'+TABS[t].short+'</option>';
       h+='</select>';
       if(showPk){
-        h+='<input type="text" class="edit-sel" value="'+esc(it.packed)+'" placeholder="Packed e.g. 4/1" onchange="saveField('+it.id+',\'packed\',this.value)">';
+        h+='<select class="edit-sel" onchange="handlePackedSel('+it.id+',this)">'+buildPackedOptions(it.packed)+'</select>';
+        h+='<input type="text" class="edit-sel" id="pkcustom_'+it.id+'" value="'+(isCustomPacked(it.packed)?esc(it.packed):'')+'" placeholder="e.g. 96/12" style="display:'+(isCustomPacked(it.packed)?'block':'none')+'" onchange="saveField('+it.id+',\'packed\',this.value)">';
       }
     h+='</div>';
-    // deal picker
+    // deal picker — qty & price dropdowns, auto-adds when both chosen (no Add button)
     if(deal){
       h+='<div class="deal-badge" style="display:flex;align-items:center;justify-content:space-between;padding:6px 9px;font-size:12px">'+
         '<span>'+deal.qty+' for $'+deal.price+'</span>'+
@@ -648,10 +650,9 @@ function cardHTML(it){
     } else {
       h+='<div style="display:flex;gap:5px;align-items:center">'+
         '<span class="lbl" style="font-size:11px;color:var(--muted)">Deal:</span>'+
-        '<input type="number" class="edit-sel" id="dq_'+it.id+'" placeholder="Qty" min="1" style="flex:1">'+
-        '<span style="font-size:11px;color:var(--muted)">for $</span>'+
-        '<input type="number" class="edit-sel" id="dp_'+it.id+'" placeholder="Price" min="0" style="flex:1">'+
-        '<button class="btn-edit" style="flex:0;padding:6px 12px" onclick="addDeal('+it.id+')">Add</button>'+
+        '<select class="edit-sel" id="dq_'+it.id+'" style="flex:1" onchange="tryAddDeal('+it.id+')">'+buildDealQtyOptions()+'</select>'+
+        '<span style="font-size:11px;color:var(--muted)">for</span>'+
+        '<select class="edit-sel" id="dp_'+it.id+'" style="flex:1" onchange="tryAddDeal('+it.id+')">'+buildDealPriceOptions()+'</select>'+
       '</div>';
     }
   h+='</div>';
@@ -879,6 +880,52 @@ function renderDeals(){
   el.innerHTML=h;
 }
 
+var PACKED_OPTS=['1/1','2/1','3/1','4/1','6/1','8/1','12/1','24/1','1/4','1/6','1/12','1/24'];
+function isCustomPacked(p){p=(p||'').trim();return p!==''&&PACKED_OPTS.indexOf(p)<0;}
+function buildPackedOptions(cur){
+  cur=(cur||'').trim();
+  var h='<option value="">Packed...</option>';
+  for(var i=0;i<PACKED_OPTS.length;i++) h+='<option value="'+PACKED_OPTS[i]+'"'+(cur===PACKED_OPTS[i]?' selected':'')+'>'+PACKED_OPTS[i]+'</option>';
+  h+='<option value="__custom"'+(isCustomPacked(cur)?' selected':'')+'>Custom...</option>';
+  return h;
+}
+function handlePackedSel(id,sel){
+  var ci=$('pkcustom_'+id);
+  if(sel.value==='__custom'){ if(ci){ci.style.display='block';ci.focus();} }
+  else { if(ci) ci.style.display='none'; saveField(id,'packed',sel.value); }
+}
+function buildDealQtyOptions(){
+  var h='<option value="">Qty</option>';
+  var qs=[2,3,4,5,6,8,10,12,15,20,24];
+  for(var i=0;i<qs.length;i++) h+='<option value="'+qs[i]+'">'+qs[i]+'</option>';
+  h+='<option value="__custom">Custom...</option>';
+  return h;
+}
+function buildDealPriceOptions(){
+  var h='<option value="">$ Price</option>';
+  var ps=[10,20,25,50,75,100,125,150,200,250,300,400,500];
+  for(var i=0;i<ps.length;i++) h+='<option value="'+ps[i]+'">$'+ps[i]+'</option>';
+  h+='<option value="__custom">Custom...</option>';
+  return h;
+}
+function tryAddDeal(id){
+  var dq=$('dq_'+id),dp=$('dp_'+id);
+  if(!dq||!dp) return;
+  // Handle custom qty
+  if(dq.value==='__custom'){
+    var cq=prompt('Custom deal quantity:','');
+    if(cq&&!isNaN(parseInt(cq))){var o=document.createElement('option');o.value=parseInt(cq);o.text=parseInt(cq);dq.insertBefore(o,dq.lastChild);dq.value=parseInt(cq);}
+    else{dq.value='';return;}
+  }
+  // Handle custom price
+  if(dp.value==='__custom'){
+    var cp=prompt('Custom deal price ($):','');
+    if(cp&&!isNaN(parseFloat(cp))){var o2=document.createElement('option');o2.value=parseFloat(cp);o2.text='$'+parseFloat(cp);dp.insertBefore(o2,dp.lastChild);dp.value=parseFloat(cp);}
+    else{dp.value='';return;}
+  }
+  // Auto-add only when BOTH chosen
+  if(dq.value&&dp.value) addDeal(id);
+}
 function addDeal(itemId){
   var it=fi(itemId);if(!it)return;
   var qty=parseInt($('dq_'+itemId).value)||0;
@@ -941,6 +988,7 @@ function renderOrders(){
         '<span style="font-size:10px;font-weight:700;color:'+pc+';border:1px solid '+pc+';border-radius:20px;padding:2px 8px">'+o.paid+'</span>'+
       '</div>'+
       '<div style="font-size:12px;color:var(--muted)">'+o.items.length+' item'+(o.items.length===1?'':'s')+' \u00b7 '+esc(o.date)+'</div>'+
+      (o.notes?'<div style="font-size:12px;color:var(--accent2);margin-top:3px;word-break:break-word;overflow-wrap:anywhere">&#9998; '+esc(o.notes)+'</div>':'')+
     '</div>';
   }
   el.innerHTML=h;
@@ -956,11 +1004,11 @@ function openOrderDetail(oid){
   var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
     '<h2 style="margin:0">'+esc(o.name||'Guest')+'</h2>'+
     '<button class="btn-secondary" style="flex:0;padding:8px 14px;min-height:auto" onclick="closeOrderDetail()">Close</button></div>';
-  h+='<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.6">'+
+  h+='<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;font-size:13px;line-height:1.6;word-break:break-word;overflow-wrap:anywhere">'+
     '<div>Email: <b>'+esc(o.email)+'</b></div>'+
     '<div>Phone: <b>'+esc(o.phone)+'</b></div>'+
     '<div>Date: <b>'+esc(o.date)+'</b></div>'+
-    (o.notes?'<div>Notes: <b>'+esc(o.notes)+'</b></div>':'')+
+    (o.notes?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">Notes: <b style="color:var(--accent2)">'+esc(o.notes)+'</b></div>':'')+
   '</div>';
   // items with checkboxes
   h+='<div class="section-title">Items Ordered</div>';
@@ -1169,7 +1217,7 @@ function openSummary(){renderSummary();$('summaryOverlay').classList.add('show')
 function closeSummary(){$('summaryOverlay').classList.remove('show');}
 
 function renderSummary(){
-  var rows=inventory.slice().sort(function(a,b){return a.tab-b.tab||a.name.localeCompare(b.name);});
+  var rows=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var h='<div style="overflow-x:auto"><table class="list-table" style="table-layout:fixed;font-size:11px">';
   h+='<thead><tr>'+
     '<th style="width:auto">Product</th>'+
