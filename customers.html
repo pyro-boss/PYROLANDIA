@@ -276,8 +276,8 @@ function updateInventoryCount(source){
 }
 function getBestDeal(name){var pd=deals.filter(function(d){return d.productName.toUpperCase()===name.toUpperCase();});if(!pd.length)return null;var best=pd[0];for(var i=1;i<pd.length;i++){if((pd[i].price/pd[i].qty)<(best.price/best.qty))best=pd[i];}return best;}
 function toggleDealsPanel(btn){showingDeals=!showingDeals;btn.classList.toggle('active',showingDeals);var panel=document.getElementById('dealsPanel');if(showingDeals){panel.style.display='block';renderDealsPanel();}else{panel.style.display='none';}}
-function openBulk(){renderBulkCustomer();document.getElementById('bulkOverlay').classList.add('show');}
-function closeBulk(){document.getElementById('bulkOverlay').classList.remove('show');}
+function openBulk(){renderBulkCustomer();document.getElementById('bulkOverlay').style.display='flex';}
+function closeBulk(){document.getElementById('bulkOverlay').style.display='none';}
 function renderBulkCustomer(){
   var el=document.getElementById('bulkList');
   var h='';
