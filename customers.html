@@ -111,6 +111,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <div class="store-bar">
   <a href="tel:2194270092" class="btn-call">&#128222; Call Us (219) 427-0092</a>
   <a href="https://maps.google.com/?q=4704+Roosevelt+St+Gary+IN+46408" target="_blank" class="btn-dir">&#128205; Directions</a>
+  <button class="btn-share" onclick="openBulk()" style="border-color:#c9a227!important;color:#e0b93a">&#128203; The List</button>
   <button class="btn-share" onclick="shareStore()">&#128279; Share</button>
 </div>
 <div class="deals-panel" id="dealsPanel">
@@ -131,7 +132,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     </select>
     <button class="cart-btn" onclick="toggleCart()">&#128722; Wishlist <span id="cartCount" style="background:rgba(255,255,255,0.3);border-radius:20px;padding:1px 6px;font-size:11px;font-weight:700">0</span></button>
     <button class="deals-filter-btn" id="dealsFilterBtn" onclick="toggleDealsPanel(this)">&#128293; Deals</button>
-    <button class="deals-filter-btn" onclick="openBulk()" style="border-color:#c9a227;color:#e0b93a">&#128176; Bulk Pricing</button>
   </div>
   <div class="tab-filters">
     <button class="filter-btn active" onclick="setStatus('',this)">All</button>
@@ -189,7 +189,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <div class="cart-overlay" id="bulkOverlay" onclick="if(event.target===this)closeBulk()">
   <div class="cart-panel">
     <div class="cart-hdr">
-      <div class="cart-title">&#128176; BULK / WHOLESALE PRICING</div>
+      <div class="cart-title">&#128203; THE LIST &mdash; BULK PRICING</div>
       <button class="cart-close" onclick="closeBulk()">&#10005;</button>
     </div>
     <div style="font-size:12px;color:var(--muted);padding:0 2px 10px;line-height:1.5">Spend <b style="color:#e0b93a">$3,000+</b> to unlock 3K pricing &middot; spend <b style="color:#e0b93a">$10,000+</b> for 10K pricing. Prices below are per case (per unit for 1/1 cakes). Ask a staff member to set up a wholesale order.</div>
