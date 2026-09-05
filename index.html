@@ -176,6 +176,7 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer}
     <div class="logo">PYR<span class="o">O</span>L<span class="a">ANDIA</span></div>
     <div class="topbar-spacer"></div>
     <span class="sync" id="sync">Ready</span>
+    <button class="icon-btn" onclick="openBulkStaff()">Bulk $</button>
     <button class="icon-btn" onclick="openSummary()">Summary</button>
   </div>
 
@@ -234,17 +235,6 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer}
       <select class="sel" id="priceTab" onchange="renderPricing()" style="flex:0 0 110px"><option value="-1">All Tabs</option></select>
     </div>
     <div id="pricingContent"></div>
-  </div>
-
-  <!-- BULK PRICING -->
-  <div class="view" id="view-bulk">
-    <h1>Bulk Pricing</h1>
-    <div class="sub">Wholesale tiers &mdash; $3K &amp; $10K spend levels (off case price)</div>
-    <div class="filter-row" style="margin-bottom:10px">
-      <input type="text" class="search-input" id="bulkSearch" placeholder="Search..." oninput="renderBulk()">
-      <select class="sel" id="bulkTab" onchange="renderBulk()" style="flex:0 0 110px"><option value="-1">All Tabs</option></select>
-    </div>
-    <div id="bulkContent"></div>
   </div>
 
   <!-- RESTOCK -->
@@ -308,6 +298,20 @@ button{font-family:'DM Sans',sans-serif;cursor:pointer}
       <button class="btn-secondary" style="flex:0;padding:8px 14px;min-height:auto" onclick="flushWrites();closeSummary()">Close</button>
     </div>
     <div id="summaryContent"></div>
+  </div>
+</div>
+
+<div class="overlay" id="bulkOverlay" onclick="if(event.target===this){flushWrites();closeBulkStaff();}">
+  <div class="modal" style="max-width:680px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0">Bulk Pricing</h2>
+      <button class="btn-secondary" style="flex:0;padding:8px 14px;min-height:auto" onclick="flushWrites();closeBulkStaff()">Close</button>
+    </div>
+    <div class="filter-row" style="margin-bottom:10px">
+      <input type="text" class="search-input" id="bulkSearch" placeholder="Search..." oninput="renderBulk()">
+      <select class="sel" id="bulkTab" onchange="renderBulk()" style="flex:0 0 110px"><option value="-1">All Tabs</option></select>
+    </div>
+    <div id="bulkContent"></div>
   </div>
 </div>
 
@@ -435,7 +439,6 @@ function buildNav(){
     {v:'orders',label:'Orders',badge:true},
     {v:'deals',label:'Deals'},
     {v:'pricing',label:'Pricing'},
-    {v:'bulk',label:'Bulk $'},
     {v:'restock',label:'Restock'},
     {v:'sales',label:'Sales'},
     {v:'settings',label:'Settings'}
@@ -468,7 +471,6 @@ function switchView(view,btn){
   window.scrollTo(0,0);
   if(view==='deals'){loadDealsFromDB();}
   if(view==='pricing'){renderPricing();}
-  if(view==='bulk'){renderBulk();}
   if(view==='restock'){renderRestock();}
   if(view==='sales'){renderSales();}
   if(view==='orders'){loadOrders();}
@@ -1384,6 +1386,8 @@ function verifySave(){
 /* ════ SUMMARY ════ */
 function openSummary(){renderSummary();$('summaryOverlay').classList.add('show');}
 function closeSummary(){$('summaryOverlay').classList.remove('show');}
+function openBulkStaff(){renderBulk();$('bulkOverlay').classList.add('show');}
+function closeBulkStaff(){$('bulkOverlay').classList.remove('show');}
 
 function renderSummary(){
   var rows=inventory.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
