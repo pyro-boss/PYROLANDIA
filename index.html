@@ -536,8 +536,8 @@ function parseTab(csv,tabIndex){
     else if(hd==='CASES'||hd==='CONTAINER') col.cases=h;
     else if(hd==='SINGLES'||hd==='STORE'||hd==='IN STORE') col.singles=h;
     else if(hd==='TOTAL'||hd==='QTY') col.total=h;
-    else if(hd==='3K'||hd==='3000') col.p3k=h;
-    else if(hd==='10K'||hd==='10000') col.p10k=h;
+    else if((hd==='3K'||hd==='3000')&&col.p3k<0) col.p3k=h;
+    else if((hd==='10K'||hd==='10000')&&col.p10k<0) col.p10k=h;
   }
   if(col.name===-1) return [];
   var items=[],seen={};
